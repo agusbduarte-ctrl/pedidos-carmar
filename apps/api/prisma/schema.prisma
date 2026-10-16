@@ -1,3 +1,8 @@
+// ============================================================
+// pedidos_carmar — Schema Prisma
+// Sprint 1.1 — Modelo de dominio completo
+// ============================================================
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -5,4 +10,279 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum Rol {
+  ADMIN
+  ENCARGADA
+  REPOSITOR
+}
+
+enum Sucursal {
+  CARMAR_1
+  CARMAR_2
+}
+
+enum EstadoPedido {
+  BORRADOR
+  ENVIADO
+  DEVUELTO
+  APROBADO
+}
+
+enum EstadoPeriodo {
+  ABIERTO
+  CERRADO
+}
+
+enum EstadoConsolidado {
+  BORRADOR
+  APROBADO
+}
+
+enum UnidadMedida {
+  UN
+  KG
+  LT
+  CAJA
+  PACK
+}
+
+// ============================================================
+// USUARIOS Y AUTENTICACIÓN
+// ============================================================
+
+model Usuario {
+  id           String    @id @default(cuid())
+  email        String?   @unique
+  passwordHash String?
+  pinHash      String?
+  nombre       String
+  rol          Rol
+  sucursal     Sucursal?
+  activo       Boolean   @default(true)
+  deletedAt    DateTime?
+
+  // Relaciones
+  rubrosAsignados       RepositorRubro[]
+  pedidosComoRepositor  Pedido[]         @relation("PedidoRepositor")
+  pedidosCreados        Pedido[]         @relation("PedidoCreadoPor")
+  pedidosEnviados       Pedido[]         @relation("PedidoEnviadoPor")
+  pedidosDevueltos      Pedido[]         @relation("PedidoDevueltoPor")
+  pedidosAprobados      Pedido[]         @relation("PedidoAprobadoPor")
+  consolidadosAprobados Consolidado[]    @relation("ConsolidadoAprobadoPor")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([rol])
+  @@index([sucursal])
+  @@index([activo])
+}
+
+// ============================================================
+// RUBROS Y ASIGNACIÓN A REPOSITORES
+// ============================================================
+
+model Rubro {
+  id     String  @id @default(cuid())
+  nombre String  @unique
+  activo Boolean @default(true)
+
+  productos       Producto[]
+  repositorRubros RepositorRubro[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RepositorRubro {
+  id        String   @id @default(cuid())
+  usuarioId String
+  rubroId   String
+  sucursal  Sucursal
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  rubro   Rubro   @relation(fields: [rubroId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([usuarioId, rubroId, sucursal])
+  @@index([usuarioId])
+  @@index([rubroId])
+}
+
+// ============================================================
+// PROVEEDORES
+// ============================================================
+
+model Proveedor {
+  id       String  @id @default(cuid())
+  nombre   String  @unique
+  email    String?
+  telefono String?
+  activo   Boolean @default(true)
+
+  productos Producto[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================================
+// CATÁLOGO DE PRODUCTOS
+// ============================================================
+
+model Producto {
+  id               String       @id @default(cuid())
+  codigo           String       @unique
+  nombre           String
+  rubroId          String
+  proveedorId      String
+  unidad           UnidadMedida @default(UN)
+  precioReferencia Decimal?     @db.Decimal(10, 2)
+  activo           Boolean      @default(true)
+  deletedAt        DateTime?
+
+  rubro     Rubro     @relation(fields: [rubroId], references: [id])
+  proveedor Proveedor @relation(fields: [proveedorId], references: [id])
+
+  itemsPedido      ItemPedido[]
+  itemsConsolidado ItemConsolidado[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([rubroId])
+  @@index([proveedorId])
+  @@index([activo])
+  @@index([nombre])
+}
+
+// ============================================================
+// PERÍODOS
+// ============================================================
+
+model Periodo {
+  id            String        @id @default(cuid())
+  nombre        String
+  fechaApertura DateTime
+  fechaCierre   DateTime?
+  estado        EstadoPeriodo @default(ABIERTO)
+
+  pedidos      Pedido[]
+  consolidados Consolidado[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([estado])
+  @@index([fechaApertura])
+}
+
+// ============================================================
+// PEDIDOS
+// ============================================================
+
+model Pedido {
+  id          String       @id @default(cuid())
+  repositorId String
+  sucursal    Sucursal
+  periodoId   String
+  estado      EstadoPedido @default(BORRADOR)
+
+  observacion String? @db.VarChar(500)
+
+  creadoPorId   String
+  enviadoPorId  String?
+  devueltoPorId String?
+  aprobadoPorId String?
+
+  fechaEnvio      DateTime?
+  fechaDevolucion DateTime?
+  fechaAprobacion DateTime?
+
+  comentarioDevolucion String? @db.VarChar(500)
+
+  repositor   Usuario  @relation("PedidoRepositor", fields: [repositorId], references: [id])
+  creadoPor   Usuario  @relation("PedidoCreadoPor", fields: [creadoPorId], references: [id])
+  enviadoPor  Usuario? @relation("PedidoEnviadoPor", fields: [enviadoPorId], references: [id])
+  devueltoPor Usuario? @relation("PedidoDevueltoPor", fields: [devueltoPorId], references: [id])
+  aprobadoPor Usuario? @relation("PedidoAprobadoPor", fields: [aprobadoPorId], references: [id])
+
+  periodo Periodo @relation(fields: [periodoId], references: [id])
+
+  items ItemPedido[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([repositorId])
+  @@index([periodoId])
+  @@index([estado])
+  @@index([sucursal])
+}
+
+model ItemPedido {
+  id          String  @id @default(cuid())
+  pedidoId    String
+  productoId  String
+  cantidad    Decimal @db.Decimal(10, 2)
+  observacion String? @db.VarChar(200)
+
+  pedido   Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  producto Producto @relation(fields: [productoId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([pedidoId, productoId])
+  @@index([pedidoId])
+  @@index([productoId])
+}
+
+// ============================================================
+// CONSOLIDADOS
+// ============================================================
+
+model Consolidado {
+  id              String            @id @default(cuid())
+  periodoId       String
+  estado          EstadoConsolidado @default(BORRADOR)
+  aprobadoPorId   String?
+  fechaAprobacion DateTime?
+
+  periodo     Periodo  @relation(fields: [periodoId], references: [id])
+  aprobadoPor Usuario? @relation("ConsolidadoAprobadoPor", fields: [aprobadoPorId], references: [id])
+
+  items ItemConsolidado[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([periodoId])
+  @@index([estado])
+}
+
+model ItemConsolidado {
+  id              String   @id @default(cuid())
+  consolidadoId   String
+  productoId      String
+  cantidadTotal   Decimal  @db.Decimal(10, 2)
+  cantidadEditada Decimal? @db.Decimal(10, 2)
+  observacion     String?  @db.VarChar(200)
+
+  consolidado Consolidado @relation(fields: [consolidadoId], references: [id], onDelete: Cascade)
+  producto    Producto    @relation(fields: [productoId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([consolidadoId, productoId])
+  @@index([consolidadoId])
+  @@index([productoId])
 }
