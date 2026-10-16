@@ -2,11 +2,11 @@
   "name": "api",
   "version": "0.0.1",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "tsx watch --env-file-if-exists=.env src/server.ts",
     "build": "tsc",
     "lint": "eslint src prisma",
     "test": "vitest run",
-    "seed": "tsx prisma/seed.ts",
+    "seed": "tsx --env-file-if-exists=.env prisma/seed.ts",
     "postinstall": "prisma generate"
   },
   "prisma": {
