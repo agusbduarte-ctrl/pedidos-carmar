@@ -35,6 +35,32 @@ pedidos_carmar/
 └── pnpm-workspace.yaml
 ```
 
+## Mover el proyecto a otra carpeta
+
+Los enlaces (symlinks) que pnpm crea en `node_modules` guardan rutas absolutas. Si movés la carpeta del proyecto sin más, esos enlaces se rompen y ningún comando va a funcionar.
+
+Pasos correctos para mover el proyecto:
+
+1. Borrar `node_modules` **antes** de mover:
+   ```
+   cmd /c rmdir /s /q node_modules
+   cmd /c rmdir /s /q apps\api\node_modules
+   cmd /c rmdir /s /q apps\web\node_modules
+   ```
+2. Mover la carpeta a la nueva ubicación.
+3. Reinstalar en la nueva ubicación:
+   ```
+   pnpm install
+   ```
+4. Aplicar migraciones y seed si es la primera vez:
+   ```
+   pnpm --filter api exec prisma migrate deploy
+   pnpm --filter api exec prisma generate
+   pnpm --filter api seed
+   ```
+
+No uses `Move-Item` de PowerShell 5.1 en `node_modules`: falla a mitad de camino con los enlaces de pnpm y deja todo a medio mover.
+
 ## Cómo arrancar
 
 Requisitos: Node 24, pnpm 9, Docker.

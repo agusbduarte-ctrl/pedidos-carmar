@@ -1,3 +1,5 @@
+name: pedidos-carmar
+
 services:
   db:
     image: postgres:16
@@ -9,5 +11,11 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U carmar -d pedidos_carmar"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
 volumes:
   pgdata:
