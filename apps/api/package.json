@@ -4,8 +4,8 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
-    "lint": "echo lint ok",
-    "test": "echo test ok",
+    "lint": "eslint src prisma",
+    "test": "vitest run",
     "seed": "tsx prisma/seed.ts"
   },
   "prisma": {
@@ -19,9 +19,13 @@
     "zod": "^3.23.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/node": "^24",
+    "eslint": "^10.13.0",
     "prisma": "^6.0.0",
     "tsx": "^4.0.0",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.71.2",
+    "vitest": "^5.0.5"
   }
 }
