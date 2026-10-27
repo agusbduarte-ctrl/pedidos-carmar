@@ -9,5 +9,8 @@ if (existsSync(envFile)) process.loadEnvFile(envFile);
 export default defineConfig({
   test: {
     include: ["src/**/*.test.ts"],
+    // Los tests comparten la BD de desarrollo y algunos (periodos, pedidos)
+    // cierran temporalmente el período abierto del seed: un archivo a la vez.
+    fileParallelism: false,
   },
 });

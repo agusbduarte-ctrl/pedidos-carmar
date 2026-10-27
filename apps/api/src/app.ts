@@ -11,6 +11,7 @@ import proveedoresRoutes from "./routes/admin/proveedores.js";
 import usuariosRoutes from "./routes/admin/usuarios.js";
 import productosRoutes from "./routes/admin/productos.js";
 import periodosRoutes from "./routes/admin/periodos.js";
+import pedidosRoutes from "./routes/pedidos.js";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -94,6 +95,7 @@ export async function buildApp(
   await app.register(usuariosRoutes, { prefix: "/admin/usuarios" });
   await app.register(productosRoutes, { prefix: "/admin/productos" });
   await app.register(periodosRoutes, { prefix: "/admin/periodos" });
+  await app.register(pedidosRoutes, { prefix: "/pedidos" });
 
   app.addHook("onClose", async () => {
     if (!prisma) await db.$disconnect();
