@@ -6,6 +6,11 @@ import rateLimit from "@fastify/rate-limit";
 import { PrismaClient, EstadoPeriodo } from "@prisma/client";
 import { COOKIE_NAME } from "./lib/jwt.js";
 import { authRoutes } from "./routes/auth.js";
+import rubrosRoutes from "./routes/admin/rubros.js";
+import proveedoresRoutes from "./routes/admin/proveedores.js";
+import usuariosRoutes from "./routes/admin/usuarios.js";
+import productosRoutes from "./routes/admin/productos.js";
+import periodosRoutes from "./routes/admin/periodos.js";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -84,6 +89,11 @@ export async function buildApp(
   });
 
   await app.register(authRoutes, { prefix: "/auth" });
+  await app.register(rubrosRoutes, { prefix: "/admin/rubros" });
+  await app.register(proveedoresRoutes, { prefix: "/admin/proveedores" });
+  await app.register(usuariosRoutes, { prefix: "/admin/usuarios" });
+  await app.register(productosRoutes, { prefix: "/admin/productos" });
+  await app.register(periodosRoutes, { prefix: "/admin/periodos" });
 
   app.addHook("onClose", async () => {
     if (!prisma) await db.$disconnect();

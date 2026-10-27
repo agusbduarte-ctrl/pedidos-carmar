@@ -89,9 +89,10 @@ model Usuario {
 // ============================================================
 
 model Rubro {
-  id     String  @id @default(cuid())
-  nombre String  @unique
-  activo Boolean @default(true)
+  id        String    @id @default(cuid())
+  nombre    String    @unique
+  activo    Boolean   @default(true)
+  deletedAt DateTime?
 
   productos       Producto[]
   repositorRubros RepositorRubro[]
@@ -121,11 +122,12 @@ model RepositorRubro {
 // ============================================================
 
 model Proveedor {
-  id       String  @id @default(cuid())
-  nombre   String  @unique
-  email    String?
-  telefono String?
-  activo   Boolean @default(true)
+  id        String    @id @default(cuid())
+  nombre    String    @unique
+  email     String?
+  telefono  String?
+  activo    Boolean   @default(true)
+  deletedAt DateTime?
 
   productos Producto[]
 
