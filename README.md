@@ -73,6 +73,7 @@ pnpm dev
 | `CORS_ORIGIN` | Origen permitido del frontend | `http://localhost:5173` |
 | `NODE_ENV` | En `production` la cookie se marca `Secure` | `development` |
 | `PORT` | Puerto de la API | `3000` |
+| `CATALOGO_XLSX_PATH` | Excel de artículos para `import-catalogo`, relativo a la raíz del repo o absoluto | `./data/catalogo.xlsx` |
 
 ### Usuarios de prueba (solo desarrollo local)
 
@@ -154,10 +155,29 @@ Reglas:
 | `pnpm build` | Compila api (`tsc`) y web (`vite build`) |
 | `pnpm --filter api lint` | ESLint sobre `src/` y `prisma/` |
 | `pnpm --filter api test` | Vitest: 88 tests de integración con `app.inject()` |
-| `pnpm --filter api seed` | Recarga los datos de prueba |
+| `pnpm --filter api seed` | Recarga los datos de prueba. **Borra todo**, incluido el catálogo importado |
+| `pnpm --filter api import-catalogo` | Importa el catálogo real desde `CATALOGO_XLSX_PATH` (ver abajo) |
 | `pnpm --filter api exec prisma studio` | Explorador visual de la base |
 
 `apps/web` todavía tiene `lint` y `test` de relleno (`echo`).
+
+### Importación del catálogo
+
+El catálogo real sale del Excel "BASE DE DATOS DE ARTICULOS" del sistema de Cármar (columnas `Cod. Art. Local`, `Artículo`, `Códigos Barras`, `Cod. Rubro`, `Rubro`). **El Excel no va al repo**: se copia a `data/catalogo.xlsx` (la carpeta `/data/` está en `.gitignore`) y se apunta `CATALOGO_XLSX_PATH` en `apps/api/.env`.
+
+`pnpm --filter api import-catalogo`:
+
+- Crea los rubros (por código; si ya existe uno con el mismo nombre, lo reutiliza y le asigna el código) y los productos nuevos en `UN`, activos y con el proveedor **SIN ASIGNAR**.
+- En productos existentes actualiza nombre y rubro, y completa el proveedor solo si está vacío (no pisa uno real). No toca `activo`, ni la unidad, ni los productos borrados por un admin.
+- Los códigos de artículo se guardan sin ceros a la izquierda (`000000000119951` → `119951`). Los códigos de barras van a la tabla `CodigoBarras` (0 o más por producto).
+- Es **idempotente** y **nunca borra**: se puede correr cada vez que haya un Excel nuevo. Trabaja en transacciones de 500 productos; si un lote falla, los demás quedan importados y alcanza con volver a correrlo.
+- Con el Excel actual (14.322 artículos): la primera corrida crea 88 rubros, 14.322 productos y 14.343 códigos de barras en unos 7 s; las siguientes no crean nada.
+
+> ⚠️ `pnpm --filter api seed` **borra todos los productos y rubros**, incluidos los importados. Después de un seed, volver a correr `pnpm --filter api import-catalogo`.
+
+`Producto.proveedorId` es opcional: si se borra físicamente un proveedor, sus productos quedan sin proveedor (`ON DELETE SET NULL`). En la práctica los proveedores solo se eliminan con borrado lógico.
+
+`xlsx` (SheetJS) se instala desde `apps/api/vendor/` y no desde npm, porque la versión de npm tiene vulnerabilidades sin corregir (ver `apps/api/vendor/README.md`).
 
 ### Sobre los tests
 

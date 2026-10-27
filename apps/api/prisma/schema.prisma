@@ -90,6 +90,7 @@ model Usuario {
 
 model Rubro {
   id        String    @id @default(cuid())
+  codigo    String?   @unique
   nombre    String    @unique
   activo    Boolean   @default(true)
   deletedAt DateTime?
@@ -144,15 +145,16 @@ model Producto {
   codigo           String       @unique
   nombre           String
   rubroId          String
-  proveedorId      String
+  proveedorId      String?
   unidad           UnidadMedida @default(UN)
   precioReferencia Decimal?     @db.Decimal(10, 2)
   activo           Boolean      @default(true)
   deletedAt        DateTime?
 
-  rubro     Rubro     @relation(fields: [rubroId], references: [id])
-  proveedor Proveedor @relation(fields: [proveedorId], references: [id])
+  rubro     Rubro      @relation(fields: [rubroId], references: [id])
+  proveedor Proveedor? @relation(fields: [proveedorId], references: [id])
 
+  codigosBarras    CodigoBarras[]
   itemsPedido      ItemPedido[]
   itemsConsolidado ItemConsolidado[]
 
@@ -163,6 +165,17 @@ model Producto {
   @@index([proveedorId])
   @@index([activo])
   @@index([nombre])
+}
+
+// Un producto puede tener 0 o N códigos de barras (lector en el futuro)
+model CodigoBarras {
+  id         String   @id @default(cuid())
+  codigo     String   @unique
+  productoId String
+  producto   Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@index([productoId])
 }
 
 // ============================================================

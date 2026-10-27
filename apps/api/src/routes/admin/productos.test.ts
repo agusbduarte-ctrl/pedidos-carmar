@@ -126,6 +126,34 @@ describe("GET /admin/productos", () => {
   });
 });
 
+describe("proveedor opcional", () => {
+  it("POST sin proveedorId: 201 con proveedor null", async () => {
+    const res = await pedir("POST", "/admin/productos", {
+      codigo: `${PREFIJO}050`,
+      nombre: "Sin proveedor",
+      rubroId,
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.json().data).toMatchObject({ proveedorId: null, proveedor: null });
+  });
+
+  it("PATCH proveedorId null lo quita; un proveedor borrado da 400", async () => {
+    const creado = (await nuevo("051")).json().data;
+    const borrado = await prisma.proveedor.create({
+      data: { nombre: `${PREFIJO}Proveedor borrado`, deletedAt: new Date() },
+    });
+
+    const quitar = await pedir("PATCH", `/admin/productos/${creado.id}`, { proveedorId: null });
+    const asignarBorrado = await pedir("PATCH", `/admin/productos/${creado.id}`, { proveedorId: borrado.id });
+
+    expect(quitar.statusCode).toBe(200);
+    expect(quitar.json().data).toMatchObject({ proveedorId: null, proveedor: null });
+    expect(asignarBorrado.statusCode).toBe(400);
+    expect(asignarBorrado.json().detalles).toEqual(["proveedorId: El proveedor no existe o está borrado"]);
+  });
+});
+
 describe("PATCH / DELETE /admin/productos/:id", () => {
   it("PATCH precioReferencia null lo vacía; el código no se puede cambiar", async () => {
     const creado = (await nuevo("030", { precioReferencia: 500 })).json().data;

@@ -31,6 +31,9 @@ importers:
       fastify:
         specifier: ^5.0.0
         version: 5.12.5
+      xlsx:
+        specifier: file:vendor/xlsx-0.20.3.tgz
+        version: file:apps/api/vendor/xlsx-0.20.3.tgz
       zod:
         specifier: ^3.23.0
         version: 3.25.76
@@ -1717,6 +1720,12 @@ packages:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
     engines: {node: '>=0.10.0'}
 
+  xlsx@file:apps/api/vendor/xlsx-0.20.3.tgz:
+    resolution: {integrity: sha512-oLDq3jw7AcLqKWH2AhCpVTZl8mf6X2YReP+Neh0SJUzV/BdZYjth94tG5toiMB1PPrYtxOCfaoUCkvtuH+3AJA==, tarball: file:apps/api/vendor/xlsx-0.20.3.tgz}
+    version: 0.20.3
+    engines: {node: '>=0.8'}
+    hasBin: true
+
   xtend@4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
     engines: {node: '>=0.4'}
@@ -3232,6 +3241,8 @@ snapshots:
   why-is-node-running@3.2.1: {}
 
   word-wrap@1.2.5: {}
+
+  xlsx@file:apps/api/vendor/xlsx-0.20.3.tgz: {}
 
   xtend@4.0.2: {}
 

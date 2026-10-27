@@ -26,7 +26,7 @@ const crearBody = z.object({
   codigo: z.string().trim().min(1),
   nombre,
   rubroId: z.string().min(1),
-  proveedorId: z.string().min(1),
+  proveedorId: z.string().min(1).optional(),
   unidad: z.nativeEnum(UnidadMedida).default(UnidadMedida.UN),
   precioReferencia: precio.optional(),
   activo: z.boolean().optional(),
@@ -37,7 +37,8 @@ const editarBody = z
   .object({
     nombre: nombre.optional(),
     rubroId: z.string().min(1).optional(),
-    proveedorId: z.string().min(1).optional(),
+    // null = quitarle el proveedor
+    proveedorId: z.string().min(1).nullable().optional(),
     unidad: z.nativeEnum(UnidadMedida).optional(),
     precioReferencia: precio.nullable().optional(),
     activo: z.boolean().optional(),
@@ -51,8 +52,8 @@ export default async function productosRoutes(app: FastifyInstance) {
   app.addHook("preHandler", authenticate);
   app.addHook("preHandler", requireRole(Rol.ADMIN));
 
-  // Rubro y proveedor tienen que existir y no estar borrados
-  const referenciasInvalidas = async (rubroId?: string, proveedorId?: string) => {
+  // Rubro y proveedor (si se envían) tienen que existir y no estar borrados
+  const referenciasInvalidas = async (rubroId?: string, proveedorId?: string | null) => {
     const [rubro, proveedor] = await Promise.all([
       rubroId ? app.db.rubro.findFirst({ where: { id: rubroId, deletedAt: null } }) : true,
       proveedorId ? app.db.proveedor.findFirst({ where: { id: proveedorId, deletedAt: null } }) : true,
@@ -118,6 +119,7 @@ export default async function productosRoutes(app: FastifyInstance) {
             data: {
               ...campos,
               precioReferencia: campos.precioReferencia ?? null,
+              proveedorId: campos.proveedorId ?? null,
               ...(activo !== undefined ? { activo } : {}),
               deletedAt: null,
             },
