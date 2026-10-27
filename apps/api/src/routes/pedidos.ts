@@ -10,6 +10,7 @@ import {
   verificarRubroAsignado,
 } from "../lib/pedidos-helpers.js";
 import { isUniqueViolation, sendValidationError } from "../lib/zod-helpers.js";
+import { periodoConConsolidadoAprobado } from "../lib/consolidado-helpers.js";
 
 const PEDIDO_RESUMEN = {
   periodo: { select: { id: true, nombre: true, estado: true } },
@@ -66,6 +67,9 @@ const itemBody = z.object({
 });
 
 const NO_ENCONTRADO = { error: "Pedido no encontrado" };
+const PERIODO_CONSOLIDADO = {
+  error: "El período ya tiene un consolidado aprobado, no se pueden modificar pedidos",
+};
 
 export default async function pedidosRoutes(app: FastifyInstance) {
   app.addHook("preHandler", authenticate);
@@ -224,6 +228,10 @@ export default async function pedidosRoutes(app: FastifyInstance) {
     const pedido = await pedidoEditable(params.data.id, request.user.id, reply);
     if (!pedido) return reply;
 
+    if (await periodoConConsolidadoAprobado(app.db, pedido.periodoId)) {
+      return reply.code(400).send(PERIODO_CONSOLIDADO);
+    }
+
     const items = await app.db.itemPedido.findMany({
       where: { pedidoId: pedido.id },
       include: { producto: true },
@@ -334,6 +342,16 @@ export default async function pedidosRoutes(app: FastifyInstance) {
     if (!params.success) return sendValidationError(reply, params.error);
     const body = devolverBody.safeParse(request.body);
     if (!body.success) return sendValidationError(reply, body.error);
+
+    // Aprobar no se bloquea: un pedido ENVIADO ya está sumado en el consolidado
+    // y sigue estándolo como APROBADO. Devolverlo sí lo sacaría.
+    const pedido = await app.db.pedido.findUnique({
+      where: { id: params.data.id },
+      select: { periodoId: true },
+    });
+    if (pedido && (await periodoConConsolidadoAprobado(app.db, pedido.periodoId))) {
+      return reply.code(400).send(PERIODO_CONSOLIDADO);
+    }
 
     return resolverEnviado(params.data.id, reply, "Solo se pueden devolver pedidos ENVIADOS", {
       estado: EstadoPedido.DEVUELTO,

@@ -2,7 +2,7 @@
 
 Sistema interno de pedidos para los repositores y la encargada de compras del Supermercado Cármar.
 
-**Estado actual:** Sprint 1.4 completo — backend con autenticación (JWT en cookie httpOnly), CRUD admin de usuarios, rubros, proveedores, productos y períodos, y el flujo de pedidos (armado por el repositor, revisión de la encargada), con 88 tests. Todavía no hay consolidado, exportación ni UI más allá de una página de prueba.
+**Estado actual:** Sprint 1.6 completo — backend con autenticación (JWT en cookie httpOnly), CRUD admin de usuarios, rubros, proveedores, productos y períodos, el flujo de pedidos (armado por el repositor, revisión de la encargada), el catálogo real importado (14.322 artículos) y el consolidado por período, con 119 tests. Todavía no hay exportación ni UI más allá de una página de prueba.
 
 ## Stack
 
@@ -122,6 +122,27 @@ Reglas de negocio:
 - **Ítems:** el producto tiene que estar activo y su rubro asignado al repositor en la sucursal del pedido. Cantidad mayor a 0; **enteros para UN, CAJA y PACK, decimales solo para KG y LT**. Observación de hasta 200 caracteres.
 - **Al enviar se revalida todo:** si desde que se cargó un ítem el producto se desactivó, el repositor perdió el rubro o la unidad cambió, el envío falla con el detalle de cada ítem.
 - **Devoluciones:** se guarda solo la última (comentario, fecha y quién la hizo).
+- **Consolidado aprobado:** si el período ya tiene un consolidado APROBADO, los pedidos no se pueden enviar ni devolver (ver abajo).
+
+### Consolidado
+
+Suma, por producto, los pedidos ENVIADOS y APROBADOS de un período. Todas las rutas son para ENCARGADA y ADMIN.
+
+| Método y ruta | Qué hace |
+|---|---|
+| `GET /consolidados` | Lista con filtros `periodoId` y `estado`, paginada |
+| `GET /consolidados/:id` | Detalle con cada producto (código, unidad, rubro, proveedor), `cantidadTotal` y `cantidadEditada` |
+| `POST /consolidados` | `{ periodoId }`: genera el consolidado BORRADOR del período (o lo regenera) |
+| `PATCH /consolidados/:id/items/:itemId` | `{ cantidadEditada, observacion? }`: ajuste manual de un ítem (`null` vuelve a la suma automática) |
+| `POST /consolidados/:id/aprobar` | BORRADOR → APROBADO |
+
+Reglas del consolidado:
+
+- **El BORRADOR se puede regenerar** las veces que haga falta: se borra el anterior (con sus cantidades editadas) y se crea uno nuevo con los pedidos del momento. Se puede generar con el período todavía abierto, para ir viendo cómo viene; el flujo es generar → revisar → regenerar cuando llegaron todos los pedidos → ajustar → aprobar. Un período tiene a lo sumo un BORRADOR (las generaciones simultáneas se serializan).
+- **`cantidadTotal`** es la suma automática; **`cantidadEditada`** es el ajuste manual de la encargada (vacío si no se tocó). La exportación usa `cantidadEditada` cuando existe. Misma regla de unidades que los pedidos: enteros salvo KG y LT.
+- **El APROBADO es inmutable:** no se edita, no se regenera (409) y no se vuelve a aprobar.
+- **Con un consolidado APROBADO en el período, los pedidos quedan congelados:** no se pueden enviar ni devolver (400), porque eso cambiaría lo que se consolidó. Aprobar un pedido ENVIADO sí se permite: ya estaba sumado y lo sigue estando.
+- **Roles:** el admin puede generar, editar y aprobar consolidados (es un acto administrativo), pero **no** aprueba ni devuelve pedidos individuales: eso es un acto de la encargada, que valida el trabajo del repositor.
 
 Convenciones:
 
@@ -154,7 +175,7 @@ Reglas:
 | `pnpm dev` | Levanta api y web en paralelo |
 | `pnpm build` | Compila api (`tsc`) y web (`vite build`) |
 | `pnpm --filter api lint` | ESLint sobre `src/` y `prisma/` |
-| `pnpm --filter api test` | Vitest: 88 tests de integración con `app.inject()` |
+| `pnpm --filter api test` | Vitest: 119 tests (integración con `app.inject()` y unitarios del parser y la importación) |
 | `pnpm --filter api seed` | Recarga los datos de prueba. **Borra todo**, incluido el catálogo importado |
 | `pnpm --filter api import-catalogo` | Importa el catálogo real desde `CATALOGO_XLSX_PATH` (ver abajo) |
 | `pnpm --filter api exec prisma studio` | Explorador visual de la base |
@@ -215,8 +236,8 @@ No uses `Move-Item` de PowerShell 5.1 en `node_modules`: falla a mitad de camino
 - ~~**Sprint 1.2**~~ — Autenticación: email + contraseña para admin/encargada; lista de usuarios + PIN para repositores.
 - ~~**Sprint 1.3**~~ — CRUD admin: usuarios, rubros, proveedores, productos, períodos.
 - ~~**Sprint 1.4**~~ — Pedidos: armado por repositor, envío, devolución y aprobación.
-- **Sprint 1.5** — Importación del catálogo real de artículos de Cármar.
-- **Sprint 1.6** — Consolidado de pedidos por período.
+- ~~**Sprint 1.5**~~ — Importación del catálogo real de artículos de Cármar.
+- ~~**Sprint 1.6**~~ — Consolidado de pedidos por período.
 - **Sprint 1.7** — Exportación.
 - **Sprint 2.x** — Frontend.
 - **Sprint 3.x** — Deploy (y logging estructurado).

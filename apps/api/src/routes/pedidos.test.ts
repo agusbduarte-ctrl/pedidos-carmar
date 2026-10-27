@@ -29,6 +29,7 @@ const productos: Record<"asignado" | "asignado2" | "noAsignado" | "inactivo", st
 const empiezaCon = { startsWith: PREFIJO };
 
 async function limpiar() {
+  await prisma.consolidado.deleteMany({ where: { periodo: { nombre: empiezaCon } } });
   await prisma.pedido.deleteMany({
     where: { OR: [{ periodo: { nombre: empiezaCon } }, { repositor: { nombre: empiezaCon } }] },
   });
@@ -481,6 +482,34 @@ describe("POST /pedidos/:id/devolver y /aprobar", () => {
     expect(res.json().data.estado).toBe("APROBADO");
     expect(res.json().data.fechaAprobacion).not.toBeNull();
     expect(res.json().data.aprobadoPor).toMatchObject({ nombre: "Encargada de Compras" });
+  });
+
+  it("con un consolidado APROBADO en el período, no se puede enviar: 400", async () => {
+    const pedido = await crearPedido();
+    await agregar(pedido.id, productos.asignado, 1);
+    await prisma.consolidado.create({ data: { periodoId, estado: "APROBADO" } });
+
+    const res = await pedir("POST", `/pedidos/${pedido.id}/enviar`);
+
+    expect(res.statusCode).toBe(400);
+    expect(res.json()).toEqual({
+      error: "El período ya tiene un consolidado aprobado, no se pueden modificar pedidos",
+    });
+    expect((await prisma.pedido.findUniqueOrThrow({ where: { id: pedido.id } })).estado).toBe("BORRADOR");
+  });
+
+  it("con un consolidado APROBADO en el período, no se puede devolver: 400", async () => {
+    const pedido = await pedidoEnviado();
+    await prisma.consolidado.create({ data: { periodoId, estado: "APROBADO" } });
+    const encargada = await comoEncargada();
+
+    const res = await encargada("POST", `/pedidos/${pedido.id}/devolver`, { comentario: "tarde" });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.json()).toEqual({
+      error: "El período ya tiene un consolidado aprobado, no se pueden modificar pedidos",
+    });
+    expect((await prisma.pedido.findUniqueOrThrow({ where: { id: pedido.id } })).estado).toBe("ENVIADO");
   });
 
   it("APROBADO es inmutable: enviar, devolver y aprobar de nuevo dan 400", async () => {
