@@ -20,7 +20,7 @@
     "@fastify/rate-limit": "^11.2.1",
     "@prisma/client": "^6.0.0",
     "bcryptjs": "^3.0.3",
-    "fastify": "^5.0.0",
+    "fastify": "^5.12.7",
     "xlsx": "file:vendor/xlsx-0.20.3.tgz",
     "zod": "^3.23.0"
   },
