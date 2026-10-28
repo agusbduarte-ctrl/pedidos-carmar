@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import type { Rol } from "../lib/api";
 import PedidoRepositor from "./PedidoRepositor";
@@ -37,6 +38,11 @@ export default function Inicio() {
         {user.sucursal ? ` (${user.sucursal.replace("_", " ")})` : ""}
       </p>
       {user.rol === "REPOSITOR" ? <PedidoRepositor /> : <p>{TEXTOS[user.rol]}</p>}
+      {user.rol !== "REPOSITOR" && (
+        <Link className="boton" to="/revision">
+          Revisar pedidos
+        </Link>
+      )}
       <button className="boton secundario" onClick={salir} disabled={saliendo}>
         Cerrar sesión
       </button>

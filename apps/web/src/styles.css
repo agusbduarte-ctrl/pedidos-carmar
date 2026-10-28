@@ -31,6 +31,27 @@ input:focus, select:focus { outline: 3px solid #8ab4f8; border-color: #1a56db; }
 .boton:disabled { opacity: 0.6; cursor: not-allowed; }
 .boton.secundario { background: #fff; color: #1a56db; border: 2px solid #1a56db; margin-top: 16px; }
 .error { margin: 0; padding: 12px; border-radius: 8px; background: #fde8e8; color: #9b1c1c; font-weight: 600; }
-.pestanas { display: flex; gap: 8px; margin-bottom: 20px; }
+.pagina.ancha { max-width: 900px; }
+a.boton { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+textarea { font: inherit; padding: 14px; border: 2px solid #b8bec7; border-radius: 8px; resize: vertical; }
+textarea:focus { outline: 3px solid #8ab4f8; border-color: #1a56db; }
+.filtro { margin-bottom: 20px; max-width: 320px; }
+.fila-pedido { text-decoration: none; color: inherit; gap: 4px; }
+.fila-pedido:hover { border-color: #1a56db; }
+.datos { gap: 4px; }
+.datos p { margin: 4px 0; }
+.rubro-grupo h3 { font-size: 1.05rem; margin: 8px 0; color: #374151; }
+.acciones { display: flex; flex-direction: column; gap: 12px; }
+.paginas .boton.secundario { margin-top: 0; }
+@media (min-width: 700px) {
+  .fila-pedido { flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  .acciones { flex-direction: row; }
+  .acciones .boton { min-width: 180px; }
+  .confirmar { max-width: 560px; }
+}
+.pestanas { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
 .pestanas button { flex: 1; font: inherit; font-weight: 700; min-height: 52px; border: 2px solid #1a56db; background: #fff; color: #1a56db; border-radius: 8px; cursor: pointer; }
 .pestanas button.activa { background: #1a56db; color: #fff; }
+@media (min-width: 700px) {
+  .pagina.ancha .pestanas button { flex: 0 0 auto; padding: 0 20px; }
+}
