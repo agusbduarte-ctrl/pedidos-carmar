@@ -6,3 +6,9 @@ dist/
 .DS_Store
 _README.md
 /data/
+
+# Claude Code
+.claude/.cache/
+.claude/settings.local.json
+.claude/
+claude-*.zip
