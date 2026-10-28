@@ -46,7 +46,11 @@ export async function buildApp(
   options: BuildAppOptions = {},
 ): Promise<FastifyInstance> {
   const db = prisma ?? new PrismaClient();
-  const app = Fastify({ logger: options.logger ?? true });
+  const app = Fastify({
+    logger: options.logger ?? true,
+    // Detrás de Netlify/Render todos compartirían IP: así request.ip (rate limit) es la del cliente.
+    trustProxy: true,
+  });
 
   app.decorate("db", db);
 
