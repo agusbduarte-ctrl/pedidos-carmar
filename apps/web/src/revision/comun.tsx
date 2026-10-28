@@ -13,8 +13,8 @@ export function EstadoEtiqueta({ estado }: { estado: EstadoPedido }) {
 }
 
 export function nombreSucursal(s: Sucursal): string {
-  // CARMAR_1 -> Cármar 1
-  return s.replace("CARMAR_", "Cármar ");
+  // CARMAR_1 -> Carmar 1
+  return s.replace("CARMAR_", "Carmar ");
 }
 
 export function formatearFecha(iso: string | null): string {

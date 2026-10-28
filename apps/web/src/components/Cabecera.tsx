@@ -21,7 +21,7 @@ export default function Cabecera() {
     <header className="cabecera">
       <div className="cabecera-interior">
         <Link className="cabecera-marca" to="/">
-          Cármar
+          <img src="/logo-carmar-blanco.png" alt="Carmar" width="102" height="30" />
         </Link>
         <div className="cabecera-usuario">
           <span className="cabecera-nombre">{user.nombre}</span>

@@ -104,8 +104,8 @@ function FormRepositor() {
           required
         >
           <option value="">Elegí la sucursal</option>
-          <option value="CARMAR_1">Cármar 1</option>
-          <option value="CARMAR_2">Cármar 2</option>
+          <option value="CARMAR_1">Carmar 1</option>
+          <option value="CARMAR_2">Carmar 2</option>
         </select>
       </label>
       <label>
@@ -162,7 +162,9 @@ export default function Login() {
 
   return (
     <main className="login">
-      <h1 className="login-marca">Cármar</h1>
+      <h1 className="login-marca">
+        <img src="/logo-carmar-blanco.png" alt="Carmar" width="240" height="71" />
+      </h1>
       <p className="login-sub">Pedidos internos</p>
       <div className="login-panel">
       <div className="pestanas" role="tablist">
