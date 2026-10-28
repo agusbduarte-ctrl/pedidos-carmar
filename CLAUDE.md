@@ -1,6 +1,6 @@
 # pedidos_carmar
 
-Sistema interno de pedidos del Supermercado Cármar. Monorepo pnpm: `apps/api` (Fastify 5 + Prisma 6 + Zod + Vitest, Postgres 16 en Docker) y `apps/web` (React + Vite, todavía mínima). Estado y estructura: `README.md`.
+Sistema interno de pedidos del Supermercado Carmar. Monorepo pnpm: `apps/api` (Fastify 5 + Prisma 6 + Zod + Vitest, Postgres 16 en Docker) y `apps/web` (React + Vite, todavía mínima). Estado y estructura: `README.md`.
 
 ## Comandos
 

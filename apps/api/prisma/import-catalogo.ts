@@ -1,4 +1,4 @@
-// Importa el catálogo de artículos exportado del sistema de Cármar.
+// Importa el catálogo de artículos exportado del sistema de Carmar.
 // Uso: pnpm --filter api import-catalogo
 // Lee la ruta del Excel de CATALOGO_XLSX_PATH (en apps/api/.env), relativa a la
 // raíz del repo o absoluta. Es idempotente: se puede correr las veces que haga falta.

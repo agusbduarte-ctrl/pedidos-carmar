@@ -9,7 +9,7 @@ export interface FilaCatalogo {
   rubroNombre: string;
 }
 
-// Encabezados del export "BASE DE DATOS DE ARTICULOS" del sistema de Cármar
+// Encabezados del export "BASE DE DATOS DE ARTICULOS" del sistema de Carmar
 export const COLUMNAS = {
   codigo: "Cod. Art. Local",
   nombre: "Artículo",

@@ -1,6 +1,6 @@
-# Pedidos Cármar
+# Pedidos Carmar
 
-Sistema interno de pedidos para los repositores y la encargada de compras del Supermercado Cármar.
+Sistema interno de pedidos para los repositores y la encargada de compras del Supermercado Carmar.
 
 **Estado actual:** Sprint 2.5 completo — backend con autenticación (JWT en cookie httpOnly), CRUD admin de usuarios, rubros, proveedores, productos y períodos, el flujo de pedidos, el catálogo real importado (14.322 artículos), el consolidado por período y su exportación a Excel, con 159 tests. El frontend cubre el login, la pantalla del repositor (armar y enviar su pedido), la de la encargada (revisar, aprobar o devolver), la del consolidado (generar, ajustar, aprobar y descargar el Excel) y la administración de usuarios, productos, rubros, proveedores y períodos.
 
@@ -189,7 +189,7 @@ Reglas:
 
 ### Importación del catálogo
 
-El catálogo real sale del Excel "BASE DE DATOS DE ARTICULOS" del sistema de Cármar (columnas `Cod. Art. Local`, `Artículo`, `Códigos Barras`, `Cod. Rubro`, `Rubro`). **El Excel no va al repo**: se copia a `data/catalogo.xlsx` (la carpeta `/data/` está en `.gitignore`) y se apunta `CATALOGO_XLSX_PATH` en `apps/api/.env`.
+El catálogo real sale del Excel "BASE DE DATOS DE ARTICULOS" del sistema de Carmar (columnas `Cod. Art. Local`, `Artículo`, `Códigos Barras`, `Cod. Rubro`, `Rubro`). **El Excel no va al repo**: se copia a `data/catalogo.xlsx` (la carpeta `/data/` está en `.gitignore`) y se apunta `CATALOGO_XLSX_PATH` en `apps/api/.env`.
 
 `pnpm --filter api import-catalogo`:
 
@@ -239,12 +239,13 @@ No uses `Move-Item` de PowerShell 5.1 en `node_modules`: falla a mitad de camino
 
 Todo sale de `apps/web/src/styles.css`: los colores, tamaños, radios y espaciados están como variables en `:root` y las pantallas no llevan estilos propios. Si se agrega una pantalla, se usan esas variables y las clases que ya existen.
 
-- **Idea:** señalética de supermercado y etiqueta de góndola. Los repositores usan el celular en el pasillo o el depósito, con luz fuerte y poco tiempo; la encargada y el admin trabajan en PC.
-- **Colores:** tinta verde azulada `#17302F` (barra, botón principal, texto), fondo papel, blanco para las superficies. Rojo, verde y azul solo para estados. Los textos cumplen contraste AA.
-- **Tipografía:** Barlow Condensed (títulos y cifras) y Atkinson Hyperlegible (texto). Se instalan con npm (`@fontsource/*`, licencia OFL) y salen del propio bundle: la app no pide nada a Google. Atkinson marca el cero con una barra para no confundirlo con la O.
-- **La placa de cantidad** (`components/Cantidad.tsx`) es lo único llamativo: la cifra en amarillo góndola con la unidad al lado. Si la encargada corrige la cantidad a mano, la placa se invierte (tinta con cifra amarilla). El amarillo se usa solo ahí y en el anillo de foco, para que siga significando algo.
-- **Reglas:** filas planas con línea fina, sin sombras; el rojo sólido solo para confirmar o devolver (en las filas, "Borrar" va con contorno rojo); nada de mayúsculas decorativas, flechas en los botones ni textos unidos con punto medio; sin animaciones salvo un cambio corto de color, y se respeta "reducir movimiento". Objetivos táctiles de 48 px en celular. Verificado de 360 px a 1440 px, sin scroll horizontal.
-- **Barra superior:** `components/Layout.tsx` la pone en todas las pantallas con sesión, con la marca, el nombre, la sucursal y "Salir".
+- **Marca:** sigue la identidad oficial de Carmar (el nombre va **sin tilde**). Los colores salen de los diseños del supermercado: rojo `#E1141C`, rojo oscuro `#A80D13`, negro `#161616` y amarillo `#FFD21F`. El logo oficial (blanco, con su rayita) está en `apps/web/public/logo-carmar-blanco.png` y el ícono de la pestaña y del celular en `favicon.png`.
+- **Idea:** los repositores usan el celular en el pasillo o el depósito, con luz fuerte y poco tiempo; la encargada y el admin trabajan en PC. La interfaz es sobria para que se destaque lo que importa: las cantidades.
+- **Colores en uso:** barra superior y login en rojo de marca (el login lleva el degradé de los carteles). Fondo gris neutro claro, superficies blancas y texto negro. Botón principal negro; rojo oscuro para devolver, borrar y cerrar. No se usa azul. Los textos cumplen contraste AA.
+- **Tipografía:** Barlow Condensed (títulos y cifras) y Barlow (texto), las de la marca. Se instalan con npm (`@fontsource/*`, licencia OFL) y salen del propio bundle: la app no pide nada a Google.
+- **La placa de cantidad** (`components/Cantidad.tsx`) es lo único llamativo: la cifra en amarillo con la unidad al lado, como una etiqueta de góndola. Si la encargada corrige la cantidad a mano, la placa se invierte (negro con cifra amarilla). El amarillo se usa solo ahí y en el anillo de foco, para que siga significando algo.
+- **Reglas:** filas planas con línea fina, sin sombras; el rojo oscuro sólido solo para confirmar o devolver (en las filas, "Borrar" va con contorno); nada de mayúsculas decorativas, flechas en los botones ni textos unidos con punto medio; sin animaciones salvo un cambio corto de color, y se respeta "reducir movimiento". Objetivos táctiles de 48 px en celular. La página no se desplaza hacia los costados (`overflow-x: clip`) y se verificó de 300 px a 1440 px, sin desborde.
+- **Barra superior:** `components/Layout.tsx` la pone en todas las pantallas con sesión, con el logo, el nombre, la sucursal y "Salir".
 
 ## Roadmap
 
@@ -252,7 +253,7 @@ Todo sale de `apps/web/src/styles.css`: los colores, tamaños, radios y espaciad
 - ~~**Sprint 1.2**~~ — Autenticación: email + contraseña para admin/encargada; lista de usuarios + PIN para repositores.
 - ~~**Sprint 1.3**~~ — CRUD admin: usuarios, rubros, proveedores, productos, períodos.
 - ~~**Sprint 1.4**~~ — Pedidos: armado por repositor, envío, devolución y aprobación.
-- ~~**Sprint 1.5**~~ — Importación del catálogo real de artículos de Cármar.
+- ~~**Sprint 1.5**~~ — Importación del catálogo real de artículos de Carmar.
 - ~~**Sprint 1.6**~~ — Consolidado de pedidos por período.
 - ~~**Sprint 1.7**~~ — Exportación del consolidado a Excel.
 - ~~**Sprint 2.1**~~ — Frontend del repositor:
