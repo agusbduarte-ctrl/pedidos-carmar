@@ -7,6 +7,12 @@ import { isAbsolute, resolve } from "node:path";
 import { PrismaClient } from "@prisma/client";
 import { parsearCatalogo } from "../src/lib/excel-parser.js";
 import { importarCatalogo } from "../src/lib/importar-catalogo.js";
+import {
+  parsearLimitePorRubro,
+  parsearListaRubros,
+  recortarCatalogo,
+  rubrosInexistentes,
+} from "../src/lib/recorte-catalogo.js";
 
 const RAIZ_REPO = resolve(__dirname, "../../..");
 const MAX_AVISOS_EN_PANTALLA = 20;
@@ -31,8 +37,22 @@ function rutaDelExcel(): string {
 async function main() {
   const ruta = rutaDelExcel();
   console.log(`📄 Leyendo ${ruta}...`);
-  const filas = parsearCatalogo(ruta);
-  console.log(`   ${filas.length} artículos únicos`);
+  const todas = parsearCatalogo(ruta);
+  console.log(`   ${todas.length} artículos únicos`);
+
+  const rubros = parsearListaRubros(process.env.CATALOGO_RUBROS);
+  const limitePorRubro = parsearLimitePorRubro(process.env.CATALOGO_LIMITE_POR_RUBRO);
+  let filas = todas;
+  if (rubros || limitePorRubro !== undefined) {
+    if (rubros) {
+      const faltan = rubrosInexistentes(todas, rubros);
+      if (faltan.length > 0) {
+        console.warn(`⚠️  Rubros que no existen en el Excel: ${faltan.join(", ")}`);
+      }
+    }
+    filas = recortarCatalogo(todas, { rubros, limitePorRubro });
+    console.log(`   Recorte aplicado: quedan ${filas.length} artículos`);
+  }
 
   const inicio = Date.now();
   const r = await importarCatalogo(prisma, filas, { log: (m) => console.log(`   ${m}`) });
