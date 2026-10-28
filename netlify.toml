@@ -1,0 +1,22 @@
+[build]
+  command = "pnpm install --frozen-lockfile && pnpm --filter web build"
+  publish = "apps/web/dist"
+
+[build.environment]
+  NODE_VERSION = "24"
+  # pnpm 9 (coincide con "packageManager" del package.json raíz)
+  PNPM_VERSION = "9"
+
+# Proxy de la API
+[[redirects]]
+  from = "/api/*"
+  # reemplazar por la URL de Render
+  to = "https://TU-API.onrender.com/:splat"
+  status = 200
+  force = true
+
+# SPA
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

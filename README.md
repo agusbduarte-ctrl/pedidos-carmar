@@ -12,7 +12,7 @@ Sistema interno de pedidos para los repositores y la encargada de compras del Su
 | Backend (`apps/api`) | Node 24, Fastify 5, Prisma 6, Zod, TypeScript 5 |
 | Auth (`apps/api`) | `@fastify/jwt`, `@fastify/cookie`, `@fastify/rate-limit`, bcryptjs |
 | Base de datos | PostgreSQL 16 (Docker Compose en local) |
-| Frontend (`apps/web`) | React 18, Vite 6, TypeScript 5 |
+| Frontend (`apps/web`) | React 18, Vite 6, TypeScript 5, React Router 7, TanStack Query 5 |
 | Calidad | ESLint 10 + typescript-eslint (api), Vitest (api) |
 
 **Todavía no existe** (aunque estaba en planes anteriores): Tailwind, PWA, deploy en Railway, rama `develop`, CI.
@@ -180,7 +180,7 @@ Reglas:
 | `pnpm dev` | Levanta api y web en paralelo |
 | `pnpm build` | Compila api (`tsc`) y web (`vite build`) |
 | `pnpm --filter api lint` | ESLint sobre `src/` y `prisma/` |
-| `pnpm --filter api test` | Vitest: 119 tests (integración con `app.inject()` y unitarios del parser y la importación) |
+| `pnpm --filter api test` | Vitest: 159 tests (integración con `app.inject()` y unitarios del parser y la importación) |
 | `pnpm --filter api seed` | Recarga los datos de prueba. **Borra todo**, incluido el catálogo importado |
 | `pnpm --filter api import-catalogo` | Importa el catálogo real desde `CATALOGO_XLSX_PATH` (ver abajo) |
 | `pnpm --filter api exec prisma studio` | Explorador visual de la base |
@@ -246,6 +246,27 @@ Todo sale de `apps/web/src/styles.css`: los colores, tamaños, radios y espaciad
 - **La placa de cantidad** (`components/Cantidad.tsx`) es lo único llamativo: la cifra en amarillo con la unidad al lado, como una etiqueta de góndola. Si la encargada corrige la cantidad a mano, la placa se invierte (negro con cifra amarilla). El amarillo se usa solo ahí y en el anillo de foco, para que siga significando algo.
 - **Reglas:** filas planas con línea fina, sin sombras; el rojo oscuro sólido solo para confirmar o devolver (en las filas, "Borrar" va con contorno); nada de mayúsculas decorativas, flechas en los botones ni textos unidos con punto medio; sin animaciones salvo un cambio corto de color, y se respeta "reducir movimiento". Objetivos táctiles de 48 px en celular. La página no se desplaza hacia los costados (`overflow-x: clip`) y se verificó de 300 px a 1440 px, sin desborde.
 - **Barra superior:** `components/Layout.tsx` la pone en todas las pantallas con sesión, con el logo, el nombre, la sucursal y "Salir".
+
+## Deploy de prueba (gratis)
+
+Para probar una semana sin pagar: **Netlify** (web), **Render free** (API) y **Neon** (Postgres).
+
+Orden de pasos:
+
+1. **Neon**: crear el proyecto y copiar la cadena de conexión (con `sslmode=require`).
+2. **Render**: crear un Web Service con estos comandos:
+   - Build: `pnpm install --frozen-lockfile && pnpm --filter api build && pnpm --filter api exec prisma migrate deploy`
+   - Start: `node apps/api/dist/server.js`
+   - Variables de entorno: `DATABASE_URL` (la de Neon, con `sslmode=require`), `JWT_SECRET` (uno propio, largo), `NODE_ENV=production`, `CORS_ORIGIN` (la URL de Netlify), `JWT_EXPIRES_IN=7d`.
+3. Poner la URL de Render en `netlify.toml` (reemplazar `TU-API.onrender.com`).
+4. **Netlify**: conectar el repo; toma la configuración de `netlify.toml`.
+
+Datos de prueba: correr `pnpm --filter api seed` en tu PC con `DATABASE_URL` apuntando a Neon. Carga solo datos de ejemplo.
+
+Ojo:
+
+- El seed crea `admin@carmar.com` / `admin123` y el PIN `1234`. Cambiá esas credenciales apenas se cargue en una URL pública.
+- Render free se duerme a los ~15 minutos sin uso: el primer pedido tarda 30-60 s en responder.
 
 ## Roadmap
 
