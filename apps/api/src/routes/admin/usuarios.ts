@@ -68,7 +68,15 @@ const editarBody = z
   })
   .strict();
 
-const EMAIL_EN_USO = { error: "El email ya está en uso" };
+const rubrosBody = z.object({
+  rubroIds: z
+    .array(z.string().trim().min(1))
+    .max(200)
+    .transform((ids) => [...new Set(ids)]),
+});
+
+const SOLO_REPOSITORES = { error: "Solo los repositores tienen rubros asignados" };
+const EMAIL_EN_USO ={ error: "El email ya está en uso" };
 const NO_ENCONTRADO = { error: "Usuario no encontrado" };
 
 export default async function usuariosRoutes(app: FastifyInstance) {
@@ -205,6 +213,71 @@ export default async function usuariosRoutes(app: FastifyInstance) {
       if (isUniqueViolation(err)) return reply.code(409).send(EMAIL_EN_USO);
       throw err;
     }
+  });
+
+  // Rubros asignados a un repositor en su sucursal actual
+  const rubrosAsignados = async (usuarioId: string, sucursal: Sucursal) => {
+    const asignaciones = await app.db.repositorRubro.findMany({
+      where: { usuarioId, sucursal, rubro: { deletedAt: null } },
+      select: { rubro: { select: { id: true, nombre: true } } },
+      orderBy: { rubro: { nombre: "asc" } },
+    });
+    return asignaciones.map((a) => a.rubro);
+  };
+
+  app.get("/:id/rubros", async (request, reply) => {
+    const params = idParams.safeParse(request.params);
+    if (!params.success) return sendValidationError(reply, params.error);
+
+    const usuario = await app.db.usuario.findFirst({
+      where: { id: params.data.id, deletedAt: null },
+    });
+    if (!usuario) return reply.code(404).send(NO_ENCONTRADO);
+    if (usuario.rol !== Rol.REPOSITOR) return reply.code(400).send(SOLO_REPOSITORES);
+    if (!usuario.sucursal) return { data: [] };
+
+    return { data: await rubrosAsignados(usuario.id, usuario.sucursal) };
+  });
+
+  app.put("/:id/rubros", async (request, reply) => {
+    const params = idParams.safeParse(request.params);
+    if (!params.success) return sendValidationError(reply, params.error);
+    const body = rubrosBody.safeParse(request.body);
+    if (!body.success) return sendValidationError(reply, body.error);
+    const { rubroIds } = body.data;
+
+    const usuario = await app.db.usuario.findFirst({
+      where: { id: params.data.id, deletedAt: null },
+    });
+    if (!usuario) return reply.code(404).send(NO_ENCONTRADO);
+    if (usuario.rol !== Rol.REPOSITOR) return reply.code(400).send(SOLO_REPOSITORES);
+    const sucursal = usuario.sucursal;
+    if (!sucursal) return reply.code(400).send({ error: "El repositor no tiene sucursal asignada" });
+
+    const existentes = await app.db.rubro.findMany({
+      where: { id: { in: rubroIds }, deletedAt: null },
+      select: { id: true },
+    });
+    const validos = new Set(existentes.map((r) => r.id));
+    const faltantes = rubroIds.filter((id) => !validos.has(id));
+    if (faltantes.length > 0) {
+      return reply.code(400).send({
+        error: "Datos inválidos",
+        detalles: faltantes.map((id) => `rubroIds: El rubro ${id} no existe`),
+      });
+    }
+
+    await app.db.$transaction(async (tx) => {
+      await tx.repositorRubro.deleteMany({
+        where: { usuarioId: usuario.id, sucursal, rubroId: { notIn: rubroIds } },
+      });
+      await tx.repositorRubro.createMany({
+        data: rubroIds.map((rubroId) => ({ usuarioId: usuario.id, sucursal, rubroId })),
+        skipDuplicates: true,
+      });
+    });
+
+    return { data: await rubrosAsignados(usuario.id, sucursal) };
   });
 
   app.delete("/:id", async (request, reply) => {
