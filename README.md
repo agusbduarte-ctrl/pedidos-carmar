@@ -2,7 +2,7 @@
 
 Sistema interno de pedidos para los repositores y la encargada de compras del Supermercado Cármar.
 
-**Estado actual:** Sprint 2.3 completo — backend con autenticación (JWT en cookie httpOnly), CRUD admin de usuarios, rubros, proveedores, productos y períodos, el flujo de pedidos, el catálogo real importado (14.322 artículos), el consolidado por período y su exportación a Excel, con 145 tests. El frontend cubre el login, la pantalla del repositor (armar y enviar su pedido), la de la encargada (revisar, aprobar o devolver) y la del consolidado (generar, ajustar, aprobar y descargar el Excel). La administración (usuarios, productos, períodos) todavía solo existe como API.
+**Estado actual:** Sprint 2.4 completo — backend con autenticación (JWT en cookie httpOnly), CRUD admin de usuarios, rubros, proveedores, productos y períodos, el flujo de pedidos, el catálogo real importado (14.322 artículos), el consolidado por período y su exportación a Excel, con 159 tests. El frontend cubre el login, la pantalla del repositor (armar y enviar su pedido), la de la encargada (revisar, aprobar o devolver), la del consolidado (generar, ajustar, aprobar y descargar el Excel) y la administración de usuarios y productos. Rubros, proveedores y períodos todavía solo existen como API.
 
 ## Stack
 
@@ -96,6 +96,7 @@ Todas las rutas `/admin/*` requieren sesión de un usuario con rol ADMIN. El tok
 | `POST /auth/login` | `{ tipo: "email", email, password }` o `{ tipo: "repositor", usuarioId, pin }`. Límite: 5/min por IP, 10/min por usuario; 10 PIN fallidos bloquean 15 min |
 | `POST /auth/logout` · `GET /auth/me` | Cerrar sesión · usuario actual |
 | `/admin/usuarios` | CRUD. Filtros `q`, `rol`, `incluirInactivos`. Un admin no puede desactivarse ni borrarse a sí mismo; el rol no se cambia por PATCH |
+| `GET` · `PUT /admin/usuarios/:id/rubros` | Rubros que repone un REPOSITOR en su sucursal. El `PUT` con `{ rubroIds }` reemplaza el conjunto (vacío = quita todos) sin tocar las de otras sucursales. Si el usuario no es repositor o no tiene sucursal: 400 |
 | `/admin/rubros` · `/admin/proveedores` | CRUD. Filtro `q` |
 | `/admin/productos` | CRUD. Filtros `q` (nombre o código), `rubroId`, `proveedorId`, `incluirInactivos` |
 | `/admin/periodos` | Alta, edición y `POST /:id/cerrar`. Un solo período abierto a la vez; no se reabren |
@@ -248,7 +249,8 @@ No uses `Move-Item` de PowerShell 5.1 en `node_modules`: falla a mitad de camino
   - Parte 2: pantalla de pedido del repositor (empezar, buscar productos, agregar, quitar, enviar, corregir un pedido devuelto). Suma `GET /pedidos/productos` y `GET /pedidos/mis-rubros` en la API.
 - ~~**Sprint 2.2**~~ — Pantalla de la encargada: lista de pedidos por estado y sucursal, detalle con ítems por rubro, aprobar y devolver con comentario. El admin la ve en solo lectura.
 - ~~**Sprint 2.3**~~ — Pantalla del consolidado para encargada y admin: elegir período, generar y regenerar, ajustar cantidades por ítem, aprobar y descargar el Excel. Suma `GET /periodos` en la API.
-- **Sprint 2.4** — Administración en la web (usuarios, rubros, proveedores, productos, períodos).
+- ~~**Sprint 2.4**~~ — Administración en la web, solo para ADMIN: usuarios (alta, edición, activar/desactivar, borrar y rubros que repone cada repositor) y productos (alta, edición, rubro, unidad y proveedor; el código no se cambia). Suma `GET` y `PUT /admin/usuarios/:id/rubros` en la API.
+- **Sprint 2.5** — Administración en la web de rubros, proveedores y períodos.
 - **Sprint 2.x** — Pasada de diseño de toda la UI (skill `frontend-design`).
 - **Sprint 3.x** — Deploy (y logging estructurado).
 - Pendientes futuros, sin sprint asignado:
