@@ -527,3 +527,118 @@ describe("POST /pedidos/:id/devolver y /aprobar", () => {
     expect(aprobar.statusCode).toBe(400);
   });
 });
+
+describe("GET /pedidos/productos y /pedidos/mis-rubros", () => {
+  const como = async (payload: Record<string, string>) =>
+    pedirCon(app, await loginToken(app, payload));
+  const comoEncargada = () => como({ tipo: "email", email: "encargada@carmar.com", password: "encargada123" });
+  const comoAdmin = () => como({ tipo: "email", email: "admin@carmar.com", password: "admin123" });
+  const codigos = (res: { json: () => { data: { codigo: string }[] } }) =>
+    res.json().data.map((p) => p.codigo);
+
+  it("sin sesión: 401", async () => {
+    const sinSesion = pedirCon(app);
+    expect((await sinSesion("GET", "/pedidos/productos")).statusCode).toBe(401);
+    expect((await sinSesion("GET", "/pedidos/mis-rubros")).statusCode).toBe(401);
+  });
+
+  it("encargada y admin: 403", async () => {
+    for (const quien of [await comoEncargada(), await comoAdmin()]) {
+      expect((await quien("GET", "/pedidos/productos")).statusCode).toBe(403);
+      expect((await quien("GET", "/pedidos/mis-rubros")).statusCode).toBe(403);
+    }
+  });
+
+  it("devuelve solo productos activos de rubros asignados, sin datos de proveedor ni precios", async () => {
+    const res = await pedir("GET", `/pedidos/productos?q=${PREFIJO}`);
+
+    expect(res.statusCode).toBe(200);
+    expect(codigos(res)).toEqual([`${PREFIJO}001`, `${PREFIJO}002`]);
+    expect(res.json().data[0]).toEqual({
+      id: productos.asignado,
+      codigo: `${PREFIJO}001`,
+      nombre: "Producto 001",
+      unidad: expect.any(String),
+      rubro: { id: rubroAsignadoId, nombre: `${PREFIJO}Asignado` },
+    });
+    expect(res.json().meta).toMatchObject({ total: 2, page: 1 });
+  });
+
+  it("excluye productos borrados", async () => {
+    await prisma.producto.update({ where: { id: productos.asignado2 }, data: { deletedAt: new Date() } });
+
+    const res = await pedir("GET", `/pedidos/productos?q=${PREFIJO}`);
+
+    expect(codigos(res)).toEqual([`${PREFIJO}001`]);
+  });
+
+  it("no incluye rubros asignados en otra sucursal", async () => {
+    const otro = await prisma.rubro.create({
+      data: {
+        nombre: `${PREFIJO}OtraSucursal`,
+        repositorRubros: { create: { usuarioId: repositor.id, sucursal: Sucursal.CARMAR_2 } },
+      },
+    });
+    await prisma.producto.create({
+      data: { codigo: `${PREFIJO}005`, nombre: "Producto 005", rubroId: otro.id, proveedorId },
+    });
+
+    const res = await pedir("GET", `/pedidos/productos?q=${PREFIJO}`);
+
+    expect(codigos(res)).toEqual([`${PREFIJO}001`, `${PREFIJO}002`]);
+  });
+
+  it("filtro q por nombre (sin distinguir mayúsculas) y por código", async () => {
+    const porNombre = await pedir("GET", `/pedidos/productos?q=${encodeURIComponent("producto 002")}`);
+    const porCodigo = await pedir("GET", `/pedidos/productos?q=${PREFIJO}001`);
+
+    expect(codigos(porNombre)).toEqual([`${PREFIJO}002`]);
+    expect(codigos(porCodigo)).toEqual([`${PREFIJO}001`]);
+  });
+
+  it("rubroId asignado filtra; ajeno devuelve lista vacía", async () => {
+    const propio = await pedir("GET", `/pedidos/productos?q=${PREFIJO}&rubroId=${rubroAsignadoId}`);
+    const noAsignado = await prisma.rubro.findFirstOrThrow({ where: { nombre: `${PREFIJO}NoAsignado` } });
+    const ajeno = await pedir("GET", `/pedidos/productos?rubroId=${noAsignado.id}`);
+
+    expect(codigos(propio)).toEqual([`${PREFIJO}001`, `${PREFIJO}002`]);
+    expect(ajeno.statusCode).toBe(200);
+    expect(ajeno.json().data).toEqual([]);
+    expect(ajeno.json().meta.total).toBe(0);
+  });
+
+  it("pagina con page y limit", async () => {
+    const p1 = await pedir("GET", `/pedidos/productos?q=${PREFIJO}&limit=1&page=1`);
+    const p2 = await pedir("GET", `/pedidos/productos?q=${PREFIJO}&limit=1&page=2`);
+
+    expect(codigos(p1)).toEqual([`${PREFIJO}001`]);
+    expect(codigos(p2)).toEqual([`${PREFIJO}002`]);
+    expect(p1.json().meta).toEqual({ total: 2, page: 1, limit: 1, totalPages: 2 });
+  });
+
+  it("mis-rubros: devuelve los rubros asignados en su sucursal, ordenados por nombre", async () => {
+    const otroAsignado = await prisma.rubro.create({
+      data: {
+        nombre: `${PREFIJO}AAA`,
+        repositorRubros: { create: { usuarioId: repositor.id, sucursal: Sucursal.CARMAR_1 } },
+      },
+    });
+    await prisma.rubro.create({
+      data: {
+        nombre: `${PREFIJO}OtraSucursal`,
+        repositorRubros: { create: { usuarioId: repositor.id, sucursal: Sucursal.CARMAR_2 } },
+      },
+    });
+
+    const res = await pedir("GET", "/pedidos/mis-rubros");
+
+    expect(res.statusCode).toBe(200);
+    const propios = (res.json() as { id: string; nombre: string }[]).filter((r) =>
+      r.nombre.startsWith(PREFIJO),
+    );
+    expect(propios).toEqual([
+      { id: otroAsignado.id, nombre: `${PREFIJO}AAA` },
+      { id: rubroAsignadoId, nombre: `${PREFIJO}Asignado` },
+    ]);
+  });
+});

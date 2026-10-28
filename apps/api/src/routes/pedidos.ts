@@ -55,6 +55,11 @@ const listaQuery = z.object({
   estado: z.nativeEnum(EstadoPedido).optional(),
   repositorId: z.string().min(1).optional(),
 });
+const productosQuery = z.object({
+  // Vacíos (?q=&rubroId=) se tratan como ausentes
+  q: z.string().trim().max(100).optional(),
+  rubroId: z.string().optional(),
+});
 const devolverBody = z.object({ comentario: z.string().trim().min(1).max(500) });
 
 const idParams = z.object({ id: z.string().min(1) });
@@ -113,6 +118,69 @@ export default async function pedidosRoutes(app: FastifyInstance) {
         ...skipTake(pagination),
       }),
       app.db.pedido.count({ where }),
+    ]);
+
+    return { data, meta: buildMeta(total, pagination.page, pagination.limit) };
+  });
+
+  // Rubros asignados al repositor en su sucursal (para el filtro de la pantalla)
+  app.get("/mis-rubros", soloRepositor, async (request) => {
+    const { id: usuarioId, sucursal } = request.user;
+    if (!sucursal) return [];
+    const asignaciones = await app.db.repositorRubro.findMany({
+      where: { usuarioId, sucursal, rubro: { deletedAt: null } },
+      select: { rubro: { select: { id: true, nombre: true } } },
+      orderBy: { rubro: { nombre: "asc" } },
+    });
+    return asignaciones.map((a) => a.rubro);
+  });
+
+  // Productos que el repositor puede cargar: activos y de sus rubros asignados
+  app.get("/productos", soloRepositor, async (request, reply) => {
+    const query = productosQuery.safeParse(request.query);
+    if (!query.success) return sendValidationError(reply, query.error);
+    const pagination = parsePagination(request.query);
+    const { q, rubroId } = query.data;
+    const { id: usuarioId, sucursal } = request.user;
+
+    const vacio = { data: [], meta: buildMeta(0, pagination.page, pagination.limit) };
+    if (!sucursal) return vacio;
+
+    const asignados = (
+      await app.db.repositorRubro.findMany({
+        where: { usuarioId, sucursal },
+        select: { rubroId: true },
+      })
+    ).map((a) => a.rubroId);
+    if (rubroId && !asignados.includes(rubroId)) return vacio;
+
+    const where: Prisma.ProductoWhereInput = {
+      activo: true,
+      deletedAt: null,
+      rubroId: rubroId ? rubroId : { in: asignados },
+      ...(q
+        ? {
+            OR: [
+              { nombre: { contains: q, mode: "insensitive" } },
+              { codigo: { contains: q, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    };
+    const [data, total] = await Promise.all([
+      app.db.producto.findMany({
+        where,
+        select: {
+          id: true,
+          codigo: true,
+          nombre: true,
+          unidad: true,
+          rubro: { select: { id: true, nombre: true } },
+        },
+        orderBy: [{ nombre: "asc" }, { id: "asc" }],
+        ...skipTake(pagination),
+      }),
+      app.db.producto.count({ where }),
     ]);
 
     return { data, meta: buildMeta(total, pagination.page, pagination.limit) };
