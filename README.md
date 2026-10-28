@@ -106,6 +106,8 @@ Todas las rutas `/admin/*` requieren sesión de un usuario con rol ADMIN. El tok
 |---|---|---|
 | `GET /pedidos/mis-pedidos` | REPOSITOR | Sus pedidos, paginados, con período y cantidad de ítems |
 | `GET /pedidos/mis-pedidos/:id` | REPOSITOR | Detalle de un pedido propio con sus ítems (de otro: 404) |
+| `GET /pedidos/productos` | REPOSITOR | Busca productos que puede cargar (`q` por nombre o código, `rubroId`, paginado): activos y de sus rubros en su sucursal, sin datos de proveedor |
+| `GET /pedidos/mis-rubros` | REPOSITOR | Rubros asignados al repositor en su sucursal |
 | `POST /pedidos` | REPOSITOR | Crea su pedido en BORRADOR en el período abierto |
 | `POST /pedidos/:id/items` | REPOSITOR | Agrega un ítem `{ productoId, cantidad, observacion? }`; si el producto ya está, suma la cantidad |
 | `DELETE /pedidos/:id/items/:itemId` | REPOSITOR | Quita un ítem |
@@ -238,8 +240,12 @@ No uses `Move-Item` de PowerShell 5.1 en `node_modules`: falla a mitad de camino
 - ~~**Sprint 1.4**~~ — Pedidos: armado por repositor, envío, devolución y aprobación.
 - ~~**Sprint 1.5**~~ — Importación del catálogo real de artículos de Cármar.
 - ~~**Sprint 1.6**~~ — Consolidado de pedidos por período.
-- **Sprint 1.7** — Exportación.
-- **Sprint 2.x** — Frontend.
+- ~~**Sprint 1.7**~~ — Exportación del consolidado a Excel.
+- ~~**Sprint 2.1**~~ — Frontend del repositor:
+  - Parte 1: base de `apps/web` (router, TanStack Query, proxy `/api` de Vite) y login (email o PIN), sesión con `/auth/me`, rutas por rol y cierre de sesión.
+  - Parte 2: pantalla de pedido del repositor (empezar, buscar productos, agregar, quitar, enviar, corregir un pedido devuelto). Suma `GET /pedidos/productos` y `GET /pedidos/mis-rubros` en la API.
+- **Sprint 2.2** — Pantalla de la encargada: listar pedidos enviados, ver el detalle, aprobar o devolver con comentario (hoy se hace por la API).
+- **Sprint 2.x** — Resto del frontend (consolidado, administración).
 - **Sprint 3.x** — Deploy (y logging estructurado).
 - Pendientes futuros, sin sprint asignado:
   - Historial de devoluciones de un pedido (hoy solo se guarda la última).
