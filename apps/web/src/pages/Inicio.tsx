@@ -43,6 +43,11 @@ export default function Inicio() {
           Revisar pedidos
         </Link>
       )}
+      {user.rol !== "REPOSITOR" && (
+        <Link className="boton" to="/consolidado">
+          Consolidado
+        </Link>
+      )}
       <button className="boton secundario" onClick={salir} disabled={saliendo}>
         Cerrar sesión
       </button>

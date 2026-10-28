@@ -48,7 +48,7 @@ function mensajePorEstado(status: number, errorApi?: string): string {
 
 export async function api<T>(
   path: string,
-  options: { method?: "GET" | "POST" | "DELETE"; body?: unknown } = {},
+  options: { method?: "GET" | "POST" | "PATCH" | "DELETE"; body?: unknown } = {},
 ): Promise<T> {
   let res: Response;
   try {
