@@ -2,7 +2,7 @@
 
 Sistema interno de pedidos para los repositores y la encargada de compras del Supermercado Cármar.
 
-**Estado actual:** Sprint 1.6 completo — backend con autenticación (JWT en cookie httpOnly), CRUD admin de usuarios, rubros, proveedores, productos y períodos, el flujo de pedidos (armado por el repositor, revisión de la encargada), el catálogo real importado (14.322 artículos) y el consolidado por período, con 119 tests. Todavía no hay exportación ni UI más allá de una página de prueba.
+**Estado actual:** Sprint 2.3 completo — backend con autenticación (JWT en cookie httpOnly), CRUD admin de usuarios, rubros, proveedores, productos y períodos, el flujo de pedidos, el catálogo real importado (14.322 artículos), el consolidado por período y su exportación a Excel, con 145 tests. El frontend cubre el login, la pantalla del repositor (armar y enviar su pedido), la de la encargada (revisar, aprobar o devolver) y la del consolidado (generar, ajustar, aprobar y descargar el Excel). La administración (usuarios, productos, períodos) todavía solo existe como API.
 
 ## Stack
 
@@ -137,6 +137,8 @@ Suma, por producto, los pedidos ENVIADOS y APROBADOS de un período. Todas las r
 | `POST /consolidados` | `{ periodoId }`: genera el consolidado BORRADOR del período (o lo regenera) |
 | `PATCH /consolidados/:id/items/:itemId` | `{ cantidadEditada, observacion? }`: ajuste manual de un ítem (`null` vuelve a la suma automática) |
 | `POST /consolidados/:id/aprobar` | BORRADOR → APROBADO |
+| `GET /consolidados/:id/export` | Descarga el `.xlsx` con una hoja por proveedor; sirve en BORRADOR y APROBADO |
+| `GET /periodos` | Lista de períodos de solo lectura (filtro `estado`, paginada) para que la encargada elija cuál consolidar. La gestión sigue en `/admin/periodos` |
 
 Reglas del consolidado:
 
@@ -245,8 +247,9 @@ No uses `Move-Item` de PowerShell 5.1 en `node_modules`: falla a mitad de camino
   - Parte 1: base de `apps/web` (router, TanStack Query, proxy `/api` de Vite) y login (email o PIN), sesión con `/auth/me`, rutas por rol y cierre de sesión.
   - Parte 2: pantalla de pedido del repositor (empezar, buscar productos, agregar, quitar, enviar, corregir un pedido devuelto). Suma `GET /pedidos/productos` y `GET /pedidos/mis-rubros` en la API.
 - ~~**Sprint 2.2**~~ — Pantalla de la encargada: lista de pedidos por estado y sucursal, detalle con ítems por rubro, aprobar y devolver con comentario. El admin la ve en solo lectura.
-- **Sprint 2.3** — Pantalla del consolidado para encargada y admin: generar, revisar, ajustar cantidades, aprobar y descargar el Excel.
-- **Sprint 2.x** — Resto del frontend (administración: usuarios, rubros, proveedores, productos, períodos) y pasada de diseño de toda la UI.
+- ~~**Sprint 2.3**~~ — Pantalla del consolidado para encargada y admin: elegir período, generar y regenerar, ajustar cantidades por ítem, aprobar y descargar el Excel. Suma `GET /periodos` en la API.
+- **Sprint 2.4** — Administración en la web (usuarios, rubros, proveedores, productos, períodos).
+- **Sprint 2.x** — Pasada de diseño de toda la UI (skill `frontend-design`).
 - **Sprint 3.x** — Deploy (y logging estructurado).
 - Pendientes futuros, sin sprint asignado:
   - Historial de devoluciones de un pedido (hoy solo se guarda la última).
