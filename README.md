@@ -235,6 +235,17 @@ Pasos correctos para mover el proyecto:
 
 No uses `Move-Item` de PowerShell 5.1 en `node_modules`: falla a mitad de camino con los enlaces de pnpm y deja todo a medio mover.
 
+## Diseño de la interfaz
+
+Todo sale de `apps/web/src/styles.css`: los colores, tamaños, radios y espaciados están como variables en `:root` y las pantallas no llevan estilos propios. Si se agrega una pantalla, se usan esas variables y las clases que ya existen.
+
+- **Idea:** señalética de supermercado y etiqueta de góndola. Los repositores usan el celular en el pasillo o el depósito, con luz fuerte y poco tiempo; la encargada y el admin trabajan en PC.
+- **Colores:** tinta verde azulada `#17302F` (barra, botón principal, texto), fondo papel, blanco para las superficies. Rojo, verde y azul solo para estados. Los textos cumplen contraste AA.
+- **Tipografía:** Barlow Condensed (títulos y cifras) y Atkinson Hyperlegible (texto). Se instalan con npm (`@fontsource/*`, licencia OFL) y salen del propio bundle: la app no pide nada a Google. Atkinson marca el cero con una barra para no confundirlo con la O.
+- **La placa de cantidad** (`components/Cantidad.tsx`) es lo único llamativo: la cifra en amarillo góndola con la unidad al lado. Si la encargada corrige la cantidad a mano, la placa se invierte (tinta con cifra amarilla). El amarillo se usa solo ahí y en el anillo de foco, para que siga significando algo.
+- **Reglas:** filas planas con línea fina, sin sombras; el rojo sólido solo para confirmar o devolver (en las filas, "Borrar" va con contorno rojo); nada de mayúsculas decorativas, flechas en los botones ni textos unidos con punto medio; sin animaciones salvo un cambio corto de color, y se respeta "reducir movimiento". Objetivos táctiles de 48 px en celular. Verificado de 360 px a 1440 px, sin scroll horizontal.
+- **Barra superior:** `components/Layout.tsx` la pone en todas las pantallas con sesión, con la marca, el nombre, la sucursal y "Salir".
+
 ## Roadmap
 
 - ~~**Sprint 1.1**~~ — Modelo de dominio, migración, seed.
@@ -251,7 +262,7 @@ No uses `Move-Item` de PowerShell 5.1 en `node_modules`: falla a mitad de camino
 - ~~**Sprint 2.3**~~ — Pantalla del consolidado para encargada y admin: elegir período, generar y regenerar, ajustar cantidades por ítem, aprobar y descargar el Excel. Suma `GET /periodos` en la API.
 - ~~**Sprint 2.4**~~ — Administración en la web, solo para ADMIN: usuarios (alta, edición, activar/desactivar, borrar y rubros que repone cada repositor) y productos (alta, edición, rubro, unidad y proveedor; el código no se cambia). Suma `GET` y `PUT /admin/usuarios/:id/rubros` en la API.
 - ~~**Sprint 2.5**~~ — Administración en la web de rubros, proveedores (con email y teléfono) y períodos, solo para ADMIN. "Desactivar" un rubro o proveedor es borrarlo (borrado lógico); la API lo impide si tiene productos activos o rubros asignados a repositores, y crear uno con el nombre de un borrado lo restaura. Al cerrar un período, la pantalla avisa cuántos pedidos quedan sin enviar, devueltos o esperando aprobación. Sin cambios en la API. Además, los avisos de éxito dejaron de convivir con los errores en las cinco pantallas de administración.
-- **Sprint 2.x** — Pasada de diseño de toda la UI (skill `frontend-design`).
+- ~~**Sprint 2.x**~~ — Pasada de diseño de toda la UI (ver "Diseño de la interfaz"). Además se arregló el cierre de sesión, que dejaba la pantalla colgada hasta recargar.
 - **Sprint 3.x** — Deploy (y logging estructurado).
 - Pendientes futuros, sin sprint asignado:
   - Historial de devoluciones de un pedido (hoy solo se guarda la última).
