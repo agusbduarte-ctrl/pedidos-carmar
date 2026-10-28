@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import type { Rol } from "../lib/api";
+import PedidoRepositor from "./PedidoRepositor";
 
 const TITULOS: Record<Rol, string> = {
   ADMIN: "Administración",
@@ -35,7 +36,7 @@ export default function Inicio() {
         Hola, <strong>{user.nombre}</strong>
         {user.sucursal ? ` (${user.sucursal.replace("_", " ")})` : ""}
       </p>
-      <p>{TEXTOS[user.rol]}</p>
+      {user.rol === "REPOSITOR" ? <PedidoRepositor /> : <p>{TEXTOS[user.rol]}</p>}
       <button className="boton secundario" onClick={salir} disabled={saliendo}>
         Cerrar sesión
       </button>

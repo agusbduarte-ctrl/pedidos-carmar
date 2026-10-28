@@ -1,6 +1,26 @@
 * { box-sizing: border-box; }
 body { margin: 0; font-family: system-ui, sans-serif; font-size: 18px; background: #f4f5f7; color: #1c1f24; }
-.pagina { max-width: 420px; margin: 0 auto; padding: 24px 16px; }
+.pagina { max-width: 480px; margin: 0 auto; padding: 24px 16px; }
+h2 { font-size: 1.25rem; margin: 0 0 12px; }
+.bloque { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+.lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.tarjeta { background: #fff; border: 1px solid #d5d9df; border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.producto-nombre { font-weight: 700; }
+.chico { font-size: 0.9rem; color: #4b5563; margin: 0; }
+.ok { margin: 0; padding: 10px; border-radius: 8px; background: #def7ec; color: #03543f; font-weight: 600; }
+.aviso { padding: 12px; border-radius: 8px; background: #e1effe; color: #1e429f; font-weight: 600; margin: 12px 0; }
+.aviso p { margin: 6px 0 0; font-weight: 400; }
+.aviso.devuelto { background: #fef3c7; color: #8a4b08; border: 2px solid #f59e0b; }
+.aviso.ok-aviso { background: #def7ec; color: #03543f; }
+.etiqueta { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 0.85rem; font-weight: 700; background: #e5e7eb; }
+.etiqueta.enviado { background: #e1effe; color: #1e429f; }
+.etiqueta.devuelto { background: #fef3c7; color: #8a4b08; }
+.etiqueta.aprobado { background: #def7ec; color: #03543f; }
+.confirmar { display: flex; flex-direction: column; gap: 10px; }
+.confirmar p { margin: 0; font-weight: 600; }
+.boton.peligro { background: #c81e1e; }
+.paginas { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.error ul { margin: 8px 0 0; padding-left: 20px; }
 .estado { padding: 24px; text-align: center; }
 h1 { font-size: 1.6rem; margin: 0 0 16px; }
 form { display: flex; flex-direction: column; gap: 16px; }

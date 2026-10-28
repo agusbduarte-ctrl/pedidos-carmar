@@ -16,10 +16,12 @@ export interface RepositorItem {
 
 export class ApiError extends Error {
   readonly status: number;
-  constructor(status: number, message: string) {
+  readonly detalles: string[];
+  constructor(status: number, message: string, detalles: string[] = []) {
     super(message);
     this.name = "ApiError";
     this.status = status;
+    this.detalles = detalles;
   }
 }
 
@@ -28,7 +30,9 @@ function mensajePorEstado(status: number, errorApi?: string): string {
     case 0:
       return "No se pudo conectar con el servidor. Revisá tu conexión.";
     case 400:
-      return "Revisá los datos ingresados.";
+      return errorApi && errorApi !== "Datos inválidos"
+        ? errorApi
+        : "Revisá los datos ingresados.";
     case 401:
       return "Datos incorrectos. Revisá e intentá de nuevo.";
     case 403:
@@ -44,7 +48,7 @@ function mensajePorEstado(status: number, errorApi?: string): string {
 
 export async function api<T>(
   path: string,
-  options: { method?: "GET" | "POST"; body?: unknown } = {},
+  options: { method?: "GET" | "POST" | "DELETE"; body?: unknown } = {},
 ): Promise<T> {
   let res: Response;
   try {
@@ -64,7 +68,11 @@ export async function api<T>(
       data && typeof data === "object" && "error" in data && typeof data.error === "string"
         ? data.error
         : undefined;
-    throw new ApiError(res.status, mensajePorEstado(res.status, errorApi));
+    const detalles =
+      data && typeof data === "object" && "detalles" in data && Array.isArray(data.detalles)
+        ? data.detalles.filter((d): d is string => typeof d === "string")
+        : [];
+    throw new ApiError(res.status, mensajePorEstado(res.status, errorApi), detalles);
   }
   return data as T;
 }
