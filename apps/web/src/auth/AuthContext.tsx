@@ -39,7 +39,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await authApi.logout();
     } finally {
-      qc.clear();
+      // No usar qc.clear(): borra la consulta del usuario y quien la mira sigue
+      // viendo la sesión vieja. Se limpian las demás y el usuario pasa a null.
+      qc.removeQueries({ predicate: (q) => q.queryKey[0] !== ME_KEY[0] });
       qc.setQueryData(ME_KEY, null);
     }
   };
