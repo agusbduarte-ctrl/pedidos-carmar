@@ -12,6 +12,16 @@ import "@fontsource/barlow/600.css";
 import "@fontsource/barlow/700.css";
 import "./styles.css";
 
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    try {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    } catch {
+      // Sin service worker la app funciona igual.
+    }
+  });
+}
+
 const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
