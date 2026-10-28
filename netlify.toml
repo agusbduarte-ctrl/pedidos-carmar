@@ -10,8 +10,7 @@
 # Proxy de la API
 [[redirects]]
   from = "/api/*"
-  # reemplazar por la URL de Render
-  to = "https://TU-API.onrender.com/:splat"
+  to = "https://carmar-api.onrender.com/:splat"
   status = 200
   force = true
 

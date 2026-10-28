@@ -255,7 +255,7 @@ Orden de pasos:
 
 1. **Neon**: crear el proyecto y copiar la cadena de conexión (con `sslmode=require`).
 2. **Render**: crear un Web Service con estos comandos:
-   - Build: `pnpm install --frozen-lockfile && pnpm --filter api build && pnpm --filter api exec prisma migrate deploy`
+   - Build: `pnpm install --frozen-lockfile --prod=false && pnpm --filter api build && pnpm --filter api exec prisma migrate deploy`
    - Start: `node apps/api/dist/server.js`
    - Variables de entorno: `DATABASE_URL` (la de Neon, con `sslmode=require`), `JWT_SECRET` (uno propio, largo), `NODE_ENV=production`, `CORS_ORIGIN` (la URL de Netlify), `JWT_EXPIRES_IN=7d`.
 3. Poner la URL de Render en `netlify.toml` (reemplazar `TU-API.onrender.com`).
