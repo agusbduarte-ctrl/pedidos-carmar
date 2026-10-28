@@ -81,6 +81,42 @@ export interface CambioProducto {
   activo?: boolean;
 }
 
+export interface ProveedorAdmin {
+  id: string;
+  nombre: string;
+  email: string | null;
+  telefono: string | null;
+}
+
+export interface CambioProveedor {
+  nombre?: string;
+  email?: string | null;
+  telefono?: string | null;
+}
+
+export type EstadoPeriodo = "ABIERTO" | "CERRADO";
+
+export interface PeriodoAdmin {
+  id: string;
+  nombre: string;
+  estado: EstadoPeriodo;
+  fechaApertura: string;
+  fechaCierre: string | null;
+}
+
+export interface CambioPeriodo {
+  nombre?: string;
+  fechaCierre?: string | null;
+}
+
+export interface ConteoCierre {
+  borradores: number | null;
+  devueltos: number | null;
+  enviados: number | null;
+  // null = no se pudo saber
+  aprobado: boolean | null;
+}
+
 function consulta(params: Record<string, string | number | boolean>): string {
   const qs = new URLSearchParams();
   for (const [clave, valor] of Object.entries(params)) {
@@ -140,4 +176,69 @@ export const adminApi = {
     api<Pagina<Opcion>>("/admin/rubros?limit=100").then((r) => r.data),
   proveedores: () =>
     api<Pagina<Opcion>>("/admin/proveedores?limit=100").then((r) => r.data),
+
+  rubrosLista: (q: string, page: number) =>
+    api<Pagina<Opcion>>(`/admin/rubros?${consulta({ q: q.trim(), page, limit: POR_PAGINA })}`),
+  crearRubro: (nombre: string) =>
+    api<{ data: Opcion }>("/admin/rubros", { method: "POST", body: { nombre } }).then((r) => r.data),
+  editarRubro: (id: string, nombre: string) =>
+    api<{ data: Opcion }>(`/admin/rubros/${id}`, { method: "PATCH", body: { nombre } }).then(
+      (r) => r.data,
+    ),
+  borrarRubro: (id: string) => api<{ ok: true }>(`/admin/rubros/${id}`, { method: "DELETE" }),
+
+  proveedoresLista: (q: string, page: number) =>
+    api<Pagina<ProveedorAdmin>>(
+      `/admin/proveedores?${consulta({ q: q.trim(), page, limit: POR_PAGINA })}`,
+    ),
+  crearProveedor: (body: { nombre: string; email?: string; telefono?: string }) =>
+    api<{ data: ProveedorAdmin }>("/admin/proveedores", { method: "POST", body }).then(
+      (r) => r.data,
+    ),
+  editarProveedor: (id: string, body: CambioProveedor) =>
+    api<{ data: ProveedorAdmin }>(`/admin/proveedores/${id}`, { method: "PATCH", body }).then(
+      (r) => r.data,
+    ),
+  borrarProveedor: (id: string) =>
+    api<{ ok: true }>(`/admin/proveedores/${id}`, { method: "DELETE" }),
+
+  periodos: (estado: EstadoPeriodo | "", page: number) =>
+    api<Pagina<PeriodoAdmin>>(`/admin/periodos?${consulta({ estado, page, limit: POR_PAGINA })}`),
+  crearPeriodo: (body: { nombre: string; fechaApertura: string; fechaCierre?: string }) =>
+    api<{ data: PeriodoAdmin }>("/admin/periodos", { method: "POST", body }).then((r) => r.data),
+  editarPeriodo: (id: string, body: CambioPeriodo) =>
+    api<{ data: PeriodoAdmin }>(`/admin/periodos/${id}`, { method: "PATCH", body }).then(
+      (r) => r.data,
+    ),
+  cerrarPeriodo: (id: string) =>
+    api<{ data: PeriodoAdmin }>(`/admin/periodos/${id}/cerrar`, { method: "POST" }).then(
+      (r) => r.data,
+    ),
+  // Cada conteo falla por separado: null = no se pudo calcular
+  conteoCierre: async (periodoId: string): Promise<ConteoCierre> => {
+    const total = (estado: string) =>
+      api<{ meta: Meta }>(
+        `/pedidos?${consulta({ periodoId, estado, limit: 1 })}`,
+      ).then(
+        (r) => r.meta.total,
+        () => null,
+      );
+    const [borradores, devueltos, enviados, aprobado] = await Promise.all([
+      total("BORRADOR"),
+      total("DEVUELTO"),
+      total("ENVIADO"),
+      api<{ data: { estado: string }[] }>(`/consolidados?${consulta({ periodoId, limit: 20 })}`).then(
+        (r) => r.data.some((c) => c.estado === "APROBADO"),
+        () => null,
+      ),
+    ]);
+    return { borradores, devueltos, enviados, aprobado };
+  },
 };
+
+// Las listas que muestran o eligen rubros/proveedores
+export function invalidarCatalogo(qc: { invalidateQueries: (o: { queryKey: string[] }) => unknown }) {
+  void qc.invalidateQueries({ queryKey: ["admin", "rubros"] });
+  void qc.invalidateQueries({ queryKey: ["admin", "proveedores"] });
+  void qc.invalidateQueries({ queryKey: ["admin", "productos", "lista"] });
+}

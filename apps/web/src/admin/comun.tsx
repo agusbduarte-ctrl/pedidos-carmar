@@ -61,6 +61,28 @@ export function formatearPrecio(p: string | number | null): string {
   });
 }
 
+// Fechas de período: la API las guarda en UTC a medianoche, así que se muestran en UTC
+// para que no se corran un día por la zona horaria de Argentina.
+export function formatearDia(iso: string | null): string {
+  if (!iso) return "-";
+  const fecha = new Date(iso);
+  if (Number.isNaN(fecha.getTime())) return "-";
+  return fecha.toLocaleDateString("es-AR", { timeZone: "UTC", day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
+// ISO de la API -> yyyy-mm-dd para un input date
+export function aInputFecha(iso: string | null): string {
+  return iso ? iso.slice(0, 10) : "";
+}
+
+// Hoy en hora local, como yyyy-mm-dd
+export function hoyInput(): string {
+  const d = new Date();
+  const mes = String(d.getMonth() + 1).padStart(2, "0");
+  const dia = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mes}-${dia}`;
+}
+
 export function Paginacion({
   meta,
   ocupado,

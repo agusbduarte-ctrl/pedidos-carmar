@@ -95,6 +95,7 @@ label.casilla { flex-direction: row; align-items: center; gap: 10px; font-weight
 .selector-rubros { display: flex; flex-direction: column; gap: 8px; }
 .lista-rubros { max-height: 260px; overflow-y: auto; border: 1px solid #d5d9df; border-radius: 8px; padding: 6px 10px; background: #fff; }
 .lista-rubros .casilla { min-height: 36px; font-weight: 400; }
+.resumen-cierre { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-weight: 400; }
 @media (min-width: 900px) {
   .admin-columnas { flex-direction: row; align-items: flex-start; }
   .admin-lista { flex: 1 1 auto; }

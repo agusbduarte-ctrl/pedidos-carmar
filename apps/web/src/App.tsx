@@ -7,6 +7,9 @@ import RevisionDetalle from "./pages/RevisionDetalle";
 import Consolidado from "./pages/Consolidado";
 import AdminUsuarios from "./pages/AdminUsuarios";
 import AdminProductos from "./pages/AdminProductos";
+import AdminRubros from "./pages/AdminRubros";
+import AdminProveedores from "./pages/AdminProveedores";
+import AdminPeriodos from "./pages/AdminPeriodos";
 
 export default function App() {
   return (
@@ -23,6 +26,9 @@ export default function App() {
       <Route element={<RequireRole roles={["ADMIN"]} />}>
         <Route path="/admin/usuarios" element={<AdminUsuarios />} />
         <Route path="/admin/productos" element={<AdminProductos />} />
+        <Route path="/admin/rubros" element={<AdminRubros />} />
+        <Route path="/admin/proveedores" element={<AdminProveedores />} />
+        <Route path="/admin/periodos" element={<AdminPeriodos />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

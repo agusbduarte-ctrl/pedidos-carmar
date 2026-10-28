@@ -11,7 +11,7 @@ const TITULOS: Record<Rol, string> = {
 };
 
 const TEXTOS: Record<Rol, string> = {
-  ADMIN: "Acá administrás los usuarios y los productos, y ves los pedidos y el consolidado.",
+  ADMIN: "Acá administrás los usuarios, productos, rubros, proveedores y períodos, y ves los pedidos y el consolidado.",
   ENCARGADA: "Acá vas a ver los pedidos y el consolidado.",
   REPOSITOR: "Acá vas a cargar los pedidos de tu sucursal.",
 };
@@ -56,6 +56,21 @@ export default function Inicio() {
       {user.rol === "ADMIN" && (
         <Link className="boton" to="/admin/productos">
           Productos
+        </Link>
+      )}
+      {user.rol === "ADMIN" && (
+        <Link className="boton" to="/admin/rubros">
+          Rubros
+        </Link>
+      )}
+      {user.rol === "ADMIN" && (
+        <Link className="boton" to="/admin/proveedores">
+          Proveedores
+        </Link>
+      )}
+      {user.rol === "ADMIN" && (
+        <Link className="boton" to="/admin/periodos">
+          Períodos
         </Link>
       )}
       <button className="boton secundario" onClick={salir} disabled={saliendo}>
