@@ -3,6 +3,11 @@ import { EstadoConsolidado, Prisma, Rol } from "@prisma/client";
 import { z } from "zod";
 import { authenticate, requireRole } from "../lib/auth.js";
 import { CONSOLIDADO_COMPLETO, generarConsolidado } from "../lib/consolidado-helpers.js";
+import {
+  ConsolidadoNoEncontradoError,
+  exportarConsolidado,
+  nombreDeArchivo,
+} from "../lib/export-consolidado.js";
 import { buildMeta, parsePagination, skipTake } from "../lib/pagination.js";
 import { cantidadValida } from "../lib/pedidos-helpers.js";
 import { sendValidationError } from "../lib/zod-helpers.js";
@@ -151,5 +156,29 @@ export default async function consolidadosRoutes(app: FastifyInstance) {
         include: CONSOLIDADO_COMPLETO,
       }),
     };
+  });
+
+  // Excel con una hoja por proveedor. Se puede exportar en BORRADOR o APROBADO.
+  app.get("/:id/export", async (request, reply) => {
+    const params = idParams.safeParse(request.params);
+    if (!params.success) return sendValidationError(reply, params.error);
+
+    const consolidado = await app.db.consolidado.findUnique({
+      where: { id: params.data.id },
+      select: { periodo: { select: { nombre: true } } },
+    });
+    if (!consolidado) return reply.code(404).send(NO_ENCONTRADO);
+
+    try {
+      const buffer = await exportarConsolidado(app.db, params.data.id);
+      return reply
+        .header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        .header("Content-Disposition", `attachment; filename="${nombreDeArchivo(consolidado.periodo.nombre)}"`)
+        .send(buffer);
+    } catch (err) {
+      // Lo borraron (regeneraron) entre la consulta de arriba y la exportación
+      if (err instanceof ConsolidadoNoEncontradoError) return reply.code(404).send(NO_ENCONTRADO);
+      throw err;
+    }
   });
 }
