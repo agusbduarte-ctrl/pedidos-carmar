@@ -2,7 +2,7 @@
 
 Sistema interno de pedidos para los repositores y la encargada de compras del Supermercado Cármar.
 
-**Estado actual:** Sprint 2.4 completo — backend con autenticación (JWT en cookie httpOnly), CRUD admin de usuarios, rubros, proveedores, productos y períodos, el flujo de pedidos, el catálogo real importado (14.322 artículos), el consolidado por período y su exportación a Excel, con 159 tests. El frontend cubre el login, la pantalla del repositor (armar y enviar su pedido), la de la encargada (revisar, aprobar o devolver), la del consolidado (generar, ajustar, aprobar y descargar el Excel) y la administración de usuarios y productos. Rubros, proveedores y períodos todavía solo existen como API.
+**Estado actual:** Sprint 2.5 completo — backend con autenticación (JWT en cookie httpOnly), CRUD admin de usuarios, rubros, proveedores, productos y períodos, el flujo de pedidos, el catálogo real importado (14.322 artículos), el consolidado por período y su exportación a Excel, con 159 tests. El frontend cubre el login, la pantalla del repositor (armar y enviar su pedido), la de la encargada (revisar, aprobar o devolver), la del consolidado (generar, ajustar, aprobar y descargar el Excel) y la administración de usuarios, productos, rubros, proveedores y períodos.
 
 ## Stack
 
@@ -250,7 +250,7 @@ No uses `Move-Item` de PowerShell 5.1 en `node_modules`: falla a mitad de camino
 - ~~**Sprint 2.2**~~ — Pantalla de la encargada: lista de pedidos por estado y sucursal, detalle con ítems por rubro, aprobar y devolver con comentario. El admin la ve en solo lectura.
 - ~~**Sprint 2.3**~~ — Pantalla del consolidado para encargada y admin: elegir período, generar y regenerar, ajustar cantidades por ítem, aprobar y descargar el Excel. Suma `GET /periodos` en la API.
 - ~~**Sprint 2.4**~~ — Administración en la web, solo para ADMIN: usuarios (alta, edición, activar/desactivar, borrar y rubros que repone cada repositor) y productos (alta, edición, rubro, unidad y proveedor; el código no se cambia). Suma `GET` y `PUT /admin/usuarios/:id/rubros` en la API.
-- **Sprint 2.5** — Administración en la web de rubros, proveedores y períodos.
+- ~~**Sprint 2.5**~~ — Administración en la web de rubros, proveedores (con email y teléfono) y períodos, solo para ADMIN. "Desactivar" un rubro o proveedor es borrarlo (borrado lógico); la API lo impide si tiene productos activos o rubros asignados a repositores, y crear uno con el nombre de un borrado lo restaura. Al cerrar un período, la pantalla avisa cuántos pedidos quedan sin enviar, devueltos o esperando aprobación. Sin cambios en la API. Además, los avisos de éxito dejaron de convivir con los errores en las cinco pantallas de administración.
 - **Sprint 2.x** — Pasada de diseño de toda la UI (skill `frontend-design`).
 - **Sprint 3.x** — Deploy (y logging estructurado).
 - Pendientes futuros, sin sprint asignado:
