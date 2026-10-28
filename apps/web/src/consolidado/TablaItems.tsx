@@ -42,12 +42,12 @@ export default function TablaItems({ consolidadoId, items, editable, alGuardar }
         />
       </label>
 
-      {grupos.length === 0 && <p className="estado">No hay productos que coincidan.</p>}
+      {grupos.length === 0 && <p className="estado">No hay productos que coincidan. Probá con otro nombre o código.</p>}
 
       {grupos.map((g) => (
         <div className="grupo-proveedor" key={g.proveedor}>
           <h3>
-            {g.proveedor} <span className="chico">({g.items.length})</span>
+            {g.proveedor} <span className="cuenta">({g.items.length})</span>
           </h3>
           <div className="tabla-scroll">
             <table className="tabla-items">
@@ -55,7 +55,6 @@ export default function TablaItems({ consolidadoId, items, editable, alGuardar }
                 <tr>
                   <th>Código</th>
                   <th>Producto</th>
-                  <th>Unidad</th>
                   <th className="num">Suma</th>
                   <th className="num">Ajustada</th>
                   <th>Observación</th>

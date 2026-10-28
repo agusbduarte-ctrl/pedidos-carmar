@@ -39,7 +39,7 @@ export default function FormularioRubro({ rubro, alEmpezar, alGuardar, alCerrar 
   };
 
   return (
-    <section className="tarjeta panel-form" aria-label={editando ? "Editar rubro" : "Nuevo rubro"}>
+    <section className="panel panel-form" aria-label={editando ? "Editar rubro" : "Nuevo rubro"}>
       <h2>{editando ? `Editar ${rubro.nombre}` : "Nuevo rubro"}</h2>
       <form onSubmit={enviar} noValidate>
         <label>

@@ -55,7 +55,7 @@ function PedidoDetalle({ id }: { id: string }) {
 
   return (
     <>
-      <p>
+      <p className="encabezado-pedido">
         {pedido.periodo.nombre} <EstadoEtiqueta estado={pedido.estado} />
       </p>
 

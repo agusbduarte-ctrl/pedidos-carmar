@@ -81,7 +81,7 @@ export default function FormularioProducto({
 
   return (
     <section
-      className="tarjeta panel-form"
+      className="panel panel-form"
       aria-label={editando ? "Editar producto" : "Nuevo producto"}
     >
       <h2>{editando ? "Editar producto" : "Nuevo producto"}</h2>

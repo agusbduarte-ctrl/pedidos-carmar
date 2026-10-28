@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import type { Rol } from "../lib/api";
@@ -10,72 +9,56 @@ const TITULOS: Record<Rol, string> = {
   REPOSITOR: "Reposición",
 };
 
-const TEXTOS: Record<Rol, string> = {
-  ADMIN: "Acá administrás los usuarios, productos, rubros, proveedores y períodos, y ves los pedidos y el consolidado.",
-  ENCARGADA: "Acá vas a ver los pedidos y el consolidado.",
-  REPOSITOR: "Acá vas a cargar los pedidos de tu sucursal.",
-};
+interface Tarea {
+  to: string;
+  titulo: string;
+  detalle: string;
+}
+
+const PEDIDOS: Tarea[] = [
+  { to: "/revision", titulo: "Revisar pedidos", detalle: "Mirá lo que mandaron los repositores, aprobalo o devolvelo" },
+  { to: "/consolidado", titulo: "Consolidado", detalle: "Sumá los pedidos del período y descargá el Excel" },
+];
+
+const CATALOGO: Tarea[] = [
+  { to: "/admin/usuarios", titulo: "Usuarios", detalle: "Altas, rubros de cada repositor y accesos" },
+  { to: "/admin/productos", titulo: "Productos", detalle: "Catálogo, unidades y proveedores" },
+  { to: "/admin/rubros", titulo: "Rubros", detalle: "Las secciones en que se agrupan los productos" },
+  { to: "/admin/proveedores", titulo: "Proveedores", detalle: "A quién se le compra cada producto" },
+  { to: "/admin/periodos", titulo: "Períodos", detalle: "Abrir y cerrar los períodos de pedidos" },
+];
+
+function Grupo({ titulo, tareas }: { titulo: string; tareas: Tarea[] }) {
+  return (
+    <section className="grupo-inicio">
+      <h2>{titulo}</h2>
+      <ul className="filas-tarea">
+        {tareas.map((t) => (
+          <li key={t.to}>
+            <Link className="fila-tarea" to={t.to}>
+              <span className="fila-tarea-titulo">{t.titulo}</span>
+              <span className="fila-tarea-detalle">{t.detalle}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
 
 export default function Inicio() {
-  const { user, logout } = useAuth();
-  const [saliendo, setSaliendo] = useState(false);
+  const { user } = useAuth();
   if (!user) return null;
-
-  const salir = async () => {
-    setSaliendo(true);
-    try {
-      await logout();
-    } catch {
-      // La sesión local se limpia igual; la ruta protegida redirige al login.
-    }
-  };
 
   return (
     <main className="pagina">
       <h1>{TITULOS[user.rol]}</h1>
       <p>
         Hola, <strong>{user.nombre}</strong>
-        {user.sucursal ? ` (${user.sucursal.replace("_", " ")})` : ""}
       </p>
-      {user.rol === "REPOSITOR" ? <PedidoRepositor /> : <p>{TEXTOS[user.rol]}</p>}
-      {user.rol !== "REPOSITOR" && (
-        <Link className="boton" to="/revision">
-          Revisar pedidos
-        </Link>
-      )}
-      {user.rol !== "REPOSITOR" && (
-        <Link className="boton" to="/consolidado">
-          Consolidado
-        </Link>
-      )}
-      {user.rol === "ADMIN" && (
-        <Link className="boton" to="/admin/usuarios">
-          Usuarios
-        </Link>
-      )}
-      {user.rol === "ADMIN" && (
-        <Link className="boton" to="/admin/productos">
-          Productos
-        </Link>
-      )}
-      {user.rol === "ADMIN" && (
-        <Link className="boton" to="/admin/rubros">
-          Rubros
-        </Link>
-      )}
-      {user.rol === "ADMIN" && (
-        <Link className="boton" to="/admin/proveedores">
-          Proveedores
-        </Link>
-      )}
-      {user.rol === "ADMIN" && (
-        <Link className="boton" to="/admin/periodos">
-          Períodos
-        </Link>
-      )}
-      <button className="boton secundario" onClick={salir} disabled={saliendo}>
-        Cerrar sesión
-      </button>
+      {user.rol === "REPOSITOR" && <PedidoRepositor />}
+      {user.rol !== "REPOSITOR" && <Grupo titulo="Pedidos" tareas={PEDIDOS} />}
+      {user.rol === "ADMIN" && <Grupo titulo="Catálogo y personas" tareas={CATALOGO} />}
     </main>
   );
 }

@@ -43,10 +43,12 @@ function FilaProducto({ pedidoId, producto }: { pedidoId: string; producto: Prod
   const decimal = UNIDADES_DECIMALES.includes(producto.unidad);
 
   return (
-    <li className="tarjeta">
+    <li className="fila-producto">
       <div className="producto-nombre">{producto.nombre}</div>
-      <div className="chico">
-        {producto.codigo} · {producto.rubro.nombre} · {producto.unidad}
+      <div className="chico producto-datos">
+        <span>{producto.codigo}</span>
+        <span>{producto.rubro.nombre}</span>
+        <span>{producto.unidad}</span>
       </div>
       <label>
         Cantidad ({producto.unidad})
@@ -160,7 +162,7 @@ export default function BuscadorProductos({ pedidoId }: { pedidoId: string }) {
         <p className="chico">No se encontraron productos.</p>
       )}
       {buscar && productos.data && (
-        <ul className="lista">
+        <ul className="lista lista-plana">
           {productos.data.data.map((p) => (
             <FilaProducto key={p.id} pedidoId={pedidoId} producto={p} />
           ))}

@@ -72,7 +72,7 @@ export default function AccionesConsolidado({ periodoId, consolidado }: Props) {
   };
 
   return (
-    <section className="bloque">
+    <div className="acciones-consolidado">
       {error && (
         <p className="error" role="alert">
           {error}
@@ -102,6 +102,22 @@ export default function AccionesConsolidado({ periodoId, consolidado }: Props) {
               href={consolidadoApi.urlExcel(consolidado.id)}
               download
             >
+              <svg
+                className="icono"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 4v11" />
+                <path d="M7 11l5 5 5-5" />
+                <path d="M5 20h14" />
+              </svg>
               Descargar Excel
             </a>
           )}
@@ -131,6 +147,6 @@ export default function AccionesConsolidado({ periodoId, consolidado }: Props) {
           </button>
         </div>
       )}
-    </section>
+    </div>
   );
 }

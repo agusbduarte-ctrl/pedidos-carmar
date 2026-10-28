@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { adminApi, invalidarCatalogo, type Opcion } from "../lib/adminApi";
 import { Paginacion, textoError, useDemorado } from "../admin/comun";
@@ -45,9 +44,6 @@ export default function AdminRubros() {
 
   return (
     <main className="pagina ancha extra">
-      <p>
-        <Link to="/">Volver al inicio</Link>
-      </p>
       <h1>Rubros</h1>
 
       <div className="barra-filtros">
@@ -89,13 +85,13 @@ export default function AdminRubros() {
               {textoError(lista.error, "No se pudieron cargar los rubros.")}
             </p>
           )}
-          {lista.data && filas.length === 0 && <p className="estado">No hay rubros para mostrar.</p>}
+          {lista.data && filas.length === 0 && <p className="estado">No hay rubros para mostrar. Probá cambiar la búsqueda.</p>}
 
-          <ul className="lista">
+          <ul className="lista lista-plana">
             {filas.map((r) => (
-              <li key={r.id} className="tarjeta fila-admin">
+              <li key={r.id} className="fila-admin">
                 <div className="fila-admin-datos">
-                  <span className="producto-nombre">{r.nombre}</span>
+                  <span className="fila-titulo">{r.nombre}</span>
                 </div>
                 <div className="fila-admin-acciones">
                   <button

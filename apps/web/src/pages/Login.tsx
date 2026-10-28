@@ -161,8 +161,10 @@ export default function Login() {
   if (user) return <Navigate to="/" replace />;
 
   return (
-    <main className="pagina">
-      <h1>Pedidos Cármar</h1>
+    <main className="login">
+      <h1 className="login-marca">Cármar</h1>
+      <p className="login-sub">Pedidos internos</p>
+      <div className="login-panel">
       <div className="pestanas" role="tablist">
         <button
           role="tab"
@@ -182,6 +184,7 @@ export default function Login() {
         </button>
       </div>
       {modo === "admin" ? <FormAdmin /> : <FormRepositor />}
+      </div>
     </main>
   );
 }

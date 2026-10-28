@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { adminApi, type EstadoPeriodo, type PeriodoAdmin } from "../lib/adminApi";
 import { formatearDia, Paginacion, textoError } from "../admin/comun";
@@ -53,9 +52,6 @@ export default function AdminPeriodos() {
 
   return (
     <main className="pagina ancha extra">
-      <p>
-        <Link to="/">Volver al inicio</Link>
-      </p>
       <h1>Períodos</h1>
 
       <div className="barra-filtros">
@@ -109,22 +105,21 @@ export default function AdminPeriodos() {
               {textoError(lista.error, "No se pudieron cargar los períodos.")}
             </p>
           )}
-          {lista.data && filas.length === 0 && <p className="estado">No hay períodos para mostrar.</p>}
+          {lista.data && filas.length === 0 && <p className="estado">No hay períodos para mostrar. Probá cambiar el filtro.</p>}
 
-          <ul className="lista">
+          <ul className="lista lista-plana">
             {filas.map((p) => {
               const esAbierto = p.estado === "ABIERTO";
               return (
-                <li key={p.id} className="tarjeta fila-admin">
+                <li key={p.id} className="fila-admin">
                   <div className="fila-admin-datos">
-                    <span className="producto-nombre">{p.nombre}</span>
-                    <span>
+                    <span className="fila-titulo">{p.nombre}</span>
+                    <span className="fila-rotulos">
                       <span className={`etiqueta ${esAbierto ? "aprobado" : ""}`}>
                         {esAbierto ? "Abierto" : "Cerrado"}
                       </span>
-                    </span>
-                    <span>
-                      Apertura: {formatearDia(p.fechaApertura)} - Cierre: {formatearDia(p.fechaCierre)}
+                      <span className="chico">Apertura: {formatearDia(p.fechaApertura)}</span>
+                      <span className="chico">Cierre: {formatearDia(p.fechaCierre)}</span>
                     </span>
                   </div>
                   {esAbierto && (

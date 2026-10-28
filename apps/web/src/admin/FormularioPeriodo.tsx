@@ -55,7 +55,7 @@ export default function FormularioPeriodo({ periodo, alEmpezar, alGuardar, alCer
 
   return (
     <section
-      className="tarjeta panel-form"
+      className="panel panel-form"
       aria-label={editando ? "Editar período" : "Abrir período"}
     >
       <h2>{editando ? `Editar ${periodo.nombre}` : "Abrir período"}</h2>

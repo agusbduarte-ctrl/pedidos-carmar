@@ -50,7 +50,7 @@ export default function AccionesRevision({ pedidoId }: { pedidoId: string }) {
       )}
 
       {modo === "nada" && (
-        <div className="acciones">
+        <div className="acciones barra-acciones">
           <button
             className="boton"
             onClick={() => {
@@ -95,7 +95,7 @@ export default function AccionesRevision({ pedidoId }: { pedidoId: string }) {
               onChange={(e) => setComentario(e.target.value)}
             />
           </label>
-          <p className="chico">
+          <p className="chico contador">
             {comentario.length} / {MAX_COMENTARIO}
           </p>
           <button

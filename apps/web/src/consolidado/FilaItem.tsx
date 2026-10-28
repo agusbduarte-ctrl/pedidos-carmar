@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { ApiError } from "../lib/api";
+import Cantidad from "../components/Cantidad";
 import { consolidadoApi, type ItemConsolidado } from "../lib/consolidadoApi";
 import { formatearCantidad, leerCantidad, textoEditable } from "./utilidades";
 
@@ -47,55 +48,63 @@ export default function FilaItem({ consolidadoId, item, editable, alGuardar }: P
 
   return (
     <tr className={ajustado ? "ajustado" : ""}>
-      <td data-etiqueta="Código">{item.producto.codigo}</td>
-      <td data-etiqueta="Producto" className="producto-nombre">
-        {item.producto.nombre}
-        {ajustado && <span className="etiqueta enviado marca-ajuste">Ajustado</span>}
+      <td data-etiqueta="Código" className="codigo">
+        {item.producto.codigo}
       </td>
-      <td data-etiqueta="Unidad">{item.producto.unidad}</td>
+      <td data-etiqueta="Producto">
+        <div className="celda-valor">
+          <span className="producto-nombre">{item.producto.nombre}</span>
+          {ajustado && <span className="rotulo marca-ajuste">Ajustado</span>}
+        </div>
+      </td>
       <td data-etiqueta="Suma" className="num">
-        {formatearCantidad(item.cantidadTotal)}
+        <Cantidad valor={item.cantidadTotal} unidad={item.producto.unidad} variante="pedida" />
       </td>
       <td data-etiqueta="Ajustada" className="num">
-        {editable ? (
-          <input
-            className="entrada-cantidad"
-            inputMode="decimal"
-            aria-label={`Cantidad ajustada de ${item.producto.nombre}`}
-            placeholder={formatearCantidad(item.cantidadTotal)}
-            value={cantidad}
-            disabled={guardar.isPending}
-            onChange={(e) => setCantidad(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !sinCambios) intentarGuardar();
-            }}
-          />
-        ) : item.cantidadEditada !== null ? (
-          formatearCantidad(item.cantidadEditada)
-        ) : (
-          "-"
-        )}
+        <div className="celda-valor ajuste">
+          {item.cantidadEditada !== null && (
+            <Cantidad valor={item.cantidadEditada} unidad={item.producto.unidad} variante="ajustada" />
+          )}
+          {editable ? (
+            <input
+              className="entrada-cantidad"
+              inputMode="decimal"
+              aria-label={`Cantidad ajustada de ${item.producto.nombre}`}
+              placeholder={formatearCantidad(item.cantidadTotal)}
+              value={cantidad}
+              disabled={guardar.isPending}
+              onChange={(e) => setCantidad(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !sinCambios) intentarGuardar();
+              }}
+            />
+          ) : (
+            item.cantidadEditada === null && "-"
+          )}
+        </div>
       </td>
       <td data-etiqueta="Observación">
-        {editable ? (
-          <input
-            aria-label={`Observación de ${item.producto.nombre}`}
-            maxLength={200}
-            value={observacion}
-            disabled={guardar.isPending}
-            onChange={(e) => setObservacion(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !sinCambios) intentarGuardar();
-            }}
-          />
-        ) : (
-          (item.observacion ?? "")
-        )}
-        {error && (
-          <span className="error-fila" role="alert">
-            {error}
-          </span>
-        )}
+        <div className="celda-valor">
+          {editable ? (
+            <input
+              aria-label={`Observación de ${item.producto.nombre}`}
+              maxLength={200}
+              value={observacion}
+              disabled={guardar.isPending}
+              onChange={(e) => setObservacion(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !sinCambios) intentarGuardar();
+              }}
+            />
+          ) : (
+            (item.observacion ?? "")
+          )}
+          {error && (
+            <span className="error-fila" role="alert">
+              {error}
+            </span>
+          )}
+        </div>
       </td>
       {editable && (
         <td data-etiqueta="">

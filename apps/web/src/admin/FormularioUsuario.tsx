@@ -89,7 +89,7 @@ export default function FormularioUsuario({
   };
 
   return (
-    <section className="tarjeta panel-form" aria-label={editando ? "Editar usuario" : "Nuevo usuario"}>
+    <section className="panel panel-form" aria-label={editando ? "Editar usuario" : "Nuevo usuario"}>
       <h2>{editando ? `Editar a ${usuario.nombre}` : "Nuevo usuario"}</h2>
       <form onSubmit={enviar} noValidate>
         {editando ? (
@@ -240,8 +240,8 @@ function RubrosDelRepositor({
       )}
       {todos.data && asignados.data && (
         <>
-          <p className="chico">
-            {elegidos.length} {elegidos.length === 1 ? "rubro asignado" : "rubros asignados"} en{" "}
+          <p className="cuenta-rubros">
+            <strong>{elegidos.length}</strong> {elegidos.length === 1 ? "rubro asignado" : "rubros asignados"} en{" "}
             {usuario.sucursal ? nombreSucursal(usuario.sucursal) : "ninguna sucursal"}.
           </p>
           <SelectorRubros

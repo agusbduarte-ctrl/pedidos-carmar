@@ -61,7 +61,7 @@ export default function FormularioProveedor({ proveedor, alEmpezar, alGuardar, a
 
   return (
     <section
-      className="tarjeta panel-form"
+      className="panel panel-form"
       aria-label={editando ? "Editar proveedor" : "Nuevo proveedor"}
     >
       <h2>{editando ? `Editar ${proveedor.nombre}` : "Nuevo proveedor"}</h2>

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { adminApi, invalidarCatalogo, type ProveedorAdmin } from "../lib/adminApi";
 import { Paginacion, textoError, useDemorado } from "../admin/comun";
@@ -45,9 +44,6 @@ export default function AdminProveedores() {
 
   return (
     <main className="pagina ancha extra">
-      <p>
-        <Link to="/">Volver al inicio</Link>
-      </p>
       <h1>Proveedores</h1>
 
       <div className="barra-filtros">
@@ -90,16 +86,18 @@ export default function AdminProveedores() {
             </p>
           )}
           {lista.data && filas.length === 0 && (
-            <p className="estado">No hay proveedores para mostrar.</p>
+            <p className="estado">No hay proveedores para mostrar. Probá cambiar la búsqueda.</p>
           )}
 
-          <ul className="lista">
+          <ul className="lista lista-plana">
             {filas.map((p) => (
-              <li key={p.id} className="tarjeta fila-admin">
+              <li key={p.id} className="fila-admin">
                 <div className="fila-admin-datos">
-                  <span className="producto-nombre">{p.nombre}</span>
-                  <span>{p.email ?? "Sin email"}</span>
-                  <span>{p.telefono ?? "Sin teléfono"}</span>
+                  <span className="fila-titulo">{p.nombre}</span>
+                  <span className="fila-rotulos">
+                    <span className="chico">{p.email ?? "Sin email"}</span>
+                    <span className="chico">{p.telefono ?? "Sin teléfono"}</span>
+                  </span>
                 </div>
                 <div className="fila-admin-acciones">
                   <button

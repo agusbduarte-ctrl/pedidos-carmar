@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { adminApi, type ProductoAdmin } from "../lib/adminApi";
 import { NOMBRE_UNIDAD, Paginacion, formatearPrecio, textoError, useDemorado } from "../admin/comun";
@@ -77,9 +76,6 @@ export default function AdminProductos() {
 
   return (
     <main className="pagina ancha extra">
-      <p>
-        <Link to="/">Volver al inicio</Link>
-      </p>
       <h1>Productos</h1>
 
       <div className="barra-filtros">
@@ -147,23 +143,25 @@ export default function AdminProductos() {
             </p>
           )}
           {lista.data && filas.length === 0 && (
-            <p className="estado">No hay productos para mostrar.</p>
+            <p className="estado">No hay productos para mostrar. Probá cambiar los filtros.</p>
           )}
 
-          <ul className="lista">
+          <ul className="lista lista-plana">
             {filas.map((p) => (
-              <li key={p.id} className="tarjeta fila-admin">
+              <li key={p.id} className="fila-admin">
                 <div className="fila-admin-datos">
-                  <span className="producto-nombre">{p.nombre}</span>
-                  <span>Código {p.codigo}</span>
-                  <span>{p.rubro.nombre}</span>
-                  <span>
-                    {NOMBRE_UNIDAD[p.unidad]}
-                    {p.precioReferencia !== null ? ` - ${formatearPrecio(p.precioReferencia)}` : ""}
+                  <span className="fila-titulo">{p.nombre}</span>
+                  <span className="codigo">Código {p.codigo}</span>
+                  <span className="fila-rotulos">
+                    <span className="rotulo">{p.rubro.nombre}</span>
+                    <span className="rotulo">{NOMBRE_UNIDAD[p.unidad]}</span>
+                    <span className={`etiqueta ${p.activo ? "aprobado" : ""}`}>
+                      {p.activo ? "Activo" : "Inactivo"}
+                    </span>
                   </span>
-                  <span>{p.proveedor?.nombre ?? "Sin proveedor"}</span>
-                  <span className={`etiqueta ${p.activo ? "aprobado" : "devuelto"}`}>
-                    {p.activo ? "Activo" : "Inactivo"}
+                  <span className="chico">
+                    {p.proveedor?.nombre ?? "Sin proveedor"}
+                    {p.precioReferencia !== null ? `: ${formatearPrecio(p.precioReferencia)}` : ""}
                   </span>
                 </div>
                 <div className="fila-admin-acciones">

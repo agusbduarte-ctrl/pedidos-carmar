@@ -26,42 +26,41 @@ export default function RevisionPedidos() {
 
   return (
     <main className="pagina ancha">
-      <p>
-        <Link to="/">Volver al inicio</Link>
-      </p>
       <h1>Pedidos para revisar</h1>
 
-      <div className="pestanas" role="tablist">
-        {PESTANAS.map((p) => (
-          <button
-            key={p.texto}
-            role="tab"
-            aria-selected={estado === p.estado}
-            className={estado === p.estado ? "activa" : ""}
-            onClick={() => {
-              setEstado(p.estado);
+      <div className="barra-revision">
+        <div className="pestanas" role="tablist">
+          {PESTANAS.map((p) => (
+            <button
+              key={p.texto}
+              role="tab"
+              aria-selected={estado === p.estado}
+              className={estado === p.estado ? "activa" : ""}
+              onClick={() => {
+                setEstado(p.estado);
+                setPage(1);
+              }}
+            >
+              {p.texto}
+            </button>
+          ))}
+        </div>
+
+        <label className="filtro-en-linea">
+          Sucursal
+          <select
+            value={sucursal}
+            onChange={(e) => {
+              setSucursal(e.target.value as Sucursal | "");
               setPage(1);
             }}
           >
-            {p.texto}
-          </button>
-        ))}
+            <option value="">Todas</option>
+            <option value="CARMAR_1">{nombreSucursal("CARMAR_1")}</option>
+            <option value="CARMAR_2">{nombreSucursal("CARMAR_2")}</option>
+          </select>
+        </label>
       </div>
-
-      <label className="filtro">
-        Sucursal
-        <select
-          value={sucursal}
-          onChange={(e) => {
-            setSucursal(e.target.value as Sucursal | "");
-            setPage(1);
-          }}
-        >
-          <option value="">Todas</option>
-          <option value="CARMAR_1">CARMAR 1</option>
-          <option value="CARMAR_2">CARMAR 2</option>
-        </select>
-      </label>
 
       {q.isPending && <p className="estado">Cargando pedidos...</p>}
       {q.isError && (
@@ -69,21 +68,27 @@ export default function RevisionPedidos() {
           {q.error instanceof ApiError ? q.error.message : "No se pudieron cargar los pedidos."}
         </p>
       )}
-      {q.data && q.data.data.length === 0 && <p className="estado">No hay pedidos para mostrar.</p>}
+      {q.data && q.data.data.length === 0 && (
+        <p className="estado">No hay pedidos para mostrar. Probá con otro estado o sucursal.</p>
+      )}
       {q.data && q.data.data.length > 0 && (
         <>
-          <ul className="lista">
+          <ul className="lista lista-plana">
             {q.data.data.map((p) => (
               <li key={p.id}>
-                <Link to={`/revision/${p.id}`} className="tarjeta fila-pedido">
-                  <span className="producto-nombre">{p.repositor.nombre}</span>
-                  <span>{nombreSucursal(p.sucursal)}</span>
-                  <span>{p.periodo.nombre}</span>
-                  <span>
+                <Link to={`/revision/${p.id}`} className="fila-revision">
+                  <span className="fila-titulo fila-revision-repositor">{p.repositor.nombre}</span>
+                  <span className="fila-revision-rotulos">
+                    <span className="rotulo">{nombreSucursal(p.sucursal)}</span>
+                    <span className="rotulo">{p.periodo.nombre}</span>
+                  </span>
+                  <span className="fila-revision-cantidad">
                     {p._count.items} {p._count.items === 1 ? "producto" : "productos"}
                   </span>
-                  <span>Enviado: {formatearFecha(p.fechaEnvio)}</span>
-                  <EstadoEtiqueta estado={p.estado} />
+                  <span className="fila-revision-fecha">Enviado: {formatearFecha(p.fechaEnvio)}</span>
+                  <span className="fila-revision-estado">
+                    <EstadoEtiqueta estado={p.estado} />
+                  </span>
                 </Link>
               </li>
             ))}

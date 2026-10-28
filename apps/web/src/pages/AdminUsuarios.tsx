@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../auth/AuthContext";
 import type { Rol } from "../lib/api";
@@ -68,9 +67,6 @@ export default function AdminUsuarios() {
 
   return (
     <main className="pagina ancha extra">
-      <p>
-        <Link to="/">Volver al inicio</Link>
-      </p>
       <h1>Usuarios</h1>
 
       <div className="barra-filtros">
@@ -129,20 +125,23 @@ export default function AdminUsuarios() {
               {textoError(lista.error, "No se pudieron cargar los usuarios.")}
             </p>
           )}
-          {lista.data && filas.length === 0 && <p className="estado">No hay usuarios para mostrar.</p>}
+          {lista.data && filas.length === 0 && <p className="estado">No hay usuarios para mostrar. Probá cambiar los filtros.</p>}
 
-          <ul className="lista">
+          <ul className="lista lista-plana">
             {filas.map((u) => {
               const esYo = u.id === user?.id;
               return (
-                <li key={u.id} className="tarjeta fila-admin">
+                <li key={u.id} className="fila-admin">
                   <div className="fila-admin-datos">
-                    <span className="producto-nombre">{u.nombre}</span>
-                    <span>{ETIQUETA_ROL[u.rol]}</span>
-                    <span>{u.sucursal ? nombreSucursal(u.sucursal) : u.email ?? "-"}</span>
-                    <span className={`etiqueta ${u.activo ? "aprobado" : "devuelto"}`}>
-                      {u.activo ? "Activo" : "Inactivo"}
+                    <span className="fila-titulo">{u.nombre}</span>
+                    <span className="fila-rotulos">
+                      <span className="rotulo">{ETIQUETA_ROL[u.rol]}</span>
+                      {u.sucursal && <span className="rotulo">{nombreSucursal(u.sucursal)}</span>}
+                      <span className={`etiqueta ${u.activo ? "aprobado" : ""}`}>
+                        {u.activo ? "Activo" : "Inactivo"}
+                      </span>
                     </span>
+                    {!u.sucursal && <span className="chico">{u.email ?? "-"}</span>}
                   </div>
                   <div className="fila-admin-acciones">
                     <button

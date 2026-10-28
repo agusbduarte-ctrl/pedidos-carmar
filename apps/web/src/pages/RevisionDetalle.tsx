@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../auth/AuthContext";
 import { ApiError } from "../lib/api";
+import Cantidad from "../components/Cantidad";
 import { revisionApi, type ItemRevision } from "../lib/revisionApi";
 import AccionesRevision from "../revision/AccionesRevision";
 import { EstadoEtiqueta, formatearFecha, nombreSucursal } from "../revision/comun";
@@ -48,30 +49,44 @@ export default function RevisionDetalle() {
     <main className="pagina ancha">
       {volver}
       <h1>Pedido de {p.repositor.nombre}</h1>
-      <div className="tarjeta datos">
-        <p>
-          <strong>Estado:</strong> <EstadoEtiqueta estado={p.estado} />
-        </p>
-        <p>
-          <strong>Sucursal:</strong> {nombreSucursal(p.sucursal)}
-        </p>
-        <p>
-          <strong>Período:</strong> {p.periodo.nombre}
-        </p>
-        <p>
-          <strong>Enviado por:</strong> {p.enviadoPor?.nombre ?? "-"} ({formatearFecha(p.fechaEnvio)})
-        </p>
+      <dl className="panel pares">
+        <div className="par">
+          <dt>Estado</dt>
+          <dd>
+            <EstadoEtiqueta estado={p.estado} />
+          </dd>
+        </div>
+        <div className="par">
+          <dt>Sucursal</dt>
+          <dd>{nombreSucursal(p.sucursal)}</dd>
+        </div>
+        <div className="par">
+          <dt>Período</dt>
+          <dd>{p.periodo.nombre}</dd>
+        </div>
+        <div className="par">
+          <dt>Enviado por</dt>
+          <dd>
+            {p.enviadoPor?.nombre ?? "-"} <span className="fecha">{formatearFecha(p.fechaEnvio)}</span>
+          </dd>
+        </div>
         {p.devueltoPor && (
-          <p>
-            <strong>Devuelto por:</strong> {p.devueltoPor.nombre} ({formatearFecha(p.fechaDevolucion)})
-          </p>
+          <div className="par">
+            <dt>Devuelto por</dt>
+            <dd>
+              {p.devueltoPor.nombre} <span className="fecha">{formatearFecha(p.fechaDevolucion)}</span>
+            </dd>
+          </div>
         )}
         {p.aprobadoPor && (
-          <p>
-            <strong>Aprobado por:</strong> {p.aprobadoPor.nombre} ({formatearFecha(p.fechaAprobacion)})
-          </p>
+          <div className="par">
+            <dt>Aprobado por</dt>
+            <dd>
+              {p.aprobadoPor.nombre} <span className="fecha">{formatearFecha(p.fechaAprobacion)}</span>
+            </dd>
+          </div>
         )}
-      </div>
+      </dl>
 
       {p.comentarioDevolucion && (
         <div className="aviso devuelto" role="status">
@@ -86,15 +101,15 @@ export default function RevisionDetalle() {
         {agruparPorRubro(p.items).map(([rubro, items]) => (
           <div key={rubro} className="rubro-grupo">
             <h3>{rubro}</h3>
-            <ul className="lista">
+            <ul className="lista lista-plana">
               {items.map((item) => (
-                <li key={item.id} className="tarjeta">
-                  <span className="producto-nombre">{item.producto.nombre}</span>
-                  <span className="chico">Código {item.producto.codigo}</span>
-                  <span>
-                    {Number(item.cantidad)} {item.producto.unidad}
-                  </span>
-                  {item.observacion && <span className="chico">Obs.: {item.observacion}</span>}
+                <li key={item.id} className="item-pedido">
+                  <div className="item-datos">
+                    <span className="producto-nombre">{item.producto.nombre}</span>
+                    <span className="codigo">Código {item.producto.codigo}</span>
+                    {item.observacion && <span className="chico">Obs.: {item.observacion}</span>}
+                  </div>
+                  <Cantidad valor={item.cantidad} unidad={item.producto.unidad} variante="pedida" />
                 </li>
               ))}
             </ul>
