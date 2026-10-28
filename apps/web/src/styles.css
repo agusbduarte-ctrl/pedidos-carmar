@@ -78,3 +78,28 @@ textarea:focus { outline: 3px solid #8ab4f8; border-color: #1a56db; }
   .tabla-items .num { text-align: left; }
   .tabla-items .entrada-cantidad { width: 100%; text-align: left; }
 }
+/* Administración (usuarios y productos) */
+.barra-filtros { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: flex-end; margin-bottom: 16px; }
+.barra-filtros .filtro { margin-bottom: 0; flex: 1 1 220px; }
+.barra-filtros .boton { flex: 0 0 auto; }
+label.casilla { flex-direction: row; align-items: center; gap: 10px; font-weight: 600; min-height: 44px; }
+.casilla input[type="checkbox"] { width: 22px; height: 22px; min-height: 0; padding: 0; flex: 0 0 auto; }
+.admin-columnas { display: flex; flex-direction: column; gap: 20px; }
+.admin-lista { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+.fila-admin { gap: 8px; }
+.fila-admin-datos { display: flex; flex-direction: column; gap: 4px; }
+.fila-admin-acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+.panel-form h2 { margin-bottom: 4px; }
+.bloque-rubros { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid #e5e7eb; padding-top: 12px; }
+.bloque-rubros h3 { font-size: 1.05rem; margin: 0; }
+.selector-rubros { display: flex; flex-direction: column; gap: 8px; }
+.lista-rubros { max-height: 260px; overflow-y: auto; border: 1px solid #d5d9df; border-radius: 8px; padding: 6px 10px; background: #fff; }
+.lista-rubros .casilla { min-height: 36px; font-weight: 400; }
+@media (min-width: 900px) {
+  .admin-columnas { flex-direction: row; align-items: flex-start; }
+  .admin-lista { flex: 1 1 auto; }
+  .admin-panel { flex: 0 0 400px; position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; }
+  .fila-admin { flex-direction: row; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .fila-admin-datos { flex: 1 1 320px; }
+  .fila-admin .confirmar { flex: 1 1 100%; }
+}
