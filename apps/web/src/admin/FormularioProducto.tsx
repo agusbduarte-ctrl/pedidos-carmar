@@ -9,6 +9,7 @@ interface Props {
   producto: ProductoAdmin | null;
   rubros: Opcion[];
   proveedores: Opcion[];
+  alEmpezar: () => void;
   alGuardar: (p: ProductoAdmin) => void;
   alCerrar: () => void;
 }
@@ -17,6 +18,7 @@ export default function FormularioProducto({
   producto,
   rubros,
   proveedores,
+  alEmpezar,
   alGuardar,
   alCerrar,
 }: Props) {
@@ -31,7 +33,6 @@ export default function FormularioProducto({
   const [precio, setPrecio] = useState(textoPrecio(producto?.precioReferencia ?? null));
   const [activo, setActivo] = useState(producto?.activo ?? true);
   const [error, setError] = useState("");
-  const [ok, setOk] = useState("");
 
   const mutacion = useMutation({
     mutationFn: async (valorPrecio: number | null): Promise<ProductoAdmin> => {
@@ -58,12 +59,10 @@ export default function FormularioProducto({
     },
     onSuccess: (guardado) => {
       setError("");
-      setOk(editando ? "Cambios guardados." : "Producto creado.");
       void qc.invalidateQueries({ queryKey: ["admin", "productos", "lista"] });
       alGuardar(guardado);
     },
     onError: (err) => {
-      setOk("");
       setError(textoError(err, "No se pudo guardar el producto."));
     },
   });
@@ -71,7 +70,7 @@ export default function FormularioProducto({
   const enviar = (e: FormEvent) => {
     e.preventDefault();
     setError("");
-    setOk("");
+    alEmpezar();
     if (!editando && codigo.trim() === "") return setError("Escribí el código.");
     if (nombre.trim().length < 2) return setError("El nombre tiene que tener al menos 2 letras.");
     if (!rubroId) return setError("Elegí el rubro.");
@@ -152,7 +151,6 @@ export default function FormularioProducto({
             {error}
           </p>
         )}
-        {ok && <p className="ok">{ok}</p>}
 
         <div className="acciones">
           <button className="boton" type="submit" disabled={mutacion.isPending}>

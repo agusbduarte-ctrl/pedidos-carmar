@@ -159,7 +159,11 @@ export default function AdminUsuarios() {
                       type="button"
                       className="boton secundario chico-boton sin-margen"
                       disabled={esYo || cambiarActivo.isPending}
-                      onClick={() => cambiarActivo.mutate(u)}
+                      onClick={() => {
+                        setError("");
+                        setAviso("");
+                        cambiarActivo.mutate(u);
+                      }}
                     >
                       {u.activo ? "Desactivar" : "Activar"}
                     </button>
@@ -167,7 +171,11 @@ export default function AdminUsuarios() {
                       type="button"
                       className="boton peligro chico-boton"
                       disabled={esYo || borrar.isPending}
-                      onClick={() => setBorrando(u.id)}
+                      onClick={() => {
+                        setError("");
+                        setAviso("");
+                        setBorrando(u.id);
+                      }}
                     >
                       Borrar
                     </button>
@@ -183,7 +191,11 @@ export default function AdminUsuarios() {
                           type="button"
                           className="boton peligro"
                           disabled={borrar.isPending}
-                          onClick={() => borrar.mutate(u.id)}
+                          onClick={() => {
+                            setError("");
+                            setAviso("");
+                            borrar.mutate(u.id);
+                          }}
                         >
                           {borrar.isPending ? "Borrando..." : "Sí, borrar"}
                         </button>
@@ -212,6 +224,11 @@ export default function AdminUsuarios() {
             <FormularioUsuario
               key={panel.tipo === "editar" ? panel.usuario.id : "nuevo"}
               usuario={panel.tipo === "editar" ? panel.usuario : null}
+              alEmpezar={() => {
+                setAviso("");
+                setError("");
+              }}
+              alAvisar={setAviso}
               alGuardar={(guardado) => {
                 setAviso("Usuario guardado.");
                 setPanel({ tipo: "editar", usuario: guardado });

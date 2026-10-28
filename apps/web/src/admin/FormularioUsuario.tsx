@@ -9,13 +9,21 @@ import SelectorRubros from "./SelectorRubros";
 interface Props {
   // null = alta
   usuario: UsuarioAdmin | null;
+  alEmpezar: () => void;
+  alAvisar: (texto: string) => void;
   alGuardar: (u: UsuarioAdmin) => void;
   alCerrar: () => void;
 }
 
 const ROLES: Rol[] = ["REPOSITOR", "ENCARGADA", "ADMIN"];
 
-export default function FormularioUsuario({ usuario, alGuardar, alCerrar }: Props) {
+export default function FormularioUsuario({
+  usuario,
+  alEmpezar,
+  alAvisar,
+  alGuardar,
+  alCerrar,
+}: Props) {
   const qc = useQueryClient();
   const editando = usuario !== null;
 
@@ -26,7 +34,6 @@ export default function FormularioUsuario({ usuario, alGuardar, alCerrar }: Prop
   const [pin, setPin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [avisoOk, setAvisoOk] = useState("");
 
   const esRepositor = rol === "REPOSITOR";
 
@@ -52,12 +59,10 @@ export default function FormularioUsuario({ usuario, alGuardar, alCerrar }: Prop
       setError("");
       setPin("");
       setPassword("");
-      setAvisoOk(editando ? "Cambios guardados." : "Usuario creado.");
       void qc.invalidateQueries({ queryKey: ["admin", "usuarios", "lista"] });
       alGuardar(guardado);
     },
     onError: (err) => {
-      setAvisoOk("");
       setError(textoError(err, "No se pudo guardar el usuario."));
     },
   });
@@ -65,7 +70,7 @@ export default function FormularioUsuario({ usuario, alGuardar, alCerrar }: Prop
   const enviar = (e: FormEvent) => {
     e.preventDefault();
     setError("");
-    setAvisoOk("");
+    alEmpezar();
     if (nombre.trim().length < 2) return setError("El nombre tiene que tener al menos 2 letras.");
     if (esRepositor) {
       if (!sucursal) return setError("Elegí la sucursal.");
@@ -165,7 +170,6 @@ export default function FormularioUsuario({ usuario, alGuardar, alCerrar }: Prop
             {error}
           </p>
         )}
-        {avisoOk && <p className="ok">{avisoOk}</p>}
 
         <div className="acciones">
           <button className="boton" type="submit" disabled={mutacion.isPending}>
@@ -177,7 +181,7 @@ export default function FormularioUsuario({ usuario, alGuardar, alCerrar }: Prop
         </div>
       </form>
 
-      {editando && usuario.rol === "REPOSITOR" && <RubrosDelRepositor usuario={usuario} />}
+      {editando && usuario.rol === "REPOSITOR" && <RubrosDelRepositor usuario={usuario} alEmpezar={alEmpezar} alAvisar={alAvisar} />}
       {!editando && esRepositor && (
         <p className="chico">Cuando lo crees vas a poder asignarle los rubros.</p>
       )}
@@ -185,11 +189,18 @@ export default function FormularioUsuario({ usuario, alGuardar, alCerrar }: Prop
   );
 }
 
-function RubrosDelRepositor({ usuario }: { usuario: UsuarioAdmin }) {
+function RubrosDelRepositor({
+  usuario,
+  alEmpezar,
+  alAvisar,
+}: {
+  usuario: UsuarioAdmin;
+  alEmpezar: () => void;
+  alAvisar: (texto: string) => void;
+}) {
   const qc = useQueryClient();
   const [cambiados, setCambiados] = useState<string[] | null>(null);
   const [error, setError] = useState("");
-  const [ok, setOk] = useState("");
 
   const todos = useQuery({
     queryKey: ["admin", "rubros", "opciones"],
@@ -207,10 +218,9 @@ function RubrosDelRepositor({ usuario }: { usuario: UsuarioAdmin }) {
       qc.setQueryData(["admin", "usuarios", "rubros", usuario.id], lista);
       setCambiados(null);
       setError("");
-      setOk("Rubros guardados.");
+      alAvisar("Rubros guardados.");
     },
     onError: (err) => {
-      setOk("");
       setError(textoError(err, "No se pudieron guardar los rubros."));
     },
   });
@@ -238,7 +248,7 @@ function RubrosDelRepositor({ usuario }: { usuario: UsuarioAdmin }) {
             rubros={todos.data}
             elegidos={elegidos}
             alCambiar={(ids) => {
-              setOk("");
+              alEmpezar();
               setCambiados(ids);
             }}
             deshabilitado={sinSucursal || guardar.isPending}
@@ -248,12 +258,15 @@ function RubrosDelRepositor({ usuario }: { usuario: UsuarioAdmin }) {
               {error}
             </p>
           )}
-          {ok && <p className="ok">{ok}</p>}
           <button
             type="button"
             className="boton"
             disabled={cambiados === null || sinSucursal || guardar.isPending}
-            onClick={() => guardar.mutate(elegidos)}
+            onClick={() => {
+              setError("");
+              alEmpezar();
+              guardar.mutate(elegidos);
+            }}
           >
             {guardar.isPending ? "Guardando..." : "Guardar rubros"}
           </button>

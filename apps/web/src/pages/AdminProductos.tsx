@@ -182,7 +182,11 @@ export default function AdminProductos() {
                     type="button"
                     className="boton secundario chico-boton sin-margen"
                     disabled={cambiarActivo.isPending}
-                    onClick={() => cambiarActivo.mutate(p)}
+                    onClick={() => {
+                      setError("");
+                      setAviso("");
+                      cambiarActivo.mutate(p);
+                    }}
                   >
                     {p.activo ? "Desactivar" : "Activar"}
                   </button>
@@ -190,7 +194,11 @@ export default function AdminProductos() {
                     type="button"
                     className="boton peligro chico-boton"
                     disabled={borrar.isPending}
-                    onClick={() => setBorrando(p.id)}
+                    onClick={() => {
+                      setError("");
+                      setAviso("");
+                      setBorrando(p.id);
+                    }}
                   >
                     Borrar
                   </button>
@@ -203,7 +211,11 @@ export default function AdminProductos() {
                         type="button"
                         className="boton peligro"
                         disabled={borrar.isPending}
-                        onClick={() => borrar.mutate(p.id)}
+                        onClick={() => {
+                          setError("");
+                          setAviso("");
+                          borrar.mutate(p.id);
+                        }}
                       >
                         {borrar.isPending ? "Borrando..." : "Sí, borrar"}
                       </button>
@@ -233,6 +245,10 @@ export default function AdminProductos() {
               producto={panel.tipo === "editar" ? panel.producto : null}
               rubros={rubros.data}
               proveedores={proveedores.data}
+              alEmpezar={() => {
+                setAviso("");
+                setError("");
+              }}
               alGuardar={(guardado) => {
                 setAviso("Producto guardado.");
                 setPanel({ tipo: "editar", producto: guardado });
