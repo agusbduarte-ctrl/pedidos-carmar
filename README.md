@@ -244,8 +244,9 @@ No uses `Move-Item` de PowerShell 5.1 en `node_modules`: falla a mitad de camino
 - ~~**Sprint 2.1**~~ — Frontend del repositor:
   - Parte 1: base de `apps/web` (router, TanStack Query, proxy `/api` de Vite) y login (email o PIN), sesión con `/auth/me`, rutas por rol y cierre de sesión.
   - Parte 2: pantalla de pedido del repositor (empezar, buscar productos, agregar, quitar, enviar, corregir un pedido devuelto). Suma `GET /pedidos/productos` y `GET /pedidos/mis-rubros` en la API.
-- **Sprint 2.2** — Pantalla de la encargada: listar pedidos enviados, ver el detalle, aprobar o devolver con comentario (hoy se hace por la API).
-- **Sprint 2.x** — Resto del frontend (consolidado, administración).
+- ~~**Sprint 2.2**~~ — Pantalla de la encargada: lista de pedidos por estado y sucursal, detalle con ítems por rubro, aprobar y devolver con comentario. El admin la ve en solo lectura.
+- **Sprint 2.3** — Pantalla del consolidado para encargada y admin: generar, revisar, ajustar cantidades, aprobar y descargar el Excel.
+- **Sprint 2.x** — Resto del frontend (administración: usuarios, rubros, proveedores, productos, períodos) y pasada de diseño de toda la UI.
 - **Sprint 3.x** — Deploy (y logging estructurado).
 - Pendientes futuros, sin sprint asignado:
   - Historial de devoluciones de un pedido (hoy solo se guarda la última).
