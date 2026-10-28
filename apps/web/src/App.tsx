@@ -1,19 +1,16 @@
-import { useEffect, useState } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { RequireRole } from "./auth/RequireRole";
+import Login from "./pages/Login";
+import Inicio from "./pages/Inicio";
 
 export default function App() {
-  const [status, setStatus] = useState("...");
-
-  useEffect(() => {
-    fetch("http://localhost:3000/health")
-      .then((r) => r.json())
-      .then((d) => setStatus(d.status))
-      .catch(() => setStatus("error"));
-  }, []);
-
   return (
-    <div style={{ fontFamily: "sans-serif", padding: 40 }}>
-      <h1>Pedidos Cármar</h1>
-      <p>API: {status}</p>
-    </div>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route element={<RequireRole />}>
+        <Route path="/" element={<Inicio />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }

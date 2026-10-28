@@ -1,0 +1,16 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; font-size: 18px; background: #f4f5f7; color: #1c1f24; }
+.pagina { max-width: 420px; margin: 0 auto; padding: 24px 16px; }
+.estado { padding: 24px; text-align: center; }
+h1 { font-size: 1.6rem; margin: 0 0 16px; }
+form { display: flex; flex-direction: column; gap: 16px; }
+label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; }
+input, select { font: inherit; padding: 14px; border: 2px solid #b8bec7; border-radius: 8px; background: #fff; min-height: 52px; }
+input:focus, select:focus { outline: 3px solid #8ab4f8; border-color: #1a56db; }
+.boton { font: inherit; font-weight: 700; min-height: 56px; border: 0; border-radius: 8px; background: #1a56db; color: #fff; cursor: pointer; padding: 0 20px; }
+.boton:disabled { opacity: 0.6; cursor: not-allowed; }
+.boton.secundario { background: #fff; color: #1a56db; border: 2px solid #1a56db; margin-top: 16px; }
+.error { margin: 0; padding: 12px; border-radius: 8px; background: #fde8e8; color: #9b1c1c; font-weight: 600; }
+.pestanas { display: flex; gap: 8px; margin-bottom: 20px; }
+.pestanas button { flex: 1; font: inherit; font-weight: 700; min-height: 52px; border: 2px solid #1a56db; background: #fff; color: #1a56db; border-radius: 8px; cursor: pointer; }
+.pestanas button.activa { background: #1a56db; color: #fff; }
