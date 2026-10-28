@@ -8,6 +8,8 @@
     "test": "vitest run",
     "seed": "tsx --env-file-if-exists=.env prisma/seed.ts",
     "import-catalogo": "tsx --env-file-if-exists=.env prisma/import-catalogo.ts",
+    "crear-admin": "tsx --env-file-if-exists=.env prisma/crear-admin.ts",
+    "asignar-unidad": "tsx --env-file-if-exists=.env prisma/asignar-unidad.ts",
     "postinstall": "prisma generate"
   },
   "prisma": {
