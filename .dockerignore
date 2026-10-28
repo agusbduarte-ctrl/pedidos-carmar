@@ -1,0 +1,25 @@
+# Lo que NUNCA debe entrar a una imagen de Docker.
+
+# Dependencias y compilados (se generan dentro de la imagen)
+**/node_modules
+**/dist
+
+# Git
+.git
+.gitignore
+
+# Datos reales: el Excel del catálogo se monta como volumen, no se copia
+data/
+
+# Secretos: ningún .env entra a una imagen (salvo los .env.example)
+**/.env
+**/.env.*
+!**/.env.example
+!deploy/.env.prod.example
+
+# Logs y basura
+**/*.log
+.DS_Store
+
+# Herramientas locales
+.claude/

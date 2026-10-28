@@ -1,0 +1,41 @@
+# Imagen de la API. Contexto de build = raíz del monorepo:
+#   docker build -f deploy/Dockerfile.api .
+FROM node:24-bookworm-slim
+
+# Prisma necesita openssl para conectarse a Postgres
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends openssl ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+# Carpeta de trabajo y de datos (el Excel del catálogo se monta en /app/data)
+WORKDIR /app
+RUN mkdir -p /app/data && chown -R node:node /app
+
+# Todo lo que sigue corre como usuario no root
+USER node
+
+# pnpm vía corepack, con la versión que pide "packageManager" del package.json raíz
+COPY --chown=node:node package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN mkdir -p /home/node/bin \
+ && corepack enable --install-directory /home/node/bin \
+ && corepack install
+ENV PATH="/home/node/bin:${PATH}"
+
+# Instalación. Primero lo mínimo para aprovechar la caché de Docker:
+# xlsx se instala desde apps/api/vendor, y "postinstall" corre "prisma generate" (necesita el schema).
+COPY --chown=node:node apps/api/package.json apps/api/package.json
+COPY --chown=node:node apps/api/vendor apps/api/vendor
+COPY --chown=node:node apps/api/prisma apps/api/prisma
+COPY --chown=node:node apps/web/package.json apps/web/package.json
+# --prod=false: tsx y prisma son devDependencies y hacen falta (migraciones y scripts)
+RUN pnpm install --frozen-lockfile --prod=false
+
+# Código y compilación
+COPY --chown=node:node apps/api apps/api
+RUN pnpm --filter api build
+
+ENV NODE_ENV=production
+EXPOSE 3000
+
+# Aplica las migraciones pendientes y arranca la API
+CMD ["sh", "-c", "pnpm --filter api exec prisma migrate deploy && node apps/api/dist/server.js"]

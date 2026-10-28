@@ -1,0 +1,35 @@
+# Caddy: HTTPS automático (Let's Encrypt), sirve la web y reenvía /api a la API.
+# DOMINIO viene del archivo .env.prod (por ejemplo pedidos.carmar.com.ar).
+{$DOMINIO} {
+	encode zstd gzip
+
+	# Cabeceras de seguridad básicas (sin HSTS preload)
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		X-Frame-Options DENY
+		-Server
+	}
+
+	# /api/algo -> la API recibe /algo (la API no lleva el prefijo /api)
+	handle_path /api/* {
+		reverse_proxy api:3000
+	}
+
+	# Todo lo demás es la web
+	handle {
+		root * /srv
+
+		# Archivos con nombre único (hash): se guardan un año
+		@assets path /assets/*
+		header @assets Cache-Control "public, max-age=31536000, immutable"
+
+		# Estos tienen que revalidarse siempre, si no la gente queda con una versión vieja
+		@sinCache path /sw.js /manifest.webmanifest /index.html
+		header @sinCache Cache-Control "no-cache"
+
+		# Cualquier ruta de la app (por ejemplo /admin) devuelve index.html
+		try_files {path} /index.html
+		file_server
+	}
+}

@@ -12,3 +12,6 @@ _README.md
 .claude/settings.local.json
 .claude/
 claude-*.zip
+
+# Producción (secretos del servidor)
+.env.prod

@@ -2,7 +2,7 @@
 
 Sistema interno de pedidos para los repositores y la encargada de compras del Supermercado Carmar.
 
-**Estado actual:** Sprint 2.5 completo — backend con autenticación (JWT en cookie httpOnly), CRUD admin de usuarios, rubros, proveedores, productos y períodos, el flujo de pedidos, el catálogo real importado (14.322 artículos), el consolidado por período y su exportación a Excel, con 159 tests. El frontend cubre el login, la pantalla del repositor (armar y enviar su pedido), la de la encargada (revisar, aprobar o devolver), la del consolidado (generar, ajustar, aprobar y descargar el Excel) y la administración de usuarios, productos, rubros, proveedores y períodos.
+**Estado actual:** Sprint 2.5 completo — backend con autenticación (JWT en cookie httpOnly), CRUD admin de usuarios, rubros, proveedores, productos y períodos, el flujo de pedidos, el catálogo real importado (14.322 artículos), el consolidado por período y su exportación a Excel, con 181 tests. El frontend cubre el login, la pantalla del repositor (armar y enviar su pedido), la de la encargada (revisar, aprobar o devolver), la del consolidado (generar, ajustar, aprobar y descargar el Excel) y la administración de usuarios, productos, rubros, proveedores y períodos.
 
 ## Stack
 
@@ -74,6 +74,8 @@ pnpm dev
 | `NODE_ENV` | En `production` la cookie se marca `Secure` | `development` |
 | `PORT` | Puerto de la API | `3000` |
 | `CATALOGO_XLSX_PATH` | Excel de artículos para `import-catalogo`, relativo a la raíz del repo o absoluto | `./data/catalogo.xlsx` |
+| `CATALOGO_RUBROS` | Opcional. Códigos de rubro a importar con `import-catalogo`, separados por coma | `70,6,47` |
+| `CATALOGO_LIMITE_POR_RUBRO` | Opcional. Máximo de artículos por rubro en `import-catalogo` (entero > 0) | `20` |
 
 ### Usuarios de prueba (solo desarrollo local)
 
@@ -180,7 +182,7 @@ Reglas:
 | `pnpm dev` | Levanta api y web en paralelo |
 | `pnpm build` | Compila api (`tsc`) y web (`vite build`) |
 | `pnpm --filter api lint` | ESLint sobre `src/` y `prisma/` |
-| `pnpm --filter api test` | Vitest: 159 tests (integración con `app.inject()` y unitarios del parser y la importación) |
+| `pnpm --filter api test` | Vitest: 181 tests (integración con `app.inject()` y unitarios del parser y la importación) |
 | `pnpm --filter api seed` | Recarga los datos de prueba. **Borra todo**, incluido el catálogo importado |
 | `pnpm --filter api import-catalogo` | Importa el catálogo real desde `CATALOGO_XLSX_PATH` (ver abajo) |
 | `pnpm --filter api exec prisma studio` | Explorador visual de la base |
@@ -197,6 +199,7 @@ El catálogo real sale del Excel "BASE DE DATOS DE ARTICULOS" del sistema de Car
 - En productos existentes actualiza nombre y rubro, y completa el proveedor solo si está vacío (no pisa uno real). No toca `activo`, ni la unidad, ni los productos borrados por un admin.
 - Los códigos de artículo se guardan sin ceros a la izquierda (`000000000119951` → `119951`). Los códigos de barras van a la tabla `CodigoBarras` (0 o más por producto).
 - Es **idempotente** y **nunca borra**: se puede correr cada vez que haya un Excel nuevo. Trabaja en transacciones de 500 productos; si un lote falla, los demás quedan importados y alcanza con volver a correrlo.
+- Para una base de prueba se puede importar solo un recorte: `CATALOGO_RUBROS=70,6,47` (solo esos códigos de rubro) y/o `CATALOGO_LIMITE_POR_RUBRO=20` (las primeras N filas de cada rubro, en el orden del Excel). Sin esas variables importa todo.
 - Con el Excel actual (14.322 artículos): la primera corrida crea 88 rubros, 14.322 productos y 14.343 códigos de barras en unos 7 s; las siguientes no crean nada.
 
 > ⚠️ `pnpm --filter api seed` **borra todos los productos y rubros**, incluidos los importados. Después de un seed, volver a correr `pnpm --filter api import-catalogo`.
@@ -204,6 +207,27 @@ El catálogo real sale del Excel "BASE DE DATOS DE ARTICULOS" del sistema de Car
 `Producto.proveedorId` es opcional: si se borra físicamente un proveedor, sus productos quedan sin proveedor (`ON DELETE SET NULL`). En la práctica los proveedores solo se eliminan con borrado lógico.
 
 `xlsx` (SheetJS) se instala desde `apps/api/vendor/` y no desde npm, porque la versión de npm tiene vulnerabilidades sin corregir (ver `apps/api/vendor/README.md`).
+
+### Instalación de producción
+
+> ⚠️ En producción **NUNCA** se corre `seed`: borra todo el catálogo y crea usuarios con contraseñas de prueba.
+
+1. `pnpm --filter api crear-admin`: crea el primer usuario ADMIN. Variables: `ADMIN_EMAIL` y `ADMIN_PASSWORD` (obligatorias, contraseña de al menos 10 caracteres) y `ADMIN_NOMBRE` (opcional, por defecto "Administrador"). Si ya existe un usuario con ese email no lo pisa y avisa. No borra nada ni muestra la contraseña.
+2. `pnpm --filter api asignar-unidad`: cambia la unidad (`UN`, `CAJA`, `PACK`, `KG`, `LT`) de los productos de ciertos rubros. Variables: `UNIDAD` y `RUBROS` (códigos separados por coma). Por defecto es un simulacro que informa cuántos productos cambiarían por rubro; recién con `APLICAR=1` aplica los cambios. Ignora productos borrados y avisa los códigos de rubro que no existen.
+
+```powershell
+$env:ADMIN_EMAIL = "admin@carmar.com"
+$env:ADMIN_PASSWORD = "una-clave-larga-123"
+pnpm --filter api crear-admin
+
+$env:UNIDAD = "KG"
+$env:RUBROS = "70,6,47"
+pnpm --filter api asignar-unidad      # simulacro
+$env:APLICAR = "1"
+pnpm --filter api asignar-unidad      # aplica
+```
+
+Los comandos usan la `DATABASE_URL` de `apps/api/.env` (o de la terminal).
 
 ### Sobre los tests
 
@@ -246,6 +270,10 @@ Todo sale de `apps/web/src/styles.css`: los colores, tamaños, radios y espaciad
 - **La placa de cantidad** (`components/Cantidad.tsx`) es lo único llamativo: la cifra en amarillo con la unidad al lado, como una etiqueta de góndola. Si la encargada corrige la cantidad a mano, la placa se invierte (negro con cifra amarilla). El amarillo se usa solo ahí y en el anillo de foco, para que siga significando algo.
 - **Reglas:** filas planas con línea fina, sin sombras; el rojo oscuro sólido solo para confirmar o devolver (en las filas, "Borrar" va con contorno); nada de mayúsculas decorativas, flechas en los botones ni textos unidos con punto medio; sin animaciones salvo un cambio corto de color, y se respeta "reducir movimiento". Objetivos táctiles de 48 px en celular. La página no se desplaza hacia los costados (`overflow-x: clip`) y se verificó de 300 px a 1440 px, sin desborde.
 - **Barra superior:** `components/Layout.tsx` la pone en todas las pantallas con sesión, con el logo, el nombre, la sucursal y "Salir".
+
+## Deploy de producción
+
+Un solo servidor con Docker Compose (Postgres + API + Caddy con HTTPS): guía paso a paso en [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 ## Deploy de prueba (gratis)
 

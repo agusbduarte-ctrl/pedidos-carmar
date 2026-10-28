@@ -5,6 +5,7 @@ import jwt from "@fastify/jwt";
 import rateLimit from "@fastify/rate-limit";
 import { PrismaClient, EstadoPeriodo } from "@prisma/client";
 import { COOKIE_NAME } from "./lib/jwt.js";
+import { leerTrustProxy } from "./lib/trust-proxy.js";
 import { authRoutes } from "./routes/auth.js";
 import rubrosRoutes from "./routes/admin/rubros.js";
 import proveedoresRoutes from "./routes/admin/proveedores.js";
@@ -48,8 +49,10 @@ export async function buildApp(
   const db = prisma ?? new PrismaClient();
   const app = Fastify({
     logger: options.logger ?? true,
-    // Detrás de Netlify/Render todos compartirían IP: así request.ip (rate limit) es la del cliente.
-    trustProxy: true,
+    // Detrás de un proxy todos compartirían IP: así request.ip (rate limit) es la del cliente.
+    // TRUST_PROXY_HOPS fija cuántos proxies hay (producción con Caddy: 1); sin ella, true.
+    // Fastify acepta un número de saltos, pero sus tipos solo declaran boolean: de ahí el cast.
+    trustProxy: leerTrustProxy(process.env.TRUST_PROXY_HOPS) as boolean,
   });
 
   app.decorate("db", db);

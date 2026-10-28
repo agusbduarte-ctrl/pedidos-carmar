@@ -1,0 +1,72 @@
+# Producción en un solo servidor: Postgres + API + Caddy (web y HTTPS).
+# Guía completa: docs/DEPLOY.md
+#
+# Siempre se usa con el archivo de variables del servidor:
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod <comando>
+#
+# Solo Caddy publica puertos. La base y la API quedan en la red interna.
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: carmar
+      POSTGRES_DB: pedidos_carmar
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD en .env.prod}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U carmar -d pedidos_carmar"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.api
+    restart: unless-stopped
+    env_file:
+      # required: false permite validar el archivo con "config" sin tener .env.prod;
+      # en el servidor sí tiene que existir (si falta JWT_SECRET la API no arranca).
+      - path: .env.prod
+        required: false
+    environment:
+      # Se arma acá con la misma clave que usa la base
+      DATABASE_URL: postgresql://carmar:${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD en .env.prod}@db:5432/pedidos_carmar
+      PORT: "3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Excel del catálogo (solo lectura). Queda afuera de la imagen.
+      - ./data:/app/data:ro
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+  web:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.web
+    restart: unless-stopped
+    environment:
+      DOMINIO: ${DOMINIO:?Falta DOMINIO en .env.prod}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

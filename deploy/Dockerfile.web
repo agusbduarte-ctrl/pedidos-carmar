@@ -1,0 +1,20 @@
+# Imagen de la web + Caddy. Contexto de build = raíz del monorepo:
+#   docker build -f deploy/Dockerfile.web .
+
+# Etapa 1: construir apps/web
+FROM node:24-bookworm-slim AS build
+WORKDIR /app
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN corepack enable && corepack install
+COPY apps/web/package.json apps/web/package.json
+# La API no se usa acá, pero pnpm necesita su package.json para validar el lockfile
+COPY apps/api/package.json apps/api/package.json
+COPY apps/api/vendor apps/api/vendor
+RUN pnpm install --frozen-lockfile --filter web... --ignore-scripts
+COPY apps/web apps/web
+RUN pnpm --filter web build
+
+# Etapa 2: Caddy sirve la web y hace proxy de /api hacia la API
+FROM caddy:2
+COPY --from=build /app/apps/web/dist /srv
+COPY deploy/Caddyfile /etc/caddy/Caddyfile
