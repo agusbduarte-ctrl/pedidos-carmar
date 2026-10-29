@@ -8,6 +8,8 @@ export interface UsuarioNombre {
 
 export interface PedidoRevisionResumen {
   id: string;
+  titulo: string | null;
+  proveedor: UsuarioNombre | null;
   estado: EstadoPedido;
   sucursal: Sucursal;
   fechaEnvio: string | null;
@@ -22,6 +24,8 @@ export interface ItemRevision extends Omit<ItemPedido, "producto"> {
 
 export interface PedidoRevisionDetalle {
   id: string;
+  titulo: string | null;
+  proveedor: UsuarioNombre | null;
   estado: EstadoPedido;
   sucursal: Sucursal;
   periodo: PeriodoResumen;

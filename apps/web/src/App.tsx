@@ -3,6 +3,7 @@ import { RequireRole } from "./auth/RequireRole";
 import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import Inicio from "./pages/Inicio";
+import PedidoArmado from "./pages/PedidoArmado";
 import RevisionPedidos from "./pages/RevisionPedidos";
 import RevisionDetalle from "./pages/RevisionDetalle";
 import Consolidado from "./pages/Consolidado";
@@ -19,6 +20,9 @@ export default function App() {
       <Route element={<Layout />}>
         <Route element={<RequireRole />}>
           <Route path="/" element={<Inicio />} />
+        </Route>
+        <Route element={<RequireRole roles={["REPOSITOR"]} />}>
+          <Route path="/pedido/:id" element={<PedidoArmado />} />
         </Route>
         <Route element={<RequireRole roles={["ENCARGADA", "ADMIN"]} />}>
           <Route path="/revision" element={<RevisionPedidos />} />

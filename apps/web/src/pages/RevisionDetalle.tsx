@@ -51,6 +51,10 @@ export default function RevisionDetalle() {
       <h1>Pedido de {p.repositor.nombre}</h1>
       <dl className="panel pares">
         <div className="par">
+          <dt>Título</dt>
+          <dd>{p.titulo ?? "Pedido sin título"}</dd>
+        </div>
+        <div className="par">
           <dt>Estado</dt>
           <dd>
             <EstadoEtiqueta estado={p.estado} />

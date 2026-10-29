@@ -78,6 +78,7 @@ export default function RevisionPedidos() {
               <li key={p.id}>
                 <Link to={`/revision/${p.id}`} className="fila-revision">
                   <span className="fila-titulo fila-revision-repositor">{p.repositor.nombre}</span>
+                  <span className="chico">{p.titulo ?? "Pedido sin título"}</span>
                   <span className="fila-revision-rotulos">
                     <span className="rotulo">{nombreSucursal(p.sucursal)}</span>
                     <span className="rotulo">{p.periodo.nombre}</span>

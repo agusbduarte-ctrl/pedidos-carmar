@@ -18,8 +18,15 @@ export interface ItemPedido {
   producto: { id: string; nombre: string; codigo: string; unidad: Unidad };
 }
 
+export interface ProveedorResumen {
+  id: string;
+  nombre: string;
+}
+
 export interface PedidoResumen {
   id: string;
+  titulo: string | null;
+  proveedor: ProveedorResumen | null;
   estado: EstadoPedido;
   comentarioDevolucion: string | null;
   periodo: PeriodoResumen;
@@ -29,6 +36,8 @@ export interface PedidoResumen {
 
 export interface PedidoCompleto {
   id: string;
+  titulo: string | null;
+  proveedor: ProveedorResumen | null;
   estado: EstadoPedido;
   comentarioDevolucion: string | null;
   periodo: PeriodoResumen;
@@ -66,7 +75,15 @@ export const pedidosApi = {
     api<{ data: PedidoResumen[]; meta: Meta }>("/pedidos/mis-pedidos").then((r) => r.data),
   detalle: (id: string) =>
     api<{ data: PedidoCompleto }>(`/pedidos/mis-pedidos/${id}`).then((r) => r.data),
-  crear: () => api<{ data: PedidoCompleto }>("/pedidos", { method: "POST" }).then((r) => r.data),
+  crear: (titulo?: string) =>
+    api<{ data: PedidoCompleto }>("/pedidos", {
+      method: "POST",
+      body: titulo ? { titulo } : {},
+    }).then((r) => r.data),
+  cambiarTitulo: (id: string, titulo: string | null) =>
+    api<{ data: PedidoCompleto }>(`/pedidos/${id}`, { method: "PATCH", body: { titulo } }).then(
+      (r) => r.data,
+    ),
   agregarItem: (id: string, item: NuevoItem) =>
     api<{ data: PedidoCompleto }>(`/pedidos/${id}/items`, { method: "POST", body: item }).then(
       (r) => r.data,
