@@ -12,13 +12,17 @@ import {
 import { isUniqueViolation, sendValidationError } from "../lib/zod-helpers.js";
 import { periodoConConsolidadoAprobado } from "../lib/consolidado-helpers.js";
 
+const PROVEEDOR_SELECT = { select: { id: true, nombre: true } } as const;
+
 const PEDIDO_RESUMEN = {
   periodo: { select: { id: true, nombre: true, estado: true } },
+  proveedor: PROVEEDOR_SELECT,
   _count: { select: { items: true } },
 } satisfies Prisma.PedidoInclude;
 
 const PEDIDO_COMPLETO = {
   periodo: { select: { id: true, nombre: true, estado: true } },
+  proveedor: PROVEEDOR_SELECT,
   items: {
     orderBy: { createdAt: "asc" },
     include: { producto: { select: { id: true, nombre: true, codigo: true, unidad: true } } },
@@ -29,6 +33,7 @@ const PEDIDO_COMPLETO = {
 const USUARIO_NOMBRE = { select: { id: true, nombre: true } } as const;
 const PEDIDO_DETALLE = {
   periodo: { select: { id: true, nombre: true, estado: true } },
+  proveedor: PROVEEDOR_SELECT,
   repositor: USUARIO_NOMBRE,
   enviadoPor: USUARIO_NOMBRE,
   devueltoPor: USUARIO_NOMBRE,
@@ -62,6 +67,13 @@ const productosQuery = z.object({
 });
 const devolverBody = z.object({ comentario: z.string().trim().min(1).max(500) });
 
+const titulo = z.string().trim().min(1).max(80);
+const crearBody = z.object({ titulo: titulo.optional(), proveedorId: z.string().min(1).optional() });
+const editarBody = z.object({
+  titulo: titulo.nullable().optional(),
+  proveedorId: z.string().min(1).nullable().optional(),
+});
+
 const idParams = z.object({ id: z.string().min(1) });
 const itemParams = z.object({ id: z.string().min(1), itemId: z.string().min(1) });
 const itemBody = z.object({
@@ -72,6 +84,7 @@ const itemBody = z.object({
 });
 
 const NO_ENCONTRADO = { error: "Pedido no encontrado" };
+const PROVEEDOR_INVALIDO = { error: "El proveedor elegido no existe" };
 const PERIODO_CONSOLIDADO = {
   error: "El período ya tiene un consolidado aprobado, no se pueden modificar pedidos",
 };
@@ -102,6 +115,9 @@ export default async function pedidosRoutes(app: FastifyInstance) {
     }
     return pedido;
   };
+
+  const proveedorExiste = async (id: string) =>
+    (await app.db.proveedor.count({ where: { id, deletedAt: null } })) > 0;
 
   const pedidoCompleto = (id: string) =>
     app.db.pedido.findUniqueOrThrow({ where: { id }, include: PEDIDO_COMPLETO });
@@ -204,14 +220,15 @@ export default async function pedidosRoutes(app: FastifyInstance) {
       return reply.code(400).send({ error: "El repositor no tiene sucursal asignada" });
     }
 
+    const body = crearBody.safeParse(request.body ?? {});
+    if (!body.success) return sendValidationError(reply, body.error);
+
     const periodo = await getPeriodoAbierto(app.db);
     if (!periodo) return reply.code(400).send({ error: "No hay período abierto" });
 
-    const existente = await app.db.pedido.findFirst({
-      where: { repositorId: usuarioId, periodoId: periodo.id },
-      select: { id: true },
-    });
-    if (existente) return reply.code(409).send({ error: "Ya tenés un pedido en este período" });
+    if (body.data.proveedorId && !(await proveedorExiste(body.data.proveedorId))) {
+      return reply.code(400).send(PROVEEDOR_INVALIDO);
+    }
 
     const data = await app.db.pedido.create({
       data: {
@@ -220,10 +237,40 @@ export default async function pedidosRoutes(app: FastifyInstance) {
         periodoId: periodo.id,
         estado: EstadoPedido.BORRADOR,
         creadoPorId: usuarioId,
+        titulo: body.data.titulo,
+        proveedorId: body.data.proveedorId,
       },
       include: PEDIDO_COMPLETO,
     });
     return reply.code(201).send({ data });
+  });
+
+  app.patch("/:id", soloRepositor, async (request, reply) => {
+    const params = idParams.safeParse(request.params);
+    if (!params.success) return sendValidationError(reply, params.error);
+    const body = editarBody.safeParse(request.body ?? {});
+    if (!body.success) return sendValidationError(reply, body.error);
+
+    const pedido = await app.db.pedido.findFirst({
+      where: { id: params.data.id, repositorId: request.user.id },
+      select: { id: true, estado: true },
+    });
+    if (!pedido) return reply.code(404).send(NO_ENCONTRADO);
+    if (!ESTADOS_EDITABLES.includes(pedido.estado)) {
+      return reply.code(409).send({ error: `El pedido no se puede editar en estado ${pedido.estado}` });
+    }
+
+    const { titulo, proveedorId } = body.data;
+    if (proveedorId && !(await proveedorExiste(proveedorId))) {
+      return reply.code(400).send(PROVEEDOR_INVALIDO);
+    }
+
+    const data = await app.db.pedido.update({
+      where: { id: pedido.id },
+      data: { titulo, proveedorId },
+      include: PEDIDO_COMPLETO,
+    });
+    return { data };
   });
 
   app.post("/:id/items", soloRepositor, async (request, reply) => {

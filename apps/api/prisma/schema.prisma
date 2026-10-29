@@ -131,6 +131,7 @@ model Proveedor {
   deletedAt DateTime?
 
   productos Producto[]
+  pedidos   Pedido[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -211,6 +212,8 @@ model Pedido {
   estado      EstadoPedido @default(BORRADOR)
 
   observacion String? @db.VarChar(500)
+  titulo      String? @db.VarChar(80)
+  proveedorId String?
 
   creadoPorId   String
   enviadoPorId  String?
@@ -229,13 +232,15 @@ model Pedido {
   devueltoPor Usuario? @relation("PedidoDevueltoPor", fields: [devueltoPorId], references: [id])
   aprobadoPor Usuario? @relation("PedidoAprobadoPor", fields: [aprobadoPorId], references: [id])
 
-  periodo Periodo @relation(fields: [periodoId], references: [id])
+  periodo   Periodo    @relation(fields: [periodoId], references: [id])
+  proveedor Proveedor? @relation(fields: [proveedorId], references: [id])
 
   items ItemPedido[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([proveedorId])
   @@index([repositorId])
   @@index([periodoId])
   @@index([estado])

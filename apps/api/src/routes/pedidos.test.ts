@@ -142,13 +142,40 @@ describe("POST /pedidos", () => {
     });
   });
 
-  it("si ya tiene un pedido en el período: 409", async () => {
-    await crearPedido();
+  it("puede crear varios pedidos en el mismo período", async () => {
+    const a = await crearPedido();
+    const b = await crearPedido();
 
-    const res = await pedir("POST", "/pedidos");
+    expect(a.id).not.toBe(b.id);
+    expect(await prisma.pedido.count({ where: { periodoId, repositorId: repositor.id } })).toBe(2);
+  });
 
-    expect(res.statusCode).toBe(409);
-    expect(res.json()).toEqual({ error: "Ya tenés un pedido en este período" });
+  it("guarda título y proveedor y los devuelve", async () => {
+    const res = await pedir("POST", "/pedidos", { titulo: "  Lácteos urgentes ", proveedorId });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.json().data).toMatchObject({
+      titulo: "Lácteos urgentes",
+      proveedorId,
+      proveedor: { id: proveedorId, nombre: `${PREFIJO}Proveedor` },
+    });
+    const lista = await pedir("GET", "/pedidos/mis-pedidos");
+    expect(lista.json().data[0]).toMatchObject({ titulo: "Lácteos urgentes", proveedor: { id: proveedorId } });
+  });
+
+  it("proveedor inexistente o borrado: 400", async () => {
+    const inexistente = await pedir("POST", "/pedidos", { proveedorId: "no-existe" });
+    await prisma.proveedor.update({ where: { id: proveedorId }, data: { deletedAt: new Date() } });
+    const borrado = await pedir("POST", "/pedidos", { proveedorId });
+
+    expect(inexistente.statusCode).toBe(400);
+    expect(borrado.statusCode).toBe(400);
+    expect(borrado.json()).toEqual({ error: "El proveedor elegido no existe" });
+  });
+
+  it("título vacío o de más de 80 caracteres: 400", async () => {
+    expect((await pedir("POST", "/pedidos", { titulo: "   " })).statusCode).toBe(400);
+    expect((await pedir("POST", "/pedidos", { titulo: "x".repeat(81) })).statusCode).toBe(400);
   });
 
   it("un usuario que no es repositor: 403", async () => {
@@ -158,6 +185,45 @@ describe("POST /pedidos", () => {
     );
 
     expect((await encargada("POST", "/pedidos")).statusCode).toBe(403);
+  });
+});
+
+describe("PATCH /pedidos/:id", () => {
+  it("edita título y proveedor, y permite quitarlos con null", async () => {
+    const { id } = await crearPedido();
+
+    const res = await pedir("PATCH", `/pedidos/${id}`, { titulo: "Bebidas", proveedorId });
+    expect(res.statusCode).toBe(200);
+    expect(res.json().data).toMatchObject({ titulo: "Bebidas", proveedor: { id: proveedorId } });
+
+    const quitar = await pedir("PATCH", `/pedidos/${id}`, { titulo: null, proveedorId: null });
+    expect(quitar.statusCode).toBe(200);
+    expect(quitar.json().data).toMatchObject({ titulo: null, proveedorId: null, proveedor: null });
+
+    const invalido = await pedir("PATCH", `/pedidos/${id}`, { proveedorId: "no-existe" });
+    expect(invalido.statusCode).toBe(400);
+  });
+
+  it("pedido ajeno o inexistente: 404", async () => {
+    const otro = await prisma.usuario.create({
+      data: { nombre: `${PREFIJO}Otro`, rol: Rol.REPOSITOR, sucursal: Sucursal.CARMAR_1 },
+    });
+    const ajeno = await prisma.pedido.create({
+      data: { repositorId: otro.id, creadoPorId: otro.id, sucursal: Sucursal.CARMAR_1, periodoId },
+    });
+
+    expect((await pedir("PATCH", `/pedidos/${ajeno.id}`, { titulo: "x" })).statusCode).toBe(404);
+    expect((await pedir("PATCH", "/pedidos/no-existe", { titulo: "x" })).statusCode).toBe(404);
+  });
+
+  it("pedido ENVIADO: 409", async () => {
+    const { id } = await crearPedido();
+    await agregar(id, productos.asignado, 1);
+    await pedir("POST", `/pedidos/${id}/enviar`);
+
+    const res = await pedir("PATCH", `/pedidos/${id}`, { titulo: "Tarde" });
+
+    expect(res.statusCode).toBe(409);
   });
 });
 
