@@ -66,7 +66,7 @@ export default function PedidoRepositor() {
           <ul className="lista lista-plana">
             {lista.data.map((p) => (
               <li key={p.id}>
-                <Link to={`/pedido/${p.id}`} className="fila-revision">
+                <Link to={`/pedido/${p.id}`} className="fila-revision compacta">
                   <span className="fila-titulo fila-revision-repositor">{p.titulo ?? "Pedido sin título"}</span>
                   <span className="fila-revision-rotulos">
                     <span className="rotulo">{p.periodo.nombre}</span>

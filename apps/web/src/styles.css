@@ -286,6 +286,11 @@ input:focus, select:focus, textarea:focus { border-color: var(--negro); }
 .fila-revision-cantidad { grid-area: cantidad; color: var(--tinta-suave); font-size: 0.95rem; }
 .fila-revision-fecha { grid-area: fecha; color: var(--tinta-suave); font-size: 0.95rem; text-align: right; }
 .fila-revision-estado { grid-area: estado; justify-self: end; }
+/* Fila apilada también en pantallas anchas: la página del repositor es angosta y no entran 5 columnas */
+.fila-revision.compacta {
+  grid-template-columns: 1fr auto; gap: var(--e1) var(--e3);
+  grid-template-areas: "repositor estado" "rotulos rotulos" "cantidad cantidad";
+}
 
 /* Consolidado */
 .barra-consolidado {
