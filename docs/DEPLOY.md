@@ -276,7 +276,36 @@ docker compose -f docker-compose.prod.yml --env-file .env.prod start api web
 
 Si el paso 5 muestra un error, no levantar nada: repetir desde el paso 4 o pedir ayuda. Al final, abrir `https://TU-DOMINIO/api/health` y comprobar que las cantidades (`usuarios`, `productos`) son las esperadas.
 
-Para ensayar la restauración sin riesgo, hacerlo en un servidor de prueba o con un nombre de proyecto aparte (`-p carmar-prueba`) y otro `DOMINIO`.
+Si el backup es de una versión anterior de la app, no pasa nada: al arrancar, la API aplica sola los cambios de base que falten (`prisma migrate deploy`).
+
+### Ensayar un backup en la PC (sin riesgo)
+
+Comprueba que una copia sirve, sin tocar producción ni la base de desarrollo. Usa una base temporal en el puerto 5433. En Git Bash, desde la carpeta del proyecto:
+
+```bash
+ARCHIVO=/c/backups/carmar/AAAA-MM-DD_HHMM.sql.gz
+gzip -t "$ARCHIVO" && echo "archivo OK"
+
+# Base temporal aparte
+docker run -d --name carmar-restore-prueba -e POSTGRES_USER=carmar \
+  -e POSTGRES_PASSWORD=prueba-restore -e POSTGRES_DB=pedidos_carmar -p 5433:5432 postgres:16
+docker exec carmar-restore-prueba pg_isready -U carmar   # repetir hasta que diga "accepting connections"
+
+# Cargar y contar
+gunzip -c "$ARCHIVO" | docker exec -i carmar-restore-prueba psql -U carmar -d pedidos_carmar -v ON_ERROR_STOP=1 -q
+docker exec carmar-restore-prueba psql -U carmar -d pedidos_carmar \
+  -c 'select count(*) from "Usuario"' -c 'select count(*) from "Producto"' -c 'select count(*) from "Pedido"'
+
+# Llevarla a la versión actual y levantar la API contra ella (puerto 3001)
+export DATABASE_URL="postgresql://carmar:prueba-restore@localhost:5433/pedidos_carmar"
+pnpm --filter api exec prisma migrate deploy
+cd apps/api && PORT=3001 npx tsx --env-file-if-exists=.env src/server.ts   # en otra terminal: curl localhost:3001/health
+
+# Al terminar (Ctrl+C en la API): borrar la base temporal. El archivo de backup no se toca.
+docker rm -f carmar-restore-prueba
+```
+
+**Último ensayo: 2026-11-02**, con `2026-10-30_0150.sql.gz`. Cargó en 1 segundo sin errores (3 usuarios, 14.322 productos, 88 rubros, 14.343 códigos de barras, 1 pedido con 3 ítems), se le aplicaron las 3 migraciones posteriores y la API respondió `/health` ok. Conviene repetirlo cada tanto con la copia más nueva.
 
 ## 13. Actualizar el sistema
 

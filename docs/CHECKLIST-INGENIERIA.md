@@ -42,7 +42,7 @@ Estados: ✅ resuelto · 🟡 parcial · ❌ falta · ➖ no aplica hoy
 | Balanceador de carga, firewall | 🟡 | Balanceador no hace falta (un servidor alcanza). Firewall: solo Caddy publica puertos; verificar que en Lightsail estén abiertos únicamente 22, 80 y 443, y SSH solo con llave. |
 | Almacenamiento | ✅ | Volumen de Postgres + Excel del catálogo montado en solo lectura. |
 | Backups | ✅ | `deploy/backup.sh` diario (14 copias), snapshots de Lightsail y copia a la PC. |
-| Redundancia / recuperación ante desastres | 🟡 | Hay copias pero **nunca se probó restaurar** una. Falta un procedimiento escrito y probado (ver plan, paso 2). La copia a la PC depende de hacerla a mano cada semana. |
+| Redundancia / recuperación ante desastres | 🟡 | Restauración ensayada el 2026-11-02 con una copia real (ver `docs/DEPLOY.md`, "Ensayar un backup en la PC"). Falta: la copia a la PC depende de hacerla a mano cada semana. |
 | Escalabilidad, caché, colas, tareas en segundo plano | ➖ | No hace falta con el volumen actual (dos sucursales). Revisar si el consolidado o el Excel empiezan a tardar. |
 
 ## 4. Ambientes y entrega
@@ -102,7 +102,7 @@ En orden de prioridad. Cada paso es chico y se puede hacer por separado.
 ### Prioridad alta (protege lo que ya está en producción)
 
 1. ✅ *Hecho 2026-11-01 (ver `docs/DEPLOY.md` §15).* **Saber cuándo se cae.** Monitor externo gratis (UptimeRobot, Better Stack o similar) que consulte `https://<dominio>/api/health` cada 5 minutos y avise por mail o Telegram.
-2. **Probar una restauración.** Tomar el último backup, restaurarlo en la base local (`docker compose up -d` + `gunzip -c backup.sql.gz | psql`) y comprobar que la app muestra los pedidos. Escribir los pasos en `docs/DEPLOY.md` sección "Restaurar un backup".
+2. ✅ *Hecho 2026-11-02 (ver `docs/DEPLOY.md`).* **Probar una restauración.** Tomar el último backup, restaurarlo en la base local (`docker compose up -d` + `gunzip -c backup.sql.gz | psql`) y comprobar que la app muestra los pedidos. Escribir los pasos en `docs/DEPLOY.md` sección "Restaurar un backup".
 3. **Rotación de logs de Docker.** En `docker-compose.prod.yml`, a cada servicio: `logging: { driver: local, options: { max-size: "10m", max-file: "5" } }`.
 4. **Endurecer el servidor.** Firewall de Lightsail con solo 22/80/443; `unattended-upgrades` activado en Ubuntu; SSH solo con llave.
 5. **Dominio propio.** Registrar el dominio del súper, cambiar `DOMINIO` y `CORS_ORIGIN` en `.env.prod`, reiniciar.
