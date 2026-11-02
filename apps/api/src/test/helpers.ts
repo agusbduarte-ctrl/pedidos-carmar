@@ -17,7 +17,7 @@ export async function loginToken(app: FastifyInstance, payload: Record<string, s
   return token;
 }
 
-export type Metodo = "GET" | "POST" | "PATCH" | "DELETE";
+export type Metodo = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 export function pedirCon(app: FastifyInstance, token?: string) {
   return (method: Metodo, url: string, payload?: object) =>

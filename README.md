@@ -112,11 +112,15 @@ Todas las rutas `/admin/*` requieren sesión de un usuario con rol ADMIN. El tok
 | `GET /pedidos/productos` | REPOSITOR | Busca productos que puede cargar (`q` por nombre o código, `rubroId`, paginado): activos y de sus rubros en su sucursal, sin datos de proveedor |
 | `GET /pedidos/mis-rubros` | REPOSITOR | Rubros asignados al repositor en su sucursal |
 | `POST /pedidos` | REPOSITOR | Crea su pedido en BORRADOR en el período abierto |
+| `GET /pedidos/proveedores` | REPOSITOR | Proveedores activos (sin "SIN ASIGNAR") para elegir en el pedido |
+| `GET /pedidos/:id/sugeridos` | REPOSITOR | Productos sugeridos según el proveedor del pedido: los ya pedidos antes (con veces y última cantidad) y los del catálogo del proveedor; solo rubros asignados, máx. 300 |
+| `PUT /pedidos/:id/items` | REPOSITOR | Carga masiva `{ items: [{ productoId, cantidad }] }` (1 a 300): fija la cantidad, 0 quita el ítem; si uno es inválido no se guarda ninguno |
+| `POST /pedidos/:id/repetir-ultimo` | REPOSITOR | Copia al pedido los ítems del último pedido propio al mismo proveedor (devuelve `copiados` y `omitidos`); 404 si no hay anterior |
 | `POST /pedidos/:id/items` | REPOSITOR | Agrega un ítem `{ productoId, cantidad, observacion? }`; si el producto ya está, suma la cantidad |
 | `DELETE /pedidos/:id/items/:itemId` | REPOSITOR | Quita un ítem |
 | `POST /pedidos/:id/enviar` | REPOSITOR | BORRADOR o DEVUELTO → ENVIADO (revalida todos los ítems) |
 | `GET /pedidos` | ENCARGADA, ADMIN | Pedidos con filtros `sucursal`, `periodoId`, `estado`, `repositorId`. Sin `estado`, excluye los BORRADOR |
-| `GET /pedidos/:id` | ENCARGADA, ADMIN | Detalle con ítems, rubro de cada producto y quién envió, devolvió o aprobó |
+| `GET /pedidos/:id` | ENCARGADA, ADMIN | Detalle con ítems, rubro de cada producto, teléfono del proveedor y quién envió, devolvió o aprobó |
 | `POST /pedidos/:id/devolver` | ENCARGADA | ENVIADO → DEVUELTO con `{ comentario }` (1 a 500 caracteres) |
 | `POST /pedidos/:id/aprobar` | ENCARGADA | ENVIADO → APROBADO |
 

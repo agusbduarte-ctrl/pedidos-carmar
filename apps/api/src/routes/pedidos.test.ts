@@ -708,3 +708,264 @@ describe("GET /pedidos/productos y /pedidos/mis-rubros", () => {
     ]);
   });
 });
+
+describe("Pedido por proveedor (fase 1)", () => {
+  const como = async (payload: Record<string, string>) => pedirCon(app, await loginToken(app, payload));
+  const comoEncargada = () => como({ tipo: "email", email: "encargada@carmar.com", password: "encargada123" });
+
+  async function pedidoCon(proveedor: string | null = proveedorId, estado: EstadoPedido = EstadoPedido.BORRADOR) {
+    return prisma.pedido.create({
+      data: {
+        repositorId: repositor.id,
+        creadoPorId: repositor.id,
+        sucursal: Sucursal.CARMAR_1,
+        periodoId,
+        proveedorId: proveedor,
+        estado,
+      },
+    });
+  }
+  async function conItems(pedidoId: string, items: [string, number, string?][]) {
+    for (const [productoId, cantidad, observacion] of items) {
+      await prisma.itemPedido.create({ data: { pedidoId, productoId, cantidad, observacion } });
+    }
+  }
+  async function pedidoAjeno(proveedor: string | null = proveedorId) {
+    const otro = await prisma.usuario.create({
+      data: { nombre: `${PREFIJO}Otro`, rol: Rol.REPOSITOR, sucursal: Sucursal.CARMAR_1 },
+    });
+    return prisma.pedido.create({
+      data: { repositorId: otro.id, creadoPorId: otro.id, sucursal: Sucursal.CARMAR_1, periodoId, proveedorId: proveedor },
+    });
+  }
+  const cantidades = (res: { json: () => { data: { items: { productoId: string; cantidad: string }[] } } }) =>
+    Object.fromEntries(res.json().data.items.map((i) => [i.productoId, Number(i.cantidad)]));
+
+  describe("GET /pedidos/proveedores", () => {
+    it("lista activos y no borrados, sin SIN ASIGNAR, por nombre", async () => {
+      await prisma.proveedor.createMany({
+        data: [
+          { nombre: `${PREFIJO}AAA` },
+          { nombre: `${PREFIJO}Inactivo`, activo: false },
+          { nombre: `${PREFIJO}Borrado`, deletedAt: new Date() },
+        ],
+      });
+
+      const res = await pedir("GET", "/pedidos/proveedores");
+
+      expect(res.statusCode).toBe(200);
+      const nombres = (res.json().data as { nombre: string }[]).map((p) => p.nombre);
+      expect(nombres).not.toContain("SIN ASIGNAR");
+      expect(nombres.filter((n) => n.startsWith(PREFIJO))).toEqual([`${PREFIJO}AAA`, `${PREFIJO}Proveedor`]);
+      expect(Object.keys(res.json().data[0])).toEqual(["id", "nombre"]);
+    });
+
+    it("sin sesión 401; encargada 403", async () => {
+      expect((await pedirCon(app)("GET", "/pedidos/proveedores")).statusCode).toBe(401);
+      expect((await (await comoEncargada())("GET", "/pedidos/proveedores")).statusCode).toBe(403);
+    });
+  });
+
+  describe("GET /pedidos/:id/sugeridos", () => {
+    it("ordena por veces pedido y nombre, con la última cantidad, y excluye rubros no asignados", async () => {
+      const actual = await pedidoCon();
+      const viejo = await pedidoCon(proveedorId, EstadoPedido.ENVIADO);
+      await new Promise((r) => setTimeout(r, 15));
+      const nuevo = await pedidoCon(proveedorId, EstadoPedido.APROBADO);
+      await conItems(viejo.id, [[productos.asignado2, 3], [productos.noAsignado, 1]]);
+      await conItems(nuevo.id, [[productos.asignado2, 7.5]]);
+
+      const res = await pedir("GET", `/pedidos/${actual.id}/sugeridos`);
+
+      expect(res.statusCode).toBe(200);
+      const data = res.json().data;
+      expect(data.map((s: { producto: { id: string } }) => s.producto.id)).toEqual([
+        productos.asignado2,
+        productos.asignado,
+      ]);
+      expect(data[0]).toMatchObject({
+        vecesPedido: 2,
+        ultimaCantidad: "7.5",
+        ultimaFecha: nuevo.createdAt.toISOString(),
+        producto: { codigo: `${PREFIJO}002`, rubro: { id: rubroAsignadoId } },
+      });
+      expect(data[1]).toMatchObject({ vecesPedido: 0, ultimaCantidad: null, ultimaFecha: null });
+    });
+
+    it("pedidos ajenos en BORRADOR no cuentan; los de otro proveedor tampoco", async () => {
+      await prisma.producto.updateMany({ where: { codigo: empiezaCon }, data: { proveedorId: null } });
+      const actual = await pedidoCon();
+      const ajenoBorrador = await pedidoAjeno();
+      const otroProv = await prisma.proveedor.create({ data: { nombre: `${PREFIJO}Otro` } });
+      const deOtroProv = await pedidoCon(otroProv.id, EstadoPedido.ENVIADO);
+      await conItems(ajenoBorrador.id, [[productos.asignado, 1]]);
+      await conItems(deOtroProv.id, [[productos.asignado2, 1]]);
+
+      const res = await pedir("GET", `/pedidos/${actual.id}/sugeridos`);
+
+      expect(res.json().data).toEqual([]);
+    });
+
+    it("sin proveedor: lista vacía", async () => {
+      const p = await pedidoCon(null);
+      const res = await pedir("GET", `/pedidos/${p.id}/sugeridos`);
+      expect(res.statusCode).toBe(200);
+      expect(res.json()).toEqual({ data: [] });
+    });
+
+    it("permisos, pedido ajeno y no editable", async () => {
+      const enviado = await pedidoCon(proveedorId, EstadoPedido.ENVIADO);
+      const ajeno = await pedidoAjeno();
+      expect((await pedirCon(app)("GET", `/pedidos/${enviado.id}/sugeridos`)).statusCode).toBe(401);
+      expect((await (await comoEncargada())("GET", `/pedidos/${enviado.id}/sugeridos`)).statusCode).toBe(403);
+      expect((await pedir("GET", `/pedidos/${ajeno.id}/sugeridos`)).statusCode).toBe(404);
+      expect((await pedir("GET", `/pedidos/${enviado.id}/sugeridos`)).statusCode).toBe(400);
+    });
+  });
+
+  describe("PUT /pedidos/:id/items", () => {
+    it("fija cantidades (no suma), conserva la observación y 0 quita el ítem", async () => {
+      const p = await pedidoCon();
+      await conItems(p.id, [[productos.asignado, 5, "urgente"], [productos.asignado2, 2]]);
+
+      const res = await pedir("PUT", `/pedidos/${p.id}/items`, {
+        items: [
+          { productoId: productos.asignado, cantidad: 3 },
+          { productoId: productos.asignado2, cantidad: 0 },
+        ],
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(cantidades(res)).toEqual({ [productos.asignado]: 3 });
+      expect(res.json().data.items[0].observacion).toBe("urgente");
+    });
+
+    it("crea los ítems nuevos", async () => {
+      const p = await pedidoCon();
+      const res = await pedir("PUT", `/pedidos/${p.id}/items`, {
+        items: [
+          { productoId: productos.asignado, cantidad: 1 },
+          { productoId: productos.asignado2, cantidad: 4 },
+        ],
+      });
+      expect(cantidades(res)).toEqual({ [productos.asignado]: 1, [productos.asignado2]: 4 });
+    });
+
+    it("rubro no asignado, producto inactivo o decimales en unidad entera: 400 y no guarda nada", async () => {
+      const p = await pedidoCon();
+      await prisma.producto.update({ where: { id: productos.asignado2 }, data: { unidad: "UN" } });
+
+      const res = await pedir("PUT", `/pedidos/${p.id}/items`, {
+        items: [
+          { productoId: productos.asignado, cantidad: 1 },
+          { productoId: productos.asignado2, cantidad: 1.5 },
+          { productoId: productos.noAsignado, cantidad: 1 },
+          { productoId: productos.inactivo, cantidad: 1 },
+        ],
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(res.json().error).toBe("Datos inválidos");
+      expect(res.json().detalles).toHaveLength(3);
+      expect(res.json().detalles.join("|")).toContain(`${PREFIJO}003`);
+      expect(await prisma.itemPedido.count({ where: { pedidoId: p.id } })).toBe(0);
+    });
+
+    it("productoId repetido, vacío o cantidad negativa: 400", async () => {
+      const p = await pedidoCon();
+      const url = `/pedidos/${p.id}/items`;
+      const rep = await pedir("PUT", url, {
+        items: [{ productoId: productos.asignado, cantidad: 1 }, { productoId: productos.asignado, cantidad: 2 }],
+      });
+      expect(rep.statusCode).toBe(400);
+      expect((await pedir("PUT", url, { items: [] })).statusCode).toBe(400);
+      expect((await pedir("PUT", url, { items: [{ productoId: productos.asignado, cantidad: -1 }] })).statusCode).toBe(400);
+    });
+
+    it("permisos, pedido ajeno y no editable", async () => {
+      const enviado = await pedidoCon(proveedorId, EstadoPedido.ENVIADO);
+      const ajeno = await pedidoAjeno();
+      const body = { items: [{ productoId: productos.asignado, cantidad: 1 }] };
+      expect((await pedirCon(app)("PUT", `/pedidos/${enviado.id}/items`, body)).statusCode).toBe(401);
+      expect((await (await comoEncargada())("PUT", `/pedidos/${enviado.id}/items`, body)).statusCode).toBe(403);
+      expect((await pedir("PUT", `/pedidos/${ajeno.id}/items`, body)).statusCode).toBe(404);
+      expect((await pedir("PUT", `/pedidos/${enviado.id}/items`, body)).statusCode).toBe(400);
+    });
+  });
+
+  describe("POST /pedidos/:id/repetir-ultimo", () => {
+    it("copia cantidad y observación, omite inválidos y los que ya están, sin tocar los existentes", async () => {
+      const anterior = await pedidoCon(proveedorId, EstadoPedido.ENVIADO);
+      await conItems(anterior.id, [
+        [productos.asignado, 4, "frío"],
+        [productos.asignado2, 6],
+        [productos.noAsignado, 1],
+        [productos.inactivo, 1],
+      ]);
+      await new Promise((r) => setTimeout(r, 15));
+      const actual = await pedidoCon();
+      await conItems(actual.id, [[productos.asignado, 9]]);
+
+      const res = await pedir("POST", `/pedidos/${actual.id}/repetir-ultimo`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.json()).toMatchObject({ copiados: 1, omitidos: 3 });
+      expect(cantidades(res)).toEqual({ [productos.asignado]: 9, [productos.asignado2]: 6 });
+    });
+
+    it("copia la observación", async () => {
+      const anterior = await pedidoCon(proveedorId, EstadoPedido.ENVIADO);
+      await conItems(anterior.id, [[productos.asignado, 4, "frío"]]);
+      const actual = await pedidoCon();
+
+      const res = await pedir("POST", `/pedidos/${actual.id}/repetir-ultimo`);
+
+      expect(res.json().data.items[0]).toMatchObject({ observacion: "frío" });
+      expect(res.json().copiados).toBe(1);
+    });
+
+    it("sin pedido anterior: 404; sin proveedor: 400", async () => {
+      const actual = await pedidoCon();
+      const vacio = await pedidoCon(proveedorId, EstadoPedido.ENVIADO); // sin ítems no cuenta
+      const sinProv = await pedidoCon(null);
+
+      const nada = await pedir("POST", `/pedidos/${actual.id}/repetir-ultimo`);
+      const sin = await pedir("POST", `/pedidos/${sinProv.id}/repetir-ultimo`);
+
+      expect(vacio.id).not.toBe(actual.id);
+      expect(nada.statusCode).toBe(404);
+      expect(nada.json()).toEqual({ error: "No hay un pedido anterior a este proveedor" });
+      expect(sin.statusCode).toBe(400);
+      expect(sin.json()).toEqual({ error: "El pedido no tiene proveedor" });
+    });
+
+    it("ignora pedidos de otro repositor", async () => {
+      const ajeno = await pedidoAjeno();
+      await conItems(ajeno.id, [[productos.asignado, 1]]);
+      const actual = await pedidoCon();
+
+      expect((await pedir("POST", `/pedidos/${actual.id}/repetir-ultimo`)).statusCode).toBe(404);
+    });
+
+    it("permisos, pedido ajeno y no editable", async () => {
+      const enviado = await pedidoCon(proveedorId, EstadoPedido.ENVIADO);
+      const ajeno = await pedidoAjeno();
+      expect((await pedirCon(app)("POST", `/pedidos/${enviado.id}/repetir-ultimo`)).statusCode).toBe(401);
+      expect((await (await comoEncargada())("POST", `/pedidos/${enviado.id}/repetir-ultimo`)).statusCode).toBe(403);
+      expect((await pedir("POST", `/pedidos/${ajeno.id}/repetir-ultimo`)).statusCode).toBe(404);
+      expect((await pedir("POST", `/pedidos/${enviado.id}/repetir-ultimo`)).statusCode).toBe(400);
+    });
+  });
+
+  it("GET /pedidos/:id (encargada) trae teléfono del proveedor y sucursal", async () => {
+    await prisma.proveedor.update({ where: { id: proveedorId }, data: { telefono: "362-123456" } });
+    const p = await pedidoCon(proveedorId, EstadoPedido.ENVIADO);
+
+    const res = await (await comoEncargada())("GET", `/pedidos/${p.id}`);
+
+    expect(res.json().data).toMatchObject({
+      sucursal: "CARMAR_1",
+      proveedor: { id: proveedorId, telefono: "362-123456" },
+    });
+  });
+});
