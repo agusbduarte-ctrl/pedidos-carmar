@@ -28,12 +28,12 @@ export default function App() {
           <Route path="/revision" element={<RevisionPedidos />} />
           <Route path="/revision/:id" element={<RevisionDetalle />} />
           <Route path="/consolidado" element={<Consolidado />} />
+          <Route path="/admin/proveedores" element={<AdminProveedores />} />
         </Route>
         <Route element={<RequireRole roles={["ADMIN"]} />}>
           <Route path="/admin/usuarios" element={<AdminUsuarios />} />
           <Route path="/admin/productos" element={<AdminProductos />} />
           <Route path="/admin/rubros" element={<AdminRubros />} />
-          <Route path="/admin/proveedores" element={<AdminProveedores />} />
           <Route path="/admin/periodos" element={<AdminPeriodos />} />
         </Route>
       </Route>

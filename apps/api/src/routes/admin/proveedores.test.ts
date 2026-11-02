@@ -43,6 +43,31 @@ afterAll(async () => {
 });
 
 describe("/admin/proveedores", () => {
+  it("la encargada puede crear y editar proveedores", async () => {
+    const login = await app.inject({
+      method: "POST",
+      url: "/auth/login",
+      payload: { tipo: "email", email: "encargada@carmar.com", password: "encargada123" },
+    });
+    const tokenEncargada = login.cookies.find((c) => c.name === "token")!.value;
+
+    const creado = await app.inject({
+      method: "POST",
+      url: "/admin/proveedores",
+      payload: { nombre: `${PREFIJO}Encargada`, telefono: "5493624123456" },
+      cookies: { token: tokenEncargada },
+    });
+    expect(creado.statusCode).toBe(201);
+
+    const editado = await app.inject({
+      method: "PATCH",
+      url: `/admin/proveedores/${creado.json().data.id}`,
+      payload: { telefono: "5493624000000" },
+      cookies: { token: tokenEncargada },
+    });
+    expect(editado.statusCode).toBe(200);
+  });
+
   it("POST con body válido: 201", async () => {
     const res = await pedir("POST", "/admin/proveedores", {
       nombre: `${PREFIJO}Norte`,

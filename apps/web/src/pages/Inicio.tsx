@@ -18,13 +18,13 @@ interface Tarea {
 const PEDIDOS: Tarea[] = [
   { to: "/revision", titulo: "Revisar pedidos", detalle: "Mirá lo que mandaron los repositores, aprobalo o devolvelo" },
   { to: "/consolidado", titulo: "Consolidado", detalle: "Sumá los pedidos del período y descargá el Excel" },
+  { to: "/admin/proveedores", titulo: "Proveedores", detalle: "A quién se le compra y su WhatsApp" },
 ];
 
 const CATALOGO: Tarea[] = [
   { to: "/admin/usuarios", titulo: "Usuarios", detalle: "Altas, rubros de cada repositor y accesos" },
   { to: "/admin/productos", titulo: "Productos", detalle: "Catálogo, unidades y proveedores" },
   { to: "/admin/rubros", titulo: "Rubros", detalle: "Las secciones en que se agrupan los productos" },
-  { to: "/admin/proveedores", titulo: "Proveedores", detalle: "A quién se le compra cada producto" },
   { to: "/admin/periodos", titulo: "Períodos", detalle: "Abrir y cerrar los períodos de pedidos" },
 ];
 

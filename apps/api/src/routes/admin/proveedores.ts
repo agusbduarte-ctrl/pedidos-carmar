@@ -23,7 +23,8 @@ const NO_ENCONTRADO = { error: "Proveedor no encontrado" };
 
 export default async function proveedoresRoutes(app: FastifyInstance) {
   app.addHook("preHandler", authenticate);
-  app.addHook("preHandler", requireRole(Rol.ADMIN));
+  // La encargada también: conoce los proveedores y su WhatsApp
+  app.addHook("preHandler", requireRole(Rol.ADMIN, Rol.ENCARGADA));
 
   // Incluye borrados: el nombre es @unique en la BD aunque el proveedor esté borrado
   const conMismoNombre = (valor: string, excluirId?: string) =>
