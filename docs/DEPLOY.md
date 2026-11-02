@@ -306,6 +306,26 @@ docker compose -f docker-compose.prod.yml --env-file .env.prod logs --tail 100 d
 
 Reiniciar un servicio: `docker compose -f docker-compose.prod.yml --env-file .env.prod restart api`.
 
+## 15. Aviso si la app se cae (monitoreo)
+
+Un servicio externo consulta `https://<DOMINIO>/api/health` cada 5 minutos y manda un aviso si falla. Una sola consulta prueba todo junto: Caddy (web y HTTPS), la API y la base, porque `/health` devuelve error 500 si la base no responde.
+
+Se usa [UptimeRobot](https://uptimerobot.com) (plan gratis):
+
+1. Crear la cuenta con el mail de quien tiene que recibir los avisos.
+2. **New monitor** → tipo **Keyword**.
+3. **URL**: `https://<DOMINIO>/api/health`.
+4. **Keyword**: `"status":"ok"`. Alerta cuando la palabra **no existe** (*Keyword not exists*).
+5. **Monitoring interval**: 5 minutos.
+6. En **alert contacts**, tildar el mail. Opcional: instalar la app de UptimeRobot en el celular para recibir avisos al teléfono.
+7. Guardar y comprobar que el monitor queda en verde (**Up**).
+
+Para probar que el aviso llega: en el servidor, `docker compose -f docker-compose.prod.yml --env-file .env.prod stop api`, esperar el mail (hasta 5-10 minutos) y volver a levantarla con `... start api`. Hacerlo en un horario sin repositores trabajando.
+
+**Si cambia el dominio** (paso 7), actualizar la URL del monitor.
+
+Si llega un aviso: mirar los logs (paso 14) y reiniciar el servicio que falla. Si el servidor entero no responde, reiniciarlo desde la consola de Lightsail.
+
 ## Problemas comunes
 
 - **La web no carga o dice que el certificado no es válido**: el `DOMINIO` no apunta a la IP del servidor, o los puertos 80/443 no están abiertos en el firewall de Lightsail. Mirar los logs de `web`.
