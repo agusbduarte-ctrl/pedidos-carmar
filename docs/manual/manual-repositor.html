@@ -57,7 +57,7 @@ th,td{border:1px solid var(--linea);padding:6px 8px;vertical-align:top}
 <main>
 
 <h2>1. Para qué sirve</h2>
-<p>Pedidos Carmar es la app donde cargás lo que hace falta reponer en tu sucursal. Armás un pedido por proveedor (por ejemplo, uno para Coca-Cola y otro para Arcor). La encargada de compras lo revisa y, al aprobarlo, la app le arma el mensaje de WhatsApp para el proveedor. Así no hay papeles ni mensajes sueltos.</p>
+<p>Pedidos Carmar es la app donde cargás lo que hace falta reponer en tu sucursal. Armás un pedido por proveedor (por ejemplo, uno para Coca-Cola y otro para Arcor). Primero el depósito se fija si eso ya está en el galpón (lo que hay, sale de ahí y no se compra). Después la encargada de compras lo revisa y, al aprobarlo, la app le arma el mensaje de WhatsApp para el proveedor. Así no hay papeles ni mensajes sueltos.</p>
 <div class="direccion">Dirección de la app: <span class="dir"></span></div>
 
 <h2>2. Instalar la app en el celular</h2>
@@ -138,10 +138,11 @@ th,td{border:1px solid var(--linea);padding:6px 8px;vertical-align:top}
 <table>
 <tr><th>Estado</th><th>Qué significa</th><th>Qué hacés</th></tr>
 <tr><td><b>Borrador</b></td><td>Lo estás armando.</td><td>Cargá productos y enviá.</td></tr>
-<tr><td><b>Enviado</b></td><td>Está esperando la revisión de la encargada.</td><td>Nada. No se puede cambiar.</td></tr>
+<tr><td><b>Enviado</b></td><td>Lo revisan el depósito y la encargada.</td><td>Nada. No se puede cambiar.</td></tr>
 <tr><td><b>Devuelto</b></td><td>La encargada pidió un cambio.</td><td>Leé el comentario, corregí y volvé a enviar.</td></tr>
 <tr><td><b>Aprobado</b></td><td>Listo, la encargada lo aceptó.</td><td>Nada. Ya no se puede cambiar.</td></tr>
 </table>
+<div class="aviso bien"><strong>Sale del galpón</strong>En un pedido aprobado, si un producto dice <b>Sale del galpón: X</b>, esa cantidad no se le compra al proveedor: te la manda el depósito.</div>
 <div class="aviso mal"><strong>Si te lo devolvieron</strong>Arriba aparece <b>La encargada te devolvió el pedido.</b> con el motivo. Leelo, corregí las cantidades en la lista de arriba, tocá <b class="btn">Guardar cantidades</b> y después tocá de nuevo <b class="btn">Enviar pedido</b>.</div>
 
 <h2>7. Salir</h2>

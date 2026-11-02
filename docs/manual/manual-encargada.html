@@ -57,7 +57,7 @@ th,td{border:1px solid var(--linea);padding:6px 8px;vertical-align:top}
 <main>
 
 <h2>1. Para qué sirve</h2>
-<p>Los repositores arman un pedido por proveedor con lo que falta en cada sucursal. Vos revisás cada pedido y lo aprobás o lo devolvés. Al aprobarlo, la app te arma el <b>mensaje para el proveedor</b>, listo para mandar por WhatsApp. También podés juntar todo en un <b>consolidado</b> y descargar el Excel.</p>
+<p>Los repositores arman un pedido por proveedor con lo que falta en cada sucursal. El depósito (Rodrigo) se fija qué hay en el galpón. Vos revisás cada pedido y lo aprobás o lo devolvés. Al aprobarlo, la app te arma el <b>mensaje para el proveedor</b>, listo para mandar por WhatsApp. También podés juntar todo en un <b>consolidado</b> y descargar el Excel.</p>
 <div class="direccion">Dirección de la app: <span class="dir"></span></div>
 
 <h2>2. Entrar</h2>
@@ -81,6 +81,11 @@ th,td{border:1px solid var(--linea);padding:6px 8px;vertical-align:top}
 
 <h2>4. Aprobar o devolver un pedido</h2>
 <p>Solo los pedidos en estado <b>Enviado</b> tienen botones.</p>
+<h3>Lo que revisó el depósito</h3>
+<p>En la lista, cada pedido enviado dice <b>Depósito revisado</b> o <b>Sin revisar depósito</b>. Al abrir uno revisado, arriba dice <b>El depósito lo revisó</b> con el nombre y la fecha, y en cada producto que hay en el galpón ves:</p>
+<p class="aviso">Pedido 10 · Del galpón 4 · A comprar 6</p>
+<p>Lo del galpón no se compra: lo manda el depósito a la sucursal.</p>
+<div class="aviso ojo"><strong>Esperá la revisión del depósito</strong>Si un pedido dice <b>Todavía no lo revisó el depósito</b> y lo aprobás igual, se compra todo lo pedido aunque esté en el galpón. Si no es urgente, esperá a que Rodrigo lo revise.</div>
 <h3>Aprobar</h3>
 <ol>
 <li>Tocá <b class="btn">Aprobar</b>.</li>
@@ -97,6 +102,7 @@ Gracias!</p>
 <li>Revisalo y mandalo desde WhatsApp. La app no manda nada sola.</li>
 </ol>
 <p>Si preferís pegarlo en otro lado (otro chat, un mail), hacé clic en <b class="btn">Copiar</b> y pegalo donde quieras.</p>
+<p>El mensaje lleva <b>solo lo que hay que comprar</b>: lo que sale del galpón no aparece. Si todo sale del galpón, la app dice <b>Todo sale del galpón: no hay nada para comprarle al proveedor.</b> Abajo ves <b>Del galpón a la sucursal: lo manda Rodrigo</b>, con <b>Pendiente</b> o <b>Mandado el</b> y la fecha.</p>
 <div class="aviso ojo"><strong>Si dice que el proveedor no tiene WhatsApp cargado</strong>WhatsApp se abre igual, pero vas a tener que elegir el contacto a mano. Para que no pase más, cargale el número en <b>Proveedores</b> (ver punto 8).</div>
 <h3>Devolver</h3>
 <ol>
@@ -108,7 +114,7 @@ Gracias!</p>
 <div class="aviso"><strong>El administrador</strong>Puede ver los pedidos, pero NO aprueba ni devuelve. Ve el aviso <b>Solo la encargada puede aprobar o devolver.</b></div>
 
 <h2 class="salto">5. Consolidado</h2>
-<p>Suma los pedidos de todo el período y los agrupa por proveedor. Entrá desde <b>Consolidado</b>, en la pantalla <span class="pant">Compras</span>.</p>
+<p>Suma lo que hay que comprar en los pedidos de todo el período (sin lo que sale del galpón) y lo agrupa por proveedor. Entrá desde <b>Consolidado</b>, en la pantalla <span class="pant">Compras</span>.</p>
 <h3>Generar</h3>
 <ol>
 <li>En <b>Período</b> elegí el que querés. Arranca en el período abierto (dice "(abierto)").</li>
@@ -151,7 +157,7 @@ Gracias!</p>
 <h2>7. Cada semana, en pocos pasos</h2>
 <ol>
 <li>Verificá que el administrador abrió el período.</li>
-<li>Durante la semana, mirá los pedidos <b>Enviados</b> y aprobalos o devolvelos.</li>
+<li>Durante la semana, mirá los pedidos <b>Enviados</b> con <b>Depósito revisado</b> y aprobalos o devolvelos.</li>
 <li>De cada pedido aprobado, mandá el mensaje al proveedor con <b>Enviar por WhatsApp</b>.</li>
 <li>Generá el consolidado para ir viendo cómo viene.</li>
 <li>Cuando estén todos, hacé clic en <b>Regenerar</b>.</li>
