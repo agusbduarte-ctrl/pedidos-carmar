@@ -58,10 +58,10 @@ code{background:#eee;padding:0 4px;border-radius:3px;font-size:.88em;word-break:
 <main>
 
 <h2>1. Para qué sirve el rol de administrador</h2>
-<p>El administrador deja el sistema listo para que los demás trabajen: abre los períodos, carga proveedores, rubros, productos y usuarios, y asigna a cada repositor lo que repone.</p>
+<p>El administrador deja el sistema listo para que los demás trabajen: carga proveedores, rubros, productos y usuarios, y asigna a cada repositor lo que repone.</p>
 <table>
 <tr><th>Sí puede</th><th>No puede</th></tr>
-<tr><td>Crear y editar períodos, proveedores, rubros, productos y usuarios.<br>Ver los pedidos.<br>Generar, regenerar, ajustar y aprobar el consolidado, y descargar el Excel.</td><td>Aprobar o devolver pedidos: eso es solo de la encargada de compras (la app muestra <b>Solo la encargada puede aprobar o devolver.</b>).<br>Hacer pedidos.<br>Cambiar su rol, o desactivarse o borrarse a sí mismo.</td></tr>
+<tr><td>Crear y editar proveedores, rubros, productos y usuarios.<br>Ver los pedidos.<br>Ver el historial y descargar el Excel.</td><td>Aprobar o devolver pedidos: eso es solo de la encargada de compras (la app muestra <b>Solo la encargada puede aprobar o devolver.</b>).<br>Hacer pedidos.<br>Cambiar su rol, o desactivarse o borrarse a sí mismo.</td></tr>
 </table>
 <div class="direccion">Dirección de la app: <span class="dir"></span></div>
 
@@ -71,36 +71,19 @@ code{background:#eee;padding:0 4px;border-radius:3px;font-size:.88em;word-break:
 <li>Hacé clic en la pestaña <b class="btn">Administración</b>.</li>
 <li>Escribí tu <b>Correo</b> y tu <b>Clave</b> y hacé clic en <b class="btn">Entrar</b>.</li>
 </ol>
-<p>Se abre la pantalla <span class="pant">Administración</span> con dos grupos. <b>Pedidos</b>: <b>Revisar pedidos</b> y <b>Consolidado</b>. <b>Catálogo y personas</b>: <b>Usuarios</b>, <b>Productos</b>, <b>Rubros</b>, <b>Proveedores</b> y <b>Períodos</b>. Para salir, usá <b class="btn">Salir</b>.</p>
+<p>Se abre la pantalla <span class="pant">Administración</span> con dos grupos. <b>Pedidos</b>: <b>Revisar pedidos</b>, <b>Historial</b> y <b>Proveedores</b>. <b>Catálogo y personas</b>: <b>Usuarios</b>, <b>Productos</b> y <b>Rubros</b>. Para salir, usá <b class="btn">Salir</b>.</p>
 
 <h2>3. Primeros pasos, en orden</h2>
 <ol>
-<li><b>Período</b>: abrí el primero (sección 4). Sin período abierto nadie puede empezar un pedido.</li>
 <li><b>Proveedores</b>: cargá a quienes les comprás (sección 5).</li>
 <li><b>Rubros</b>: ya vienen 88 importados. Revisalos y agregá o corregí lo que falte (sección 6).</li>
 <li><b>Usuarios</b>: creá la encargada y los repositores, y asignales sus rubros (sección 8).</li>
 <li><b>Productos</b>: ya vienen unos 14 mil importados. Ajustá unidades y proveedores de los que más se piden (sección 7).</li>
-<li><b>Chequeo final</b>: entrá como repositor con un usuario de prueba, hacé clic en <b class="btn">Empezar pedido</b>, buscá un producto y cargalo. Si lo ves, está todo bien.</li>
+<li><b>Chequeo final</b>: entrá como repositor con un usuario de prueba, hacé clic en <b class="btn">Nuevo pedido</b>, elegí un proveedor, buscá un producto y cargalo. Si lo ves, está todo bien.</li>
 </ol>
 
-<h2 class="salto">4. Períodos</h2>
-<p>Un período es el lapso de pedidos (por ejemplo, una semana). Entrá a <b>Períodos</b>. Podés filtrar por <b>Estado</b>: <b>Todos</b>, <b>Abiertos</b> o <b>Cerrados</b>.</p>
-<h3>Abrir un período</h3>
-<ol>
-<li>Hacé clic en <b class="btn">Abrir período</b>.</li>
-<li>Escribí el <b>Nombre</b> (por ejemplo, "Semana 12").</li>
-<li>Elegí la <b>Fecha de apertura</b>. La <b>Fecha de cierre (opcional)</b> podés dejarla vacía.</li>
-<li>Hacé clic en <b class="btn">Abrir período</b> (el botón del formulario).</li>
-</ol>
-<div class="aviso ojo"><strong>Solo uno abierto a la vez</strong>Si ya hay uno abierto, el botón no funciona y la app dice <b>Primero cerrá el período abierto</b>. La fecha de apertura no se puede cambiar después; el nombre y el cierre sí, con <b class="btn">Editar</b>.</div>
-<h3>Cerrar un período</h3>
-<ol>
-<li>En la fila del período abierto, hacé clic en <b class="btn">Cerrar período</b>.</li>
-<li>La app pregunta <b>¿Cerrar el período ...? No se puede reabrir.</b> y cuenta los pedidos <b>sin enviar (borrador)</b>, los <b>devueltos</b> y los <b>enviados esperando aprobación</b>, y dice si el consolidado está aprobado.</li>
-<li>Si está bien, hacé clic en <b class="btn">Sí, cerrar el período</b>. Si no, en <b class="btn">No, volver</b>.</li>
-</ol>
-<div class="aviso mal"><strong>Un período cerrado no se reabre</strong>Los borradores y los devueltos ya no se pueden enviar. Los enviados todavía los puede aprobar o devolver la encargada.</div>
-<p><b>Cuándo cerrar:</b> cuando la encargada ya aprobó el consolidado y descargó el Excel, o cuando no esperás más pedidos. Si hay pedidos esperando aprobación, avisale a la encargada antes de cerrar.</p>
+<h2 class="salto">4. Períodos (ya no se usan)</h2>
+<p>Desde noviembre de 2026 los pedidos no dependen de un período: cada pedido tiene su fecha y los repositores pueden empezar uno cuando quieran. La pantalla de períodos ya no aparece en el menú. Los pedidos viejos conservan el período que tenían.</p>
 
 <h2>5. Proveedores</h2>
 <p>Entrá a <b>Proveedores</b>. Podés buscar con <b>Buscar por nombre</b>. Para cargar uno: <b class="btn">Nuevo proveedor</b>, completá <b>Nombre</b> (obligatorio, mínimo 2 letras), <b>Email (opcional)</b> y <b>Teléfono (opcional)</b>, y hacé clic en <b class="btn">Crear proveedor</b>. Para corregir uno: <b class="btn">Editar</b> y <b class="btn">Guardar cambios</b>.</p>
@@ -137,7 +120,7 @@ code{background:#eee;padding:0 4px;border-radius:3px;font-size:.88em;word-break:
 <h3>Lo que ya viene importado</h3>
 <ul>
 <li>Los ~14 mil productos entraron con proveedor <b>SIN ASIGNAR</b> y en <b>UN</b>. Ya se pasaron el pescado a KG y las gaseosas a PACK.</li>
-<li><b>Asigná proveedor a los que más se piden.</b> El Excel del consolidado sale con una hoja por proveedor; los productos sin proveedor salen todos juntos en la hoja <b>SIN ASIGNAR</b>, y la encargada no sabe a quién comprarle. No hace falta hacerlo con los 14 mil: empezá por los más pedidos.</li>
+<li><b>Asigná proveedor a los que más se piden.</b> Así, cuando un repositor empieza un pedido a ese proveedor, esos productos ya le aparecen en la lista para poner la cantidad. No hace falta hacerlo con los 14 mil: empezá por los más pedidos.</li>
 <li><b>Excepciones:</b> si un producto viene por pack (lámparas, pilas), buscalo, hacé clic en <b class="btn">Editar</b>, cambiá la <b>Unidad</b> a <b>Pack (PACK)</b> y <b class="btn">Guardar cambios</b>.</li>
 </ul>
 <div class="aviso bien"><strong>Cargar el pan común (en KG)</strong>Buscá primero que no exista. Después hacé clic en <b class="btn">Nuevo producto</b>: escribí un <b>Código</b> propio que no se repita y el <b>Nombre</b> ("Pan común"), elegí el <b>Rubro</b> Panadería, el <b>Proveedor</b> y la <b>Unidad</b> <b>Kilo (KG)</b>, y hacé clic en <b class="btn">Crear producto</b>. Así los repositores pueden pedir, por ejemplo, 2,5 kilos.</div>
@@ -171,12 +154,10 @@ code{background:#eee;padding:0 4px;border-radius:3px;font-size:.88em;word-break:
 <li>La primera vez en esa sucursal, asignale sus rubros ahí y hacé clic en <b class="btn">Guardar rubros</b>. Las asignaciones se guardan por sucursal: cuando vuelva a la primera, quedan como estaban.</li>
 <li>Avisale que salga y vuelva a entrar.</li>
 </ol>
-<div class="aviso mal"><strong>Elegí bien el momento</strong>Hay un solo pedido por repositor por período, y queda asociado a la sucursal donde se creó. Hacé el cambio <b>entre períodos</b> o cuando su pedido ya esté <b>enviado y aprobado</b>.</div>
-<div class="aviso ojo"><strong>Si cambia a mitad de período con el pedido ya hecho</strong>Creá un usuario temporal (por ejemplo "Juan C2") con la otra sucursal, su propio PIN y los rubros de ahí. Cuando termine el período, desactivalo.</div>
+<div class="aviso ojo"><strong>Pedidos en curso</strong>Cada pedido queda asociado a la sucursal donde se creó. Si tiene pedidos en <b>Borrador</b>, que los envíe antes del cambio.</div>
 
-<h2>10. Consolidado</h2>
-<p>Desde <b>Consolidado</b> el administrador puede <b class="btn">Generar consolidado</b>, <b class="btn">Regenerar</b>, ajustar cantidades (<b>Ajustada</b> y <b>Observación</b>, con <b class="btn">Guardar</b>), <b class="btn">Aprobar</b> y <b class="btn">Descargar Excel</b>. El paso a paso está en el <b>manual de la encargada de compras</b>. Normalmente lo hace ella; vos lo hacés si ella no está.</p>
-<div class="aviso mal"><strong>Aprobado es definitivo</strong>Un consolidado aprobado ya no se edita ni se regenera. Regenerar borra los ajustes hechos a mano.</div>
+<h2>10. Historial</h2>
+<p>Desde <b>Historial</b> ves todo lo que se pidió, con filtros por fechas, proveedor, sucursal y producto, y descargás el Excel. El paso a paso está en el <b>manual de la encargada de compras</b>. El consolidado ya no se usa: lo reemplazó el Historial.</p>
 
 <h2>11. Seguridad y orden</h2>
 <ul>
@@ -199,11 +180,9 @@ code{background:#eee;padding:0 4px;border-radius:3px;font-size:.88em;word-break:
 <table>
 <tr><th>Qué pasa</th><th>Qué hacer</th></tr>
 <tr><td>Un repositor no ve productos</td><td>Probablemente no tiene rubros asignados en su sucursal actual. Editalo y asignale los rubros (sección 8).</td></tr>
-<tr><td>No puede empezar el pedido</td><td>No hay período abierto. Abrí uno en <b>Períodos</b>.</td></tr>
 <tr><td>Un repositor olvidó el PIN</td><td>Editá su usuario, escribí un PIN nuevo y hacé clic en <b class="btn">Guardar cambios</b>. Si quedó bloqueado, esperá 15 minutos.</td></tr>
 <tr><td>No deja borrar un rubro o proveedor</td><td>Tiene productos activos (o el rubro está asignado a repositores). Pasá esos productos a otro, o sacá las asignaciones, y probá de nuevo.</td></tr>
 <tr><td>Un producto no aparece en la búsqueda del repositor</td><td>Está inactivo (usá <b class="btn">Activar</b>) o su rubro no está asignado a ese repositor en su sucursal.</td></tr>
-<tr><td>El consolidado sale con una sola hoja</td><td>Los productos pedidos no tienen proveedor y salen todos en <b>SIN ASIGNAR</b>. Asignales proveedor y hacé clic en <b class="btn">Regenerar</b> (si no está aprobado).</td></tr>
 </table>
 <p class="pie">Manual del administrador - Pedidos Carmar. Dirección: <span class="dir"></span></p>
 

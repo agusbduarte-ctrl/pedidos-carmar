@@ -2,6 +2,8 @@
 
 Acordado el 2026-11-02.
 
+**Estado:** Fases 1, 2 y 3 hechas y en producción (2026-11-02). Fase 4 pendiente, a decidir con el uso real.
+
 ## El problema
 
 1. **Armar un pedido cuesta más que mandarlo por WhatsApp.** El repositor busca cada producto entre 14.322 artículos y lo agrega de a uno, con pasos extra (período, título, confirmaciones).
