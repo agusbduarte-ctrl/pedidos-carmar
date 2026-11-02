@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { PedidoRevisionDetalle } from "../lib/revisionApi";
-import { armarMensajeProveedor } from "./mensajeProveedor";
+import { armarMensajeProveedor, cantidadAComprar } from "./mensajeProveedor";
 
 export default function MensajeProveedor({ pedido }: { pedido: PedidoRevisionDetalle }) {
   const [copiado, setCopiado] = useState(false);
@@ -24,10 +24,19 @@ export default function MensajeProveedor({ pedido }: { pedido: PedidoRevisionDet
     }
   };
 
+  if (!pedido.items.some((i) => cantidadAComprar(i) > 0)) {
+    return (
+      <section className="bloque">
+        <h2>Mensaje para el proveedor</h2>
+        <p className="estado">Todo sale del galpón: no hay nada para comprarle al proveedor.</p>
+      </section>
+    );
+  }
+
   return (
     <section className="bloque">
       <h2>Mensaje para el proveedor</h2>
-      <textarea readOnly rows={Math.min(14, pedido.items.length + 3)} value={texto} />
+      <textarea readOnly rows={Math.min(14, texto.split("\n").length + 1)} value={texto} />
       {numero === "" && (
         <p className="chico">
           El proveedor no tiene WhatsApp cargado: vas a tener que elegir el contacto.

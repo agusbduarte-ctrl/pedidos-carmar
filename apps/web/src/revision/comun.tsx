@@ -17,6 +17,13 @@ export function nombreSucursal(s: Sucursal): string {
   return s.replace("CARMAR_", "Carmar ");
 }
 
+export function formatearFechaCorta(iso: string | null): string {
+  if (!iso) return "-";
+  const fecha = new Date(iso);
+  if (Number.isNaN(fecha.getTime())) return "-";
+  return fecha.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" });
+}
+
 export function formatearFecha(iso: string | null): string {
   if (!iso) return "-";
   const fecha = new Date(iso);

@@ -15,6 +15,7 @@ export interface ItemPedido {
   // Decimal de la BD: puede llegar como string
   cantidad: string | number;
   observacion: string | null;
+  cantidadDeposito?: string | null;
   producto: { id: string; nombre: string; codigo: string; unidad: Unidad };
 }
 

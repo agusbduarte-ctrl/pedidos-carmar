@@ -31,7 +31,7 @@ export interface FiltroUsuarios {
 
 export type NuevoUsuario =
   | { rol: "REPOSITOR"; nombre: string; sucursal: Sucursal; pin: string }
-  | { rol: "ADMIN" | "ENCARGADA"; nombre: string; email: string; password: string };
+  | { rol: "ADMIN" | "ENCARGADA" | "DEPOSITO"; nombre: string; email: string; password: string };
 
 export interface CambioUsuario {
   nombre?: string;

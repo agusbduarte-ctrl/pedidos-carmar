@@ -130,7 +130,7 @@ export default function PedidoArmado() {
       )}
       {pedido.estado === "ENVIADO" && (
         <div className="aviso" role="status">
-          Tu pedido ya fue enviado. Está esperando la revisión de la encargada y no se puede cambiar.
+          Tu pedido ya fue enviado. Lo revisan el depósito y la encargada. Ya no se puede cambiar.
         </div>
       )}
       {pedido.estado === "APROBADO" && (
@@ -143,7 +143,7 @@ export default function PedidoArmado() {
 
       <section className="bloque">
         <h2>Tu pedido ({pedido.items.length})</h2>
-        <ListaItems pedidoId={pedido.id} items={pedido.items} editable={editable} />
+        <ListaItems pedidoId={pedido.id} items={pedido.items} editable={editable} aprobado={pedido.estado === "APROBADO"} />
       </section>
 
       {editable && (

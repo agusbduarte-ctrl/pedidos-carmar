@@ -15,7 +15,7 @@ interface Props {
   alCerrar: () => void;
 }
 
-const ROLES: Rol[] = ["REPOSITOR", "ENCARGADA", "ADMIN"];
+const ROLES: Rol[] = ["REPOSITOR", "ENCARGADA", "DEPOSITO", "ADMIN"];
 
 export default function FormularioUsuario({
   usuario,
@@ -52,7 +52,7 @@ export default function FormularioUsuario({
       }
       const nuevo: NuevoUsuario = esRepositor
         ? { rol: "REPOSITOR", nombre: nombre.trim(), sucursal: sucursal as Sucursal, pin }
-        : { rol: rol as "ADMIN" | "ENCARGADA", nombre: nombre.trim(), email: email.trim(), password };
+        : { rol: rol as "ADMIN" | "ENCARGADA" | "DEPOSITO", nombre: nombre.trim(), email: email.trim(), password };
       return adminApi.crearUsuario(nuevo);
     },
     onSuccess: (guardado) => {

@@ -11,6 +11,8 @@ import AdminUsuarios from "./pages/AdminUsuarios";
 import AdminProductos from "./pages/AdminProductos";
 import AdminRubros from "./pages/AdminRubros";
 import AdminProveedores from "./pages/AdminProveedores";
+import DepositoPedidos from "./pages/DepositoPedidos";
+import DepositoDetalle from "./pages/DepositoDetalle";
 import AdminPeriodos from "./pages/AdminPeriodos";
 
 export default function App() {
@@ -23,6 +25,10 @@ export default function App() {
         </Route>
         <Route element={<RequireRole roles={["REPOSITOR"]} />}>
           <Route path="/pedido/:id" element={<PedidoArmado />} />
+        </Route>
+        <Route element={<RequireRole roles={["DEPOSITO"]} />}>
+          <Route path="/deposito" element={<DepositoPedidos />} />
+          <Route path="/deposito/:id" element={<DepositoDetalle />} />
         </Route>
         <Route element={<RequireRole roles={["ENCARGADA", "ADMIN"]} />}>
           <Route path="/revision" element={<RevisionPedidos />} />

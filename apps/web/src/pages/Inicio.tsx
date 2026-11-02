@@ -7,6 +7,7 @@ const TITULOS: Record<Rol, string> = {
   ADMIN: "Administración",
   ENCARGADA: "Compras",
   REPOSITOR: "Reposición",
+  DEPOSITO: "Depósito",
 };
 
 interface Tarea {
@@ -26,6 +27,11 @@ const CATALOGO: Tarea[] = [
   { to: "/admin/productos", titulo: "Productos", detalle: "Catálogo, unidades y proveedores" },
   { to: "/admin/rubros", titulo: "Rubros", detalle: "Las secciones en que se agrupan los productos" },
   { to: "/admin/periodos", titulo: "Períodos", detalle: "Abrir y cerrar los períodos de pedidos" },
+];
+
+const DEPOSITO: Tarea[] = [
+  { to: "/deposito", titulo: "Revisar pedidos", detalle: "Fijate qué hay en el galpón antes de que se compre" },
+  { to: "/deposito?vista=trasladar", titulo: "Para mandar a sucursales", detalle: "Lo aprobado que sale del galpón" },
 ];
 
 function Grupo({ titulo, tareas }: { titulo: string; tareas: Tarea[] }) {
@@ -57,7 +63,8 @@ export default function Inicio() {
         Hola, <strong>{user.nombre}</strong>
       </p>
       {user.rol === "REPOSITOR" && <PedidoRepositor />}
-      {user.rol !== "REPOSITOR" && <Grupo titulo="Pedidos" tareas={PEDIDOS} />}
+      {user.rol === "DEPOSITO" && <Grupo titulo="Galpón" tareas={DEPOSITO} />}
+      {(user.rol === "ENCARGADA" || user.rol === "ADMIN") && <Grupo titulo="Pedidos" tareas={PEDIDOS} />}
       {user.rol === "ADMIN" && <Grupo titulo="Catálogo y personas" tareas={CATALOGO} />}
     </main>
   );

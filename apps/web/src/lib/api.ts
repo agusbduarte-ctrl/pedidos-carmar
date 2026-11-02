@@ -1,4 +1,4 @@
-export type Rol = "ADMIN" | "ENCARGADA" | "REPOSITOR";
+export type Rol = "ADMIN" | "ENCARGADA" | "REPOSITOR" | "DEPOSITO";
 export type Sucursal = "CARMAR_1" | "CARMAR_2";
 
 export interface AuthUser {

@@ -89,6 +89,11 @@ export default function RevisionPedidos() {
                   <span className="fila-revision-fecha">Enviado: {formatearFecha(p.fechaEnvio)}</span>
                   <span className="fila-revision-estado">
                     <EstadoEtiqueta estado={p.estado} />
+                    {p.estado === "ENVIADO" && (
+                      <span className="chico">
+                        {p.fechaRevisionDeposito ? "Depósito revisado" : "Sin revisar depósito"}
+                      </span>
+                    )}
                   </span>
                 </Link>
               </li>

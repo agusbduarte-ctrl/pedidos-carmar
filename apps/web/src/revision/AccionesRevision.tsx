@@ -11,7 +11,7 @@ function mensajeError(err: unknown): string {
 
 type Modo = "nada" | "aprobar" | "devolver";
 
-export default function AccionesRevision({ pedidoId }: { pedidoId: string }) {
+export default function AccionesRevision({ pedidoId, revisado = true }: { pedidoId: string; revisado?: boolean }) {
   const qc = useQueryClient();
   const [modo, setModo] = useState<Modo>("nada");
   const [comentario, setComentario] = useState("");
@@ -75,6 +75,11 @@ export default function AccionesRevision({ pedidoId }: { pedidoId: string }) {
       {modo === "aprobar" && (
         <div className="confirmar" role="dialog" aria-label="Confirmar aprobación">
           <p>¿Aprobás este pedido? Después no se puede cambiar.</p>
+          {!revisado && (
+            <p className="aviso">
+              Todavía no lo revisó el depósito. Si lo aprobás ahora, se compra todo lo pedido.
+            </p>
+          )}
           <button className="boton" disabled={ocupado} onClick={() => aprobar.mutate()}>
             {aprobar.isPending ? "Aprobando..." : "Sí, aprobar"}
           </button>

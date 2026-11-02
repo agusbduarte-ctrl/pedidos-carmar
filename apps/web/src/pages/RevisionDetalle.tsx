@@ -4,10 +4,11 @@ import { useAuth } from "../auth/AuthContext";
 import { ApiError } from "../lib/api";
 import Cantidad from "../components/Cantidad";
 import { revisionApi, type ItemRevision } from "../lib/revisionApi";
+import { formatearCantidad, cantidadAComprar } from "../revision/mensajeProveedor";
 import { nombrePedido } from "../lib/pedidosApi";
 import MensajeProveedor from "../revision/BloqueMensajeProveedor";
 import AccionesRevision from "../revision/AccionesRevision";
-import { EstadoEtiqueta, formatearFecha, nombreSucursal } from "../revision/comun";
+import { EstadoEtiqueta, formatearFecha, formatearFechaCorta, nombreSucursal } from "../revision/comun";
 
 function agruparPorRubro(items: ItemRevision[]): [string, ItemRevision[]][] {
   const grupos = new Map<string, ItemRevision[]>();
@@ -105,6 +106,18 @@ export default function RevisionDetalle() {
         </div>
       )}
 
+      {p.fechaRevisionDeposito && (
+        <div className="aviso ok-aviso" role="status">
+          El depósito lo revisó ({p.revisadoDepositoPor?.nombre ?? "Depósito"},{" "}
+          {formatearFecha(p.fechaRevisionDeposito)})
+        </div>
+      )}
+      {p.estado === "ENVIADO" && !p.fechaRevisionDeposito && (
+        <div className="aviso devuelto" role="status">
+          Todavía no lo revisó el depósito. Si lo aprobás ahora, se compra todo lo pedido.
+        </div>
+      )}
+
       <section className="bloque">
         <h2>Productos ({p.items.length})</h2>
         {p.items.length === 0 && <p className="estado">El pedido no tiene productos.</p>}
@@ -119,7 +132,16 @@ export default function RevisionDetalle() {
                     <span className="codigo">Código {item.producto.codigo}</span>
                     {item.observacion && <span className="chico">Obs.: {item.observacion}</span>}
                   </div>
-                  <Cantidad valor={item.cantidad} unidad={item.producto.unidad} variante="pedida" />
+                  {Number(item.cantidadDeposito ?? 0) > 0 ? (
+                    <span className="chico">
+                      Pedido {formatearCantidad(item.cantidad)} · Del galpón {formatearCantidad(item.cantidadDeposito ?? 0)} ·{" "}
+                      <strong>
+                        A comprar {formatearCantidad(cantidadAComprar(item))} {item.producto.unidad}
+                      </strong>
+                    </span>
+                  ) : (
+                    <Cantidad valor={item.cantidad} unidad={item.producto.unidad} variante="pedida" />
+                  )}
                 </li>
               ))}
             </ul>
@@ -128,8 +150,18 @@ export default function RevisionDetalle() {
       </section>
 
       {p.estado === "APROBADO" && <MensajeProveedor pedido={p} />}
+      {p.estado === "APROBADO" && p.items.some((i) => Number(i.cantidadDeposito ?? 0) > 0) && (
+        <section className="bloque">
+          <h2>Del galpón a la sucursal: lo manda Rodrigo</h2>
+          <p>
+            {p.fechaTrasladoEnviado
+              ? `Mandado el ${formatearFechaCorta(p.fechaTrasladoEnviado)}`
+              : "Pendiente"}
+          </p>
+        </section>
+      )}
 
-      {p.estado === "ENVIADO" && user?.rol === "ENCARGADA" && <AccionesRevision pedidoId={p.id} />}
+      {p.estado === "ENVIADO" && user?.rol === "ENCARGADA" && <AccionesRevision pedidoId={p.id} revisado={!!p.fechaRevisionDeposito} />}
       {p.estado === "ENVIADO" && user?.rol === "ADMIN" && (
         <div className="aviso" role="status">
           Solo la encargada puede aprobar o devolver.

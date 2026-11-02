@@ -8,10 +8,12 @@ export default function ListaItems({
   pedidoId,
   items,
   editable,
+  aprobado = false,
 }: {
   pedidoId: string;
   items: ItemPedido[];
   editable: boolean;
+  aprobado?: boolean;
 }) {
   const qc = useQueryClient();
   const [confirmando, setConfirmando] = useState<string | null>(null);
@@ -46,6 +48,9 @@ export default function ListaItems({
               <div className="producto-nombre">{it.producto.nombre}</div>
               <div className="chico">{it.producto.codigo}</div>
               {it.observacion && <div className="chico">Obs.: {it.observacion}</div>}
+              {aprobado && Number(it.cantidadDeposito ?? 0) > 0 && (
+                <div className="chico">Sale del galpón: {Number(it.cantidadDeposito).toLocaleString("es-AR")}</div>
+              )}
             </div>
             <Cantidad valor={it.cantidad} unidad={it.producto.unidad} />
             {editable && (

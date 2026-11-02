@@ -87,6 +87,7 @@ export default function AdminUsuarios() {
             <option value="">Todos</option>
             <option value="REPOSITOR">{ETIQUETA_ROL.REPOSITOR}</option>
             <option value="ENCARGADA">{ETIQUETA_ROL.ENCARGADA}</option>
+            <option value="DEPOSITO">{ETIQUETA_ROL.DEPOSITO}</option>
             <option value="ADMIN">{ETIQUETA_ROL.ADMIN}</option>
           </select>
         </label>

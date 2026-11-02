@@ -6,6 +6,7 @@ export const ETIQUETA_ROL: Record<Rol, string> = {
   ADMIN: "Administrador/a",
   ENCARGADA: "Encargada de compras",
   REPOSITOR: "Repositor",
+  DEPOSITO: "Depósito",
 };
 
 export const NOMBRE_UNIDAD: Record<Unidad, string> = {
