@@ -60,9 +60,6 @@ export default function PedidoRepositor() {
               <li key={p.id}>
                 <Link to={`/pedido/${p.id}`} className="fila-revision compacta">
                   <span className="fila-titulo fila-revision-repositor">{nombrePedido(p)}</span>
-                  <span className="fila-revision-rotulos">
-                    <span className="rotulo">{p.periodo.nombre}</span>
-                  </span>
                   <span className="fila-revision-cantidad">
                     {p._count.items} {p._count.items === 1 ? "producto" : "productos"}
                   </span>

@@ -16,7 +16,7 @@ export interface PedidoRevisionResumen {
   fechaRevisionDeposito?: string | null;
   createdAt: string;
   repositor: UsuarioNombre;
-  periodo: PeriodoResumen;
+  periodo: PeriodoResumen | null;
   _count: { items: number };
 }
 
@@ -30,7 +30,7 @@ export interface PedidoRevisionDetalle {
   proveedor: { id: string; nombre: string; telefono: string | null } | null;
   estado: EstadoPedido;
   sucursal: Sucursal;
-  periodo: PeriodoResumen;
+  periodo: PeriodoResumen | null;
   repositor: UsuarioNombre;
   enviadoPor: UsuarioNombre | null;
   devueltoPor: UsuarioNombre | null;

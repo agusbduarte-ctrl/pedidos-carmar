@@ -37,7 +37,7 @@ export interface PedidoResumen {
   proveedor: ProveedorResumen | null;
   estado: EstadoPedido;
   comentarioDevolucion: string | null;
-  periodo: PeriodoResumen;
+  periodo: PeriodoResumen | null;
   createdAt: string;
   _count: { items: number };
 }
@@ -48,7 +48,7 @@ export interface PedidoCompleto {
   proveedor: ProveedorResumen | null;
   estado: EstadoPedido;
   comentarioDevolucion: string | null;
-  periodo: PeriodoResumen;
+  periodo: PeriodoResumen | null;
   createdAt: string;
   items: ItemPedido[];
 }

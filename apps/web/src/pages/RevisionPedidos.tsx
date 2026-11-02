@@ -81,7 +81,6 @@ export default function RevisionPedidos() {
                   <span className="chico">{nombrePedido(p)}</span>
                   <span className="fila-revision-rotulos">
                     <span className="rotulo">{nombreSucursal(p.sucursal)}</span>
-                    <span className="rotulo">{p.periodo.nombre}</span>
                   </span>
                   <span className="fila-revision-cantidad">
                     {p._count.items} {p._count.items === 1 ? "producto" : "productos"}

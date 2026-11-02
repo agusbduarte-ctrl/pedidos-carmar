@@ -72,10 +72,6 @@ export default function RevisionDetalle() {
           <dd>{nombreSucursal(p.sucursal)}</dd>
         </div>
         <div className="par">
-          <dt>Período</dt>
-          <dd>{p.periodo.nombre}</dd>
-        </div>
-        <div className="par">
           <dt>Enviado por</dt>
           <dd>
             {p.enviadoPor?.nombre ?? "-"} <span className="fecha">{formatearFecha(p.fechaEnvio)}</span>

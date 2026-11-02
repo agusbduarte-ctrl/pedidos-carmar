@@ -118,7 +118,8 @@ export default function PedidoArmado() {
       {volver}
       <h1>{nombrePedido(pedido)}</h1>
       <p className="encabezado-pedido">
-        {pedido.periodo.nombre} <EstadoEtiqueta estado={pedido.estado} />
+        {new Date(pedido.createdAt).toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "2-digit" })}{" "}
+        <EstadoEtiqueta estado={pedido.estado} />
       </p>
 
       {pedido.estado === "DEVUELTO" && (

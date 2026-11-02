@@ -324,7 +324,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--negro); }
 .tabla-items .boton { min-height: 44px; }
 
 /* Administración */
-.barra-filtros { display: flex; flex-wrap: wrap; gap: var(--e3) var(--e4); align-items: flex-end; margin-bottom: var(--e4); }
+.barra-filtros { display: flex; flex-direction: row; flex-wrap: wrap; gap: var(--e3) var(--e4); align-items: flex-end; margin-bottom: var(--e4); }
 .barra-filtros .filtro { margin-bottom: 0; flex: 1 1 220px; }
 .barra-filtros .casilla { min-height: 52px; }
 .barra-filtros .boton { flex: 1 1 100%; }

@@ -6,14 +6,13 @@ import Inicio from "./pages/Inicio";
 import PedidoArmado from "./pages/PedidoArmado";
 import RevisionPedidos from "./pages/RevisionPedidos";
 import RevisionDetalle from "./pages/RevisionDetalle";
-import Consolidado from "./pages/Consolidado";
+import Historial from "./pages/Historial";
 import AdminUsuarios from "./pages/AdminUsuarios";
 import AdminProductos from "./pages/AdminProductos";
 import AdminRubros from "./pages/AdminRubros";
 import AdminProveedores from "./pages/AdminProveedores";
 import DepositoPedidos from "./pages/DepositoPedidos";
 import DepositoDetalle from "./pages/DepositoDetalle";
-import AdminPeriodos from "./pages/AdminPeriodos";
 
 export default function App() {
   return (
@@ -33,14 +32,13 @@ export default function App() {
         <Route element={<RequireRole roles={["ENCARGADA", "ADMIN"]} />}>
           <Route path="/revision" element={<RevisionPedidos />} />
           <Route path="/revision/:id" element={<RevisionDetalle />} />
-          <Route path="/consolidado" element={<Consolidado />} />
+          <Route path="/historial" element={<Historial />} />
           <Route path="/admin/proveedores" element={<AdminProveedores />} />
         </Route>
         <Route element={<RequireRole roles={["ADMIN"]} />}>
           <Route path="/admin/usuarios" element={<AdminUsuarios />} />
           <Route path="/admin/productos" element={<AdminProductos />} />
           <Route path="/admin/rubros" element={<AdminRubros />} />
-          <Route path="/admin/periodos" element={<AdminPeriodos />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
