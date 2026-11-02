@@ -335,7 +335,7 @@ docker compose -f docker-compose.prod.yml --env-file .env.prod logs --tail 100 d
 
 Reiniciar un servicio: `docker compose -f docker-compose.prod.yml --env-file .env.prod restart api`.
 
-Los logs tienen tope (configurado en `docker-compose.prod.yml`, bloque `x-logging`): hasta 5 archivos de 10 MB por servicio, unos 50 MB cada uno. Los más viejos se borran solos. Para ver cuánto ocupan: `sudo du -sh /var/lib/docker/containers/*/*-json.log*`. Espacio libre del disco: `df -h /`.
+Los logs tienen tope (configurado en `docker-compose.prod.yml`, bloque `x-logging`): hasta 5 archivos de 10 MB por servicio, unos 50 MB cada uno. Los más viejos se borran solos. Para ver cuánto ocupan: `sudo sh -c 'du -sh /var/lib/docker/containers/*/*-json.log*'` (con `sh -c` para que el `*` lo expanda root). Espacio libre del disco: `df -h /`.
 
 ## 15. Aviso si la app se cae (monitoreo)
 
