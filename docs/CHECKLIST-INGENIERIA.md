@@ -39,7 +39,7 @@ Estados: ✅ resuelto · 🟡 parcial · ❌ falta · ➖ no aplica hoy
 | Servidores / nube | ✅ | AWS Lightsail (São Paulo), Docker Compose (db, api, web). |
 | DNS y dominio | ❌ | Dominio provisorio `sslip.io`. Falta registrar un dominio propio del súper y cambiar `DOMINIO` y `CORS_ORIGIN`. |
 | Certificados SSL | ✅ | Caddy los renueva solo. |
-| Balanceador de carga, firewall | 🟡 | Balanceador no hace falta (un servidor alcanza). Firewall: solo Caddy publica puertos; verificar que en Lightsail estén abiertos únicamente 22, 80 y 443, y SSH solo con llave. |
+| Balanceador de carga, firewall | ✅ | Balanceador no hace falta (un servidor alcanza). Revisado 2026-11-02: firewall de Lightsail y ufw solo con 22/80/443, SSH solo con llave y sin root. |
 | Almacenamiento | ✅ | Volumen de Postgres + Excel del catálogo montado en solo lectura. |
 | Backups | ✅ | `deploy/backup.sh` diario (14 copias), snapshots de Lightsail y copia a la PC. |
 | Redundancia / recuperación ante desastres | 🟡 | Restauración ensayada el 2026-11-02 con una copia real (ver `docs/DEPLOY.md`, "Ensayar un backup en la PC"). Falta: la copia a la PC depende de hacerla a mano cada semana. |
@@ -91,7 +91,7 @@ Estados: ✅ resuelto · 🟡 parcial · ❌ falta · ➖ no aplica hoy
 | Términos y condiciones | ➖ | Uso interno; alcanza con una nota de uso aceptable para empleados. |
 | Actualización de dependencias | 🟡 | Se hizo mantenimiento (2026-10-27). Quedan avisos altos en zod <4 y Prisma 6, que necesitan sprints dedicados. Sin rutina fija. |
 | Costos de infraestructura | 🟡 | Lightsail pagado por Agustín. Falta dejar escrito el costo mensual y quién lo paga a futuro, junto con el dominio. |
-| Mantenerlo funcionando (APIs de terceros, SO, dependencias) | 🟡 | Ubuntu sin actualizaciones automáticas confirmadas. Sin calendario de mantenimiento. |
+| Mantenerlo funcionando (APIs de terceros, SO, dependencias) | 🟡 | Ubuntu con actualizaciones de seguridad automáticas y reinicio a las 04:00 AR si hace falta (confirmado 2026-11-02). Sin calendario de mantenimiento de la app. |
 
 ---
 
@@ -104,7 +104,7 @@ En orden de prioridad. Cada paso es chico y se puede hacer por separado.
 1. ✅ *Hecho 2026-11-01 (ver `docs/DEPLOY.md` §15).* **Saber cuándo se cae.** Monitor externo gratis (UptimeRobot, Better Stack o similar) que consulte `https://<dominio>/api/health` cada 5 minutos y avise por mail o Telegram.
 2. ✅ *Hecho 2026-11-02 (ver `docs/DEPLOY.md`).* **Probar una restauración.** Tomar el último backup, restaurarlo en la base local (`docker compose up -d` + `gunzip -c backup.sql.gz | psql`) y comprobar que la app muestra los pedidos. Escribir los pasos en `docs/DEPLOY.md` sección "Restaurar un backup".
 3. ✅ *Hecho 2026-11-02 (bloque `x-logging` en `docker-compose.prod.yml`, json-file 5 × 10 MB).* **Rotación de logs de Docker.**
-4. **Endurecer el servidor.** Firewall de Lightsail con solo 22/80/443; `unattended-upgrades` activado en Ubuntu; SSH solo con llave.
+4. ✅ *Hecho 2026-11-02 (ver `docs/DEPLOY.md` §3).* **Endurecer el servidor.** Firewall de Lightsail con solo 22/80/443; `unattended-upgrades` activado en Ubuntu; SSH solo con llave.
 5. **Dominio propio.** Registrar el dominio del súper, cambiar `DOMINIO` y `CORS_ORIGIN` en `.env.prod`, reiniciar.
 6. **Apagar la prueba gratis.** Netlify, Render y Neon (borrar la base de Neon). Evaluar si el repo debería ser privado.
 

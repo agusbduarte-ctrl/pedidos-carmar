@@ -67,6 +67,28 @@ sudo dpkg-reconfigure -plow unattended-upgrades
 
 (Elegir "Yes" en la pantalla.)
 
+Reinicio automático solo cuando una actualización lo pide, a las 07:00 UTC (04:00 en Argentina, después del backup). La app vuelve sola porque los contenedores tienen `restart: unless-stopped`:
+
+```bash
+printf 'Unattended-Upgrade::Automatic-Reboot "true";\nUnattended-Upgrade::Automatic-Reboot-Time "07:00";\n' | sudo tee /etc/apt/apt.conf.d/52-carmar-reinicio
+```
+
+SSH: solo con llave (Ubuntu en Lightsail ya viene con `PasswordAuthentication no`) y sin entrada directa como `root`. **No cerrar la sesión actual** hasta comprobar que una segunda conexión entra bien:
+
+```bash
+echo "PermitRootLogin no" | sudo tee /etc/ssh/sshd_config.d/99-carmar.conf
+sudo sshd -t && sudo systemctl reload ssh
+sudo sshd -T | grep -Ei '^(permitrootlogin|passwordauthentication)'   # tiene que decir "no" en los dos
+```
+
+Para revisar todo de una vez (no cambia nada):
+
+```bash
+sudo ufw status; systemctl is-enabled unattended-upgrades; cat /etc/apt/apt.conf.d/20auto-upgrades /etc/apt/apt.conf.d/52-carmar-reinicio; sudo sshd -T | grep -Ei '^(passwordauthentication|permitrootlogin)'
+```
+
+**Última revisión: 2026-11-02.** ufw activo (22, 80, 443 tcp/udp), firewall de Lightsail con 22, 80 y 443, actualizaciones automáticas activas con reinicio a las 07:00 UTC, SSH solo con llave y sin root.
+
 > Docker se salta el `ufw` cuando publica puertos. No importa acá porque solo el contenedor `web` publica puertos (80 y 443), pero por eso el firewall de Lightsail de la sección 1 es la barrera real.
 
 ## 4. Instalar Docker
