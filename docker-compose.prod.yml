@@ -6,10 +6,19 @@
 #
 # Solo Caddy publica puertos. La base y la API quedan en la red interna.
 
+# Logs de Docker con tope: hasta 5 archivos de 10 MB por servicio (~50 MB).
+# Los más viejos se borran solos para que no se llene el disco.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
 services:
   db:
     image: postgres:16
     restart: unless-stopped
+    logging: *logging
     environment:
       POSTGRES_USER: carmar
       POSTGRES_DB: pedidos_carmar
@@ -27,6 +36,7 @@ services:
       context: .
       dockerfile: deploy/Dockerfile.api
     restart: unless-stopped
+    logging: *logging
     env_file:
       # required: false permite validar el archivo con "config" sin tener .env.prod;
       # en el servidor sí tiene que existir (si falta JWT_SECRET la API no arranca).
@@ -54,6 +64,7 @@ services:
       context: .
       dockerfile: deploy/Dockerfile.web
     restart: unless-stopped
+    logging: *logging
     environment:
       DOMINIO: ${DOMINIO:?Falta DOMINIO en .env.prod}
     ports:
