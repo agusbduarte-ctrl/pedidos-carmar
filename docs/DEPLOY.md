@@ -313,12 +313,13 @@ Un servicio externo consulta `https://<DOMINIO>/api/health` cada 5 minutos y man
 Se usa [UptimeRobot](https://uptimerobot.com) (plan gratis):
 
 1. Crear la cuenta con el mail de quien tiene que recibir los avisos.
-2. **New monitor** → tipo **Keyword**.
+2. **New monitor** → tipo **HTTP(s)**. Alcanza: si la base falla `/health` da 500, y si la API no responde Caddy da 502; los dos cuentan como caída.
 3. **URL**: `https://<DOMINIO>/api/health`.
-4. **Keyword**: `"status":"ok"`. Alerta cuando la palabra **no existe** (*Keyword not exists*).
-5. **Monitoring interval**: 5 minutos.
-6. En **alert contacts**, tildar el mail. Opcional: instalar la app de UptimeRobot en el celular para recibir avisos al teléfono.
-7. Guardar y comprobar que el monitor queda en verde (**Up**).
+4. **Monitoring interval**: 5 minutos.
+5. En **alert contacts**, tildar el mail. Opcional: instalar la app de UptimeRobot en el celular para recibir avisos al teléfono.
+6. Guardar y comprobar que el monitor queda en verde (**Up**).
+
+Estado: creado el 2026-11-01 sobre `pedidos.18-230-136-195.sslip.io`.
 
 Para probar que el aviso llega: en el servidor, `docker compose -f docker-compose.prod.yml --env-file .env.prod stop api`, esperar el mail (hasta 5-10 minutos) y volver a levantarla con `... start api`. Hacerlo en un horario sin repositores trabajando.
 
