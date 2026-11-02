@@ -27,11 +27,22 @@ const productos: Record<"asignado" | "asignado2" | "noAsignado" | "inactivo", st
 };
 
 const empiezaCon = { startsWith: PREFIJO };
+// Los pedidos ya no tienen período: los del repositor del seed creados en esta corrida se borran por fecha
+const INICIO = new Date();
 
 async function limpiar() {
   await prisma.consolidado.deleteMany({ where: { periodo: { nombre: empiezaCon } } });
   await prisma.pedido.deleteMany({
-    where: { OR: [{ periodo: { nombre: empiezaCon } }, { repositor: { nombre: empiezaCon } }] },
+    where: {
+      OR: [
+        { periodo: { nombre: empiezaCon } },
+        { repositor: { nombre: empiezaCon } },
+        {
+          createdAt: { gte: INICIO },
+          repositor: { rol: Rol.REPOSITOR, sucursal: Sucursal.CARMAR_1, email: null },
+        },
+      ],
+    },
   });
   await prisma.periodo.deleteMany({ where: { nombre: empiezaCon } });
   await prisma.producto.deleteMany({ where: { codigo: empiezaCon } });
@@ -119,16 +130,16 @@ function agregar(pedidoId: string, productoId: string, cantidad: number, observa
 }
 
 describe("POST /pedidos", () => {
-  it("sin período abierto: 400", async () => {
+  it("sin período abierto: 201, el pedido no tiene período", async () => {
     await prisma.periodo.update({ where: { id: periodoId }, data: { estado: EstadoPeriodo.CERRADO } });
 
     const res = await pedir("POST", "/pedidos");
 
-    expect(res.statusCode).toBe(400);
-    expect(res.json()).toEqual({ error: "No hay período abierto" });
+    expect(res.statusCode).toBe(201);
+    expect(res.json().data).toMatchObject({ estado: "BORRADOR", periodoId: null, periodo: null });
   });
 
-  it("con período abierto: 201 en BORRADOR, con la sucursal del repositor", async () => {
+  it("201 en BORRADOR, con la sucursal del repositor y sin período", async () => {
     const res = await pedir("POST", "/pedidos");
 
     expect(res.statusCode).toBe(201);
@@ -137,17 +148,17 @@ describe("POST /pedidos", () => {
       creadoPorId: repositor.id,
       sucursal: "CARMAR_1",
       estado: "BORRADOR",
-      periodoId,
+      periodoId: null,
       items: [],
     });
   });
 
-  it("puede crear varios pedidos en el mismo período", async () => {
+  it("puede crear varios pedidos", async () => {
     const a = await crearPedido();
     const b = await crearPedido();
 
     expect(a.id).not.toBe(b.id);
-    expect(await prisma.pedido.count({ where: { periodoId, repositorId: repositor.id } })).toBe(2);
+    expect(await prisma.pedido.count({ where: { id: { in: [a.id, b.id] }, periodoId: null } })).toBe(2);
   });
 
   it("guarda título y proveedor y los devuelve", async () => {
@@ -363,6 +374,7 @@ describe("POST /pedidos/:id/enviar", () => {
 
   it("si el período se cerró, el BORRADOR queda huérfano: no se edita ni se envía", async () => {
     const pedido = await crearPedido();
+    await conPeriodo(pedido.id);
     await agregar(pedido.id, productos.asignado, 1);
     await prisma.periodo.update({ where: { id: periodoId }, data: { estado: EstadoPeriodo.CERRADO } });
 
@@ -411,8 +423,14 @@ describe("GET /pedidos/mis-pedidos", () => {
 const comoEncargada = async () =>
   pedirCon(app, await loginToken(app, { tipo: "email", email: "encargada@carmar.com", password: "encargada123" }));
 
-async function pedidoEnviado() {
+// Los pedidos nuevos no tienen período; se les asigna uno para probar los datos históricos
+async function conPeriodo(id: string) {
+  await prisma.pedido.update({ where: { id }, data: { periodoId } });
+}
+
+async function pedidoEnviado(legadoConPeriodo = true) {
   const pedido = await crearPedido();
+  if (legadoConPeriodo) await conPeriodo(pedido.id);
   await agregar(pedido.id, productos.asignado, 2);
   expect((await pedir("POST", `/pedidos/${pedido.id}/enviar`)).statusCode).toBe(200);
   return pedido;
@@ -550,8 +568,21 @@ describe("POST /pedidos/:id/devolver y /aprobar", () => {
     expect(res.json().data.aprobadoPor).toMatchObject({ nombre: "Encargada de Compras" });
   });
 
+  it("pedido sin período: enviar y devolver ignoran los consolidados aprobados", async () => {
+    await prisma.consolidado.create({ data: { periodoId, estado: "APROBADO" } });
+    const pedido = await pedidoEnviado(false);
+    const encargada = await comoEncargada();
+
+    const res = await encargada("POST", `/pedidos/${pedido.id}/devolver`, { comentario: "falta algo" });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.json().data.estado).toBe("DEVUELTO");
+    expect(res.json().data.periodo).toBeNull();
+  });
+
   it("con un consolidado APROBADO en el período, no se puede enviar: 400", async () => {
     const pedido = await crearPedido();
+    await conPeriodo(pedido.id);
     await agregar(pedido.id, productos.asignado, 1);
     await prisma.consolidado.create({ data: { periodoId, estado: "APROBADO" } });
 

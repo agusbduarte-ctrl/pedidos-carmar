@@ -211,7 +211,7 @@ model Pedido {
   id          String       @id @default(cuid())
   repositorId String
   sucursal    Sucursal
-  periodoId   String
+  periodoId   String?
   estado      EstadoPedido @default(BORRADOR)
 
   observacion String? @db.VarChar(500)
@@ -244,7 +244,7 @@ model Pedido {
   revisadoDepositoPor Usuario? @relation("PedidoRevisadoDepositoPor", fields: [revisadoDepositoPorId], references: [id])
   trasladoEnviadoPor  Usuario? @relation("PedidoTrasladoEnviadoPor", fields: [trasladoEnviadoPorId], references: [id])
 
-  periodo   Periodo    @relation(fields: [periodoId], references: [id])
+  periodo   Periodo?   @relation(fields: [periodoId], references: [id])
   proveedor Proveedor? @relation(fields: [proveedorId], references: [id])
 
   items ItemPedido[]

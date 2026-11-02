@@ -6,7 +6,6 @@ import { buildMeta, parsePagination, skipTake } from "../lib/pagination.js";
 import {
   ESTADOS_EDITABLES,
   cantidadValida,
-  getPeriodoAbierto,
   verificarRubroAsignado,
 } from "../lib/pedidos-helpers.js";
 import { isUniqueViolation, sendValidationError } from "../lib/zod-helpers.js";
@@ -125,8 +124,8 @@ export default async function pedidosRoutes(app: FastifyInstance) {
       reply.code(400).send({ error: `El pedido no se puede editar en estado ${pedido.estado}` });
       return null;
     }
-    // Decisión 3: si el período se cerró, el pedido queda huérfano
-    if (pedido.periodo.estado !== EstadoPeriodo.ABIERTO) {
+    // Pedidos viejos con período: si se cerró, quedan huérfanos. Los nuevos no tienen período.
+    if (pedido.periodo && pedido.periodo.estado !== EstadoPeriodo.ABIERTO) {
       reply.code(400).send({ error: "El período del pedido está cerrado" });
       return null;
     }
@@ -240,9 +239,6 @@ export default async function pedidosRoutes(app: FastifyInstance) {
     const body = crearBody.safeParse(request.body ?? {});
     if (!body.success) return sendValidationError(reply, body.error);
 
-    const periodo = await getPeriodoAbierto(app.db);
-    if (!periodo) return reply.code(400).send({ error: "No hay período abierto" });
-
     if (body.data.proveedorId && !(await proveedorExiste(body.data.proveedorId))) {
       return reply.code(400).send(PROVEEDOR_INVALIDO);
     }
@@ -251,7 +247,7 @@ export default async function pedidosRoutes(app: FastifyInstance) {
       data: {
         repositorId: usuarioId,
         sucursal,
-        periodoId: periodo.id,
+        periodoId: null,
         estado: EstadoPedido.BORRADOR,
         creadoPorId: usuarioId,
         titulo: body.data.titulo,
@@ -596,7 +592,7 @@ export default async function pedidosRoutes(app: FastifyInstance) {
     const pedido = await pedidoEditable(params.data.id, request.user.id, reply);
     if (!pedido) return reply;
 
-    if (await periodoConConsolidadoAprobado(app.db, pedido.periodoId)) {
+    if (pedido.periodoId && (await periodoConConsolidadoAprobado(app.db, pedido.periodoId))) {
       return reply.code(400).send(PERIODO_CONSOLIDADO);
     }
 
@@ -729,7 +725,7 @@ export default async function pedidosRoutes(app: FastifyInstance) {
       where: { id: params.data.id },
       select: { periodoId: true },
     });
-    if (pedido && (await periodoConConsolidadoAprobado(app.db, pedido.periodoId))) {
+    if (pedido?.periodoId && (await periodoConConsolidadoAprobado(app.db, pedido.periodoId))) {
       return reply.code(400).send(PERIODO_CONSOLIDADO);
     }
 

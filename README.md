@@ -112,7 +112,7 @@ Todas las rutas `/admin/*` requieren sesión de un usuario con rol ADMIN, salvo 
 | `GET /pedidos/mis-pedidos/:id` | REPOSITOR | Detalle de un pedido propio con sus ítems (de otro: 404) |
 | `GET /pedidos/productos` | REPOSITOR | Busca productos que puede cargar (`q` por nombre o código, `rubroId`, paginado): activos y de sus rubros en su sucursal, sin datos de proveedor |
 | `GET /pedidos/mis-rubros` | REPOSITOR | Rubros asignados al repositor en su sucursal |
-| `POST /pedidos` | REPOSITOR | Crea su pedido en BORRADOR en el período abierto |
+| `POST /pedidos` | REPOSITOR | Crea su pedido en BORRADOR, sin período (no hace falta que haya uno abierto) |
 | `GET /pedidos/proveedores` | REPOSITOR | Proveedores activos (sin "SIN ASIGNAR") para elegir en el pedido |
 | `GET /pedidos/:id/sugeridos` | REPOSITOR | Productos sugeridos según el proveedor del pedido: los ya pedidos antes (con veces y última cantidad) y los del catálogo del proveedor; solo rubros asignados, máx. 300 |
 | `PUT /pedidos/:id/items` | REPOSITOR | Carga masiva `{ items: [{ productoId, cantidad }] }` (1 a 300): fija la cantidad, 0 quita el ítem; si uno es inválido no se guarda ninguno |
@@ -133,13 +133,29 @@ Reglas de negocio:
 
 - **Rol DEPOSITO (Rodrigo, galpón externo):** entra con email y contraseña, sin sucursal. Revisa cada pedido ENVIADO y carga `cantidadDeposito` por ítem (`null` = sin revisar, `0` = no hay). Reenviar un pedido (DEVUELTO → ENVIADO) borra la revisión. El consolidado suma solo lo que hay que comprar (`cantidad - cantidadDeposito`) y omite los productos que quedan en 0.
 - **Máquina de estados:** BORRADOR → ENVIADO (repositor) → DEVUELTO o APROBADO (encargada); DEVUELTO → ENVIADO (repositor). El repositor solo edita en BORRADOR o DEVUELTO. **APROBADO es inmutable.** Si dos encargadas actúan a la vez sobre el mismo pedido, la segunda recibe 400.
-- **Un pedido por repositor por período.** Sin período abierto no se puede crear (400). Si el período se cierra con un pedido sin enviar, ese pedido queda huérfano: no se edita ni se envía. La encargada sí puede aprobar o devolver pedidos de un período cerrado.
+- **Los pedidos ya no dependen de períodos.** Los nuevos tienen `periodoId` null y se pueden crear, editar y enviar siempre. Solo los pedidos viejos que tienen período conservan las reglas anteriores: si el período se cerró con un pedido sin enviar, queda huérfano (no se edita ni se envía), y con un consolidado APROBADO en su período no se envían ni devuelven.
 - **Ítems:** el producto tiene que estar activo y su rubro asignado al repositor en la sucursal del pedido. Cantidad mayor a 0; **enteros para UN, CAJA y PACK, decimales solo para KG y LT**. Observación de hasta 200 caracteres.
 - **Al enviar se revalida todo:** si desde que se cargó un ítem el producto se desactivó, el repositor perdió el rubro o la unidad cambió, el envío falla con el detalle de cada ítem.
 - **Devoluciones:** se guarda solo la última (comentario, fecha y quién la hizo).
-- **Consolidado aprobado:** si el período ya tiene un consolidado APROBADO, los pedidos no se pueden enviar ni devolver (ver abajo).
+- **Consolidado aprobado:** si el período de un pedido viejo ya tiene un consolidado APROBADO, ese pedido no se puede enviar ni devolver (ver abajo).
 
-### Consolidado
+### Historial
+
+Reemplaza al consolidado como herramienta de la encargada. Rutas para ENCARGADA y ADMIN (401 sin sesión, 403 al resto). Cada fila es un ítem de pedido.
+
+| Método y ruta | Qué hace |
+|---|---|
+| `GET /historial` | `{ data, meta, resumen }`: ítems paginados (`page`, `limit`), más `resumen` por producto (veces, pedido, depósito, comprado; máx. 200) calculado sobre todo el filtro, no solo la página |
+| `GET /historial/excel` | Descarga `historial-pedidos_<desde>_a_<hasta>.xlsx` con las hojas "Detalle" (una fila por ítem) y "Resumen" (por producto). Máximo 50.000 filas (si no, 400) |
+
+Filtros (query): `desde` y `hasta` (`YYYY-MM-DD`), `proveedorId`, `sucursal` (`CARMAR_1` o `CARMAR_2`), `q` (nombre o código del producto), `estado` (`APROBADO` por defecto, o `TODOS` = ENVIADO, DEVUELTO y APROBADO).
+
+- **Fechas en hora de Argentina** (`America/Argentina/Buenos_Aires`, UTC-3): el filtro es por `fechaEnvio` del pedido, `hasta` es inclusivo y el día empieza y termina a medianoche argentina. Sin fechas, devuelve los últimos 30 días incluyendo hoy. `desde` no puede ser posterior a `hasta` y el rango máximo es de 400 días (400 si no).
+- `cantidadComprada` = `cantidad` - `cantidadDeposito` (0 si el depósito no lo revisó).
+
+### Consolidado (datos históricos)
+
+Los períodos y el consolidado quedan solo como datos históricos: la API vieja sigue disponible, pero los pedidos nuevos no tienen período.
 
 Suma, por producto, los pedidos ENVIADOS y APROBADOS de un período. Todas las rutas son para ENCARGADA y ADMIN.
 
