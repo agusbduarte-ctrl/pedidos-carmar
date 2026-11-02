@@ -70,7 +70,7 @@ Estados: ✅ resuelto · 🟡 parcial · ❌ falta · ➖ no aplica hoy
 | Punto del video | Estado | Situación |
 |---|---|---|
 | Logging | 🟡 | Fastify loguea por consola (pino). Los logs quedan en Docker sin rotación configurada: pueden llenar el disco. |
-| Monitoreo, métricas, alertas | ❌ | Solo el healthcheck interno de Docker. **Nadie se entera si la app se cae** hasta que un repositor avisa. |
+| Monitoreo, métricas, alertas | 🟡 | Desde 2026-11-01: UptimeRobot revisa `/api/health` cada 5 min y avisa por mail (prueba recibida). Faltan métricas de uso y rendimiento. |
 | Trazabilidad / observabilidad | 🟡 | Hay `requestId` de Fastify en los logs, sin un lugar donde buscarlos. |
 | Errores no controlados | 🟡 | Sin `setErrorHandler` propio: revisar que ningún error devuelva detalles internos y que el mensaje al usuario sea en castellano simple. |
 | Rendimiento | 🟡 | Sin medir. Revisar índices de pedidos por período/usuario cuando haya meses de datos. |
@@ -101,7 +101,7 @@ En orden de prioridad. Cada paso es chico y se puede hacer por separado.
 
 ### Prioridad alta (protege lo que ya está en producción)
 
-1. **Saber cuándo se cae.** Monitor externo gratis (UptimeRobot, Better Stack o similar) que consulte `https://<dominio>/api/health` cada 5 minutos y avise por mail o Telegram.
+1. ✅ *Hecho 2026-11-01 (ver `docs/DEPLOY.md` §15).* **Saber cuándo se cae.** Monitor externo gratis (UptimeRobot, Better Stack o similar) que consulte `https://<dominio>/api/health` cada 5 minutos y avise por mail o Telegram.
 2. **Probar una restauración.** Tomar el último backup, restaurarlo en la base local (`docker compose up -d` + `gunzip -c backup.sql.gz | psql`) y comprobar que la app muestra los pedidos. Escribir los pasos en `docs/DEPLOY.md` sección "Restaurar un backup".
 3. **Rotación de logs de Docker.** En `docker-compose.prod.yml`, a cada servicio: `logging: { driver: local, options: { max-size: "10m", max-file: "5" } }`.
 4. **Endurecer el servidor.** Firewall de Lightsail con solo 22/80/443; `unattended-upgrades` activado en Ubuntu; SSH solo con llave.
