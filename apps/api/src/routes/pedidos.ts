@@ -41,6 +41,7 @@ const PEDIDO_DETALLE = {
   enviadoPor: USUARIO_NOMBRE,
   devueltoPor: USUARIO_NOMBRE,
   aprobadoPor: USUARIO_NOMBRE,
+  revisadoDepositoPor: USUARIO_NOMBRE,
   items: {
     orderBy: { createdAt: "asc" },
     include: {
@@ -628,11 +629,21 @@ export default async function pedidosRoutes(app: FastifyInstance) {
       return reply.code(400).send({ error: "El pedido tiene ítems inválidos", detalles });
     }
 
-    const data = await app.db.pedido.update({
-      where: { id: pedido.id },
-      data: { estado: EstadoPedido.ENVIADO, fechaEnvio: new Date(), enviadoPorId: request.user.id },
-      include: PEDIDO_COMPLETO,
-    });
+    // Un reenvío se revisa de nuevo en el depósito: se limpia la revisión anterior
+    const [, data] = await app.db.$transaction([
+      app.db.itemPedido.updateMany({ where: { pedidoId: pedido.id }, data: { cantidadDeposito: null } }),
+      app.db.pedido.update({
+        where: { id: pedido.id },
+        data: {
+          estado: EstadoPedido.ENVIADO,
+          fechaEnvio: new Date(),
+          enviadoPorId: request.user.id,
+          revisadoDepositoPorId: null,
+          fechaRevisionDeposito: null,
+        },
+        include: PEDIDO_COMPLETO,
+      }),
+    ]);
     return { data };
   });
 
@@ -680,6 +691,8 @@ export default async function pedidosRoutes(app: FastifyInstance) {
         include: {
           repositor: { select: { id: true, nombre: true } },
           periodo: { select: { id: true, nombre: true, estado: true } },
+          proveedor: PROVEEDOR_SELECT,
+          revisadoDepositoPor: USUARIO_NOMBRE,
           _count: { select: { items: true } },
         },
         // Los no enviados (fechaEnvio null) al final

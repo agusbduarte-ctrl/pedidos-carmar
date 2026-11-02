@@ -50,9 +50,9 @@ const crearBody = z
       if (!d.sucursal) issue("sucursal", "Requerida para repositores");
       if (d.password) issue("password", "Los repositores entran con PIN, no con contraseña");
     } else {
-      if (!d.email) issue("email", "Requerido para admin y encargada");
+      if (!d.email) issue("email", "Requerido para admin, encargada y depósito");
       if (!d.password) issue("password", "Requerida para admin y encargada");
-      if (d.pin) issue("pin", "Admin y encargada entran con contraseña, no con PIN");
+      if (d.pin) issue("pin", "Admin, encargada y depósito entran con contraseña, no con PIN");
     }
   });
 
@@ -184,8 +184,8 @@ export default async function usuariosRoutes(app: FastifyInstance) {
       if (d.password !== undefined) detalles.push("password: Los repositores entran con PIN");
       if (d.sucursal === null) detalles.push("sucursal: Un repositor tiene que tener sucursal");
     } else {
-      if (d.pin !== undefined) detalles.push("pin: Admin y encargada entran con contraseña");
-      if (d.email === null) detalles.push("email: Admin y encargada tienen que tener email");
+      if (d.pin !== undefined) detalles.push("pin: Admin, encargada y depósito entran con contraseña");
+      if (d.email === null) detalles.push("email: Admin, encargada y depósito tienen que tener email");
     }
     if (detalles.length > 0) {
       return reply.code(400).send({ error: "Datos inválidos", detalles });

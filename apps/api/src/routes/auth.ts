@@ -138,7 +138,7 @@ export async function authRoutes(app: FastifyInstance) {
         usuario = await app.db.usuario.findFirst({
           where: {
             email,
-            rol: { in: [Rol.ADMIN, Rol.ENCARGADA] },
+            rol: { in: [Rol.ADMIN, Rol.ENCARGADA, Rol.DEPOSITO] },
             activo: true,
             deletedAt: null,
           },

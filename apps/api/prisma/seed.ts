@@ -86,9 +86,10 @@ async function main() {
 
   // 5. Usuarios
   console.log('👥 Creando usuarios...');
-  const [adminHash, encargadaHash, pinHash] = await Promise.all([
+  const [adminHash, encargadaHash, depositoHash, pinHash] = await Promise.all([
     bcrypt.hash('admin123', 10),
     bcrypt.hash('encargada123', 10),
+    bcrypt.hash('deposito123', 10),
     bcrypt.hash('1234', 10),
   ]);
 
@@ -107,6 +108,15 @@ async function main() {
       passwordHash: encargadaHash,
       nombre: 'Encargada de Compras',
       rol: Rol.ENCARGADA,
+    },
+  });
+
+  await prisma.usuario.create({
+    data: {
+      email: 'deposito@carmar.com',
+      passwordHash: depositoHash,
+      nombre: 'Rodrigo Depósito',
+      rol: Rol.DEPOSITO,
     },
   });
 
@@ -144,7 +154,7 @@ async function main() {
   console.log(`   - ${rubros.length} rubros`);
   console.log(`   - ${proveedores.length} proveedores`);
   console.log(`   - ${productos.length} productos`);
-  console.log(`   - 3 usuarios (admin, encargada, repositor)`);
+  console.log(`   - 4 usuarios (admin, encargada, depósito, repositor)`);
   console.log(`   - Admin: ${admin.email}`);
   console.log(`   - Encargada: ${encargada.email}`);
   console.log(`   - 2 rubros asignados al repositor`);

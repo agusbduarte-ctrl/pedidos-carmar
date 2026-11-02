@@ -28,7 +28,7 @@ type Db = PrismaClient | Prisma.TransactionClient;
 export function revalidarPedidos(db: Db, periodoId: string) {
   return db.pedido.findMany({
     where: { periodoId, estado: { in: ESTADOS_CONSOLIDABLES } },
-    include: { items: { select: { productoId: true, cantidad: true } } },
+    include: { items: { select: { productoId: true, cantidad: true, cantidadDeposito: true } } },
   });
 }
 
@@ -47,7 +47,7 @@ export type ResultadoGeneracion =
   | { ok: false; error: "periodo_no_encontrado" | "ya_aprobado" };
 
 // Genera (o regenera) el consolidado BORRADOR de un período sumando los
-// pedidos ENVIADOS y APROBADOS. Si ya había un BORRADOR se reemplaza entero,
+// pedidos ENVIADOS y APROBADOS, descontando lo que hay en el depósito. Si ya había un BORRADOR se reemplaza entero,
 // incluidas sus cantidades editadas. Si hay uno APROBADO no se toca.
 export async function generarConsolidado(db: PrismaClient, periodoId: string): Promise<ResultadoGeneracion> {
   return db.$transaction(async (tx) => {
@@ -68,9 +68,14 @@ export async function generarConsolidado(db: PrismaClient, periodoId: string): P
 
     const totales = new Map<string, Prisma.Decimal>();
     for (const pedido of await revalidarPedidos(tx, periodoId)) {
-      for (const { productoId, cantidad } of pedido.items) {
-        totales.set(productoId, (totales.get(productoId) ?? new Prisma.Decimal(0)).add(cantidad));
+      for (const { productoId, cantidad, cantidadDeposito } of pedido.items) {
+        // Solo lo que hay que comprar: lo que sale del depósito no entra
+        const aComprar = cantidad.sub(cantidadDeposito ?? 0);
+        totales.set(productoId, (totales.get(productoId) ?? new Prisma.Decimal(0)).add(aComprar));
       }
+    }
+    for (const [productoId, total] of totales) {
+      if (total.lte(0)) totales.delete(productoId);
     }
 
     const consolidado = await tx.consolidado.create({

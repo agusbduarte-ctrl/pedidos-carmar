@@ -20,6 +20,7 @@ enum Rol {
   ADMIN
   ENCARGADA
   REPOSITOR
+  DEPOSITO
 }
 
 enum Sucursal {
@@ -68,13 +69,15 @@ model Usuario {
   deletedAt    DateTime?
 
   // Relaciones
-  rubrosAsignados       RepositorRubro[]
-  pedidosComoRepositor  Pedido[]         @relation("PedidoRepositor")
-  pedidosCreados        Pedido[]         @relation("PedidoCreadoPor")
-  pedidosEnviados       Pedido[]         @relation("PedidoEnviadoPor")
-  pedidosDevueltos      Pedido[]         @relation("PedidoDevueltoPor")
-  pedidosAprobados      Pedido[]         @relation("PedidoAprobadoPor")
-  consolidadosAprobados Consolidado[]    @relation("ConsolidadoAprobadoPor")
+  rubrosAsignados          RepositorRubro[]
+  pedidosComoRepositor     Pedido[]         @relation("PedidoRepositor")
+  pedidosCreados           Pedido[]         @relation("PedidoCreadoPor")
+  pedidosEnviados          Pedido[]         @relation("PedidoEnviadoPor")
+  pedidosDevueltos         Pedido[]         @relation("PedidoDevueltoPor")
+  pedidosAprobados         Pedido[]         @relation("PedidoAprobadoPor")
+  consolidadosAprobados    Consolidado[]    @relation("ConsolidadoAprobadoPor")
+  pedidosRevisadosDeposito Pedido[]         @relation("PedidoRevisadoDepositoPor")
+  pedidosTrasladoEnviado   Pedido[]         @relation("PedidoTrasladoEnviadoPor")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -220,6 +223,12 @@ model Pedido {
   devueltoPorId String?
   aprobadoPorId String?
 
+  revisadoDepositoPorId String?
+  trasladoEnviadoPorId  String?
+
+  fechaRevisionDeposito DateTime?
+  fechaTrasladoEnviado  DateTime?
+
   fechaEnvio      DateTime?
   fechaDevolucion DateTime?
   fechaAprobacion DateTime?
@@ -231,6 +240,9 @@ model Pedido {
   enviadoPor  Usuario? @relation("PedidoEnviadoPor", fields: [enviadoPorId], references: [id])
   devueltoPor Usuario? @relation("PedidoDevueltoPor", fields: [devueltoPorId], references: [id])
   aprobadoPor Usuario? @relation("PedidoAprobadoPor", fields: [aprobadoPorId], references: [id])
+
+  revisadoDepositoPor Usuario? @relation("PedidoRevisadoDepositoPor", fields: [revisadoDepositoPorId], references: [id])
+  trasladoEnviadoPor  Usuario? @relation("PedidoTrasladoEnviadoPor", fields: [trasladoEnviadoPorId], references: [id])
 
   periodo   Periodo    @relation(fields: [periodoId], references: [id])
   proveedor Proveedor? @relation(fields: [proveedorId], references: [id])
@@ -253,6 +265,9 @@ model ItemPedido {
   productoId  String
   cantidad    Decimal @db.Decimal(10, 2)
   observacion String? @db.VarChar(200)
+
+  // null = el depósito no lo revisó; 0 = no hay en el depósito
+  cantidadDeposito Decimal? @db.Decimal(10, 2)
 
   pedido   Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
   producto Producto @relation(fields: [productoId], references: [id])

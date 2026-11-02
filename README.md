@@ -85,6 +85,7 @@ Creados por `pnpm --filter api seed`, que **borra y recrea todos los datos**.
 |---|---|
 | ADMIN | `admin@carmar.com` / `admin123` |
 | ENCARGADA | `encargada@carmar.com` / `encargada123` |
+| DEPOSITO | `deposito@carmar.com` / `deposito123` |
 | REPOSITOR (CARMAR_1) | PIN `1234` — rubros Limpieza y Bazar |
 
 ## API
@@ -122,10 +123,15 @@ Todas las rutas `/admin/*` requieren sesión de un usuario con rol ADMIN, salvo 
 | `GET /pedidos` | ENCARGADA, ADMIN | Pedidos con filtros `sucursal`, `periodoId`, `estado`, `repositorId`. Sin `estado`, excluye los BORRADOR |
 | `GET /pedidos/:id` | ENCARGADA, ADMIN | Detalle con ítems, rubro de cada producto, teléfono del proveedor y quién envió, devolvió o aprobó |
 | `POST /pedidos/:id/devolver` | ENCARGADA | ENVIADO → DEVUELTO con `{ comentario }` (1 a 500 caracteres) |
-| `POST /pedidos/:id/aprobar` | ENCARGADA | ENVIADO → APROBADO |
+| `POST /pedidos/:id/aprobar` | ENCARGADA | ENVIADO → APROBADO (no hace falta que el depósito lo haya revisado) |
+| `GET /deposito/pedidos?vista=` | DEPOSITO | `revisar` (default): pedidos ENVIADO, el más viejo primero. `trasladar`: pedidos APROBADO con algo del depósito para mandar y sin marcar como enviado. Paginado |
+| `GET /deposito/pedidos/:id` | DEPOSITO | Detalle de un pedido ENVIADO o APROBADO con ítems, `cantidadDeposito` y quién revisó (otro estado: 404) |
+| `PUT /deposito/pedidos/:id/revision` | DEPOSITO | `{ items: [{ itemId, cantidadDeposito }] }`: cuánto hay en el depósito por cada ítem (uno por ítem, de 0 a lo pedido, entero salvo KG y LT). Solo pedidos ENVIADO (si no, 409); se puede repetir mientras siga ENVIADO |
+| `POST /deposito/pedidos/:id/traslado-enviado` | DEPOSITO | Marca como enviado a la sucursal lo que salió del depósito (APROBADO con ítems de depósito > 0; repetido: 409) |
 
 Reglas de negocio:
 
+- **Rol DEPOSITO (Rodrigo, galpón externo):** entra con email y contraseña, sin sucursal. Revisa cada pedido ENVIADO y carga `cantidadDeposito` por ítem (`null` = sin revisar, `0` = no hay). Reenviar un pedido (DEVUELTO → ENVIADO) borra la revisión. El consolidado suma solo lo que hay que comprar (`cantidad - cantidadDeposito`) y omite los productos que quedan en 0.
 - **Máquina de estados:** BORRADOR → ENVIADO (repositor) → DEVUELTO o APROBADO (encargada); DEVUELTO → ENVIADO (repositor). El repositor solo edita en BORRADOR o DEVUELTO. **APROBADO es inmutable.** Si dos encargadas actúan a la vez sobre el mismo pedido, la segunda recibe 400.
 - **Un pedido por repositor por período.** Sin período abierto no se puede crear (400). Si el período se cierra con un pedido sin enviar, ese pedido queda huérfano: no se edita ni se envía. La encargada sí puede aprobar o devolver pedidos de un período cerrado.
 - **Ítems:** el producto tiene que estar activo y su rubro asignado al repositor en la sucursal del pedido. Cantidad mayor a 0; **enteros para UN, CAJA y PACK, decimales solo para KG y LT**. Observación de hasta 200 caracteres.
