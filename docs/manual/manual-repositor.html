@@ -57,7 +57,7 @@ th,td{border:1px solid var(--linea);padding:6px 8px;vertical-align:top}
 <main>
 
 <h2>1. Para qué sirve</h2>
-<p>Pedidos Carmar es la app donde cargás lo que hace falta reponer en tu sucursal. La encargada de compras lo revisa y arma el pedido a los proveedores. Así no hay papeles ni mensajes sueltos.</p>
+<p>Pedidos Carmar es la app donde cargás lo que hace falta reponer en tu sucursal. Armás un pedido por proveedor (por ejemplo, uno para Coca-Cola y otro para Arcor). La encargada de compras lo revisa y, al aprobarlo, la app le arma el mensaje de WhatsApp para el proveedor. Así no hay papeles ni mensajes sueltos.</p>
 <div class="direccion">Dirección de la app: <span class="dir"></span></div>
 
 <h2>2. Instalar la app en el celular</h2>
@@ -89,14 +89,29 @@ th,td{border:1px solid var(--linea);padding:6px 8px;vertical-align:top}
 <div class="aviso"><strong>La primera vez</strong>Puede tardar unos segundos en abrir. Esperá, no hace falta tocar nada más.</div>
 
 <h2>4. Armar el pedido</h2>
-<p>Al entrar ves la pantalla <span class="pant">Reposición</span> con tu nombre.</p>
+<p>Al entrar ves la pantalla <span class="pant">Reposición</span> con tu nombre y, abajo, <span class="pant">Mis pedidos</span>.</p>
+<h3>Empezar un pedido nuevo</h3>
 <ol>
-<li>Si todavía no empezaste, tocá <b class="btn">Empezar pedido</b>. Se crea el pedido del período abierto.</li>
-<li>Abajo, en <span class="pant">Buscar productos</span>, escribí el nombre o el código (al menos 2 letras). También podés elegir un <b>Rubro</b> de la lista.</li>
-<li>En cada producto escribí la <b>Cantidad</b>.</li>
-<li>Si querés, escribí una <b>Observación (opcional)</b>, de hasta 200 letras.</li>
-<li>Tocá <b class="btn">Agregar</b>. Vas a ver <b>Agregado al pedido.</b> y el producto aparece en <span class="pant">Tu pedido</span>.</li>
+<li>Tocá <b class="btn">Nuevo pedido</b>.</li>
+<li>La app pregunta <b>¿A qué proveedor le pedís?</b> Tocá el proveedor (podés escribir parte del nombre para encontrarlo).</li>
+<li>Si el proveedor no está en la lista, tocá <b class="btn">Otro / sin proveedor</b> y avisale a la encargada para que lo cargue.</li>
 </ol>
+<p>Podés tener varios pedidos a la vez: uno por proveedor o por entrega (por ejemplo, Arcor del viernes y Arcor del domingo).</p>
+<h3>Cargar las cantidades</h3>
+<p>Arriba aparece <span class="pant">Lo que le pedís a (proveedor)</span>: la lista de productos que ya se le pidieron antes a ese proveedor, con <b>La última vez</b> y la cantidad que se pidió.</p>
+<ol>
+<li>Escribí la <b>Cantidad</b> en cada producto que necesites. Los que no necesitás, dejalos vacíos.</li>
+<li>Tocá <b class="btn">Guardar cantidades</b>. Vas a ver <b>Cantidades guardadas.</b> y los productos aparecen en <span class="pant">Tu pedido</span>.</li>
+</ol>
+<div class="aviso"><strong>Atajo: Repetir último pedido</strong>Si pedís casi lo mismo que la vez anterior, tocá <b class="btn">Repetir último pedido</b>. La app copia los productos y cantidades de tu último pedido a ese proveedor. Después cambiá lo que haga falta y tocá <b class="btn">Guardar cantidades</b>.</div>
+<h3>Agregar un producto que no está en la lista</h3>
+<ol>
+<li>Más abajo, en <span class="pant">¿Falta algo? Buscalo</span>, escribí el nombre o el código (al menos 2 letras). También podés elegir un <b>Rubro</b>.</li>
+<li>Escribí la <b>Cantidad</b> y, si querés, una <b>Observación (opcional)</b>.</li>
+<li>Tocá <b class="btn">Agregar</b>. Vas a ver <b>Agregado al pedido.</b></li>
+</ol>
+<div class="aviso"><strong>La primera vez con cada proveedor</strong>La lista de arriba sale vacía: buscá los productos abajo. Desde el pedido siguiente ya te aparecen arriba, listos para poner la cantidad.</div>
+<p>Si querés, en <b>Ponerle un nombre (opcional)</b>, al final de la pantalla, le podés poner un nombre al pedido (ej: <i>Arcor viernes</i>). Si no, se llama con el proveedor y la fecha (ej: <i>Coca-Cola – 02/11</i>).</p>
 <h3>Qué cantidad poner</h3>
 <ul>
 <li>Unidad, caja y pack: números enteros (<span class="cant">3</span>, <span class="cant">12</span>). Sin coma.</li>
@@ -108,12 +123,13 @@ th,td{border:1px solid var(--linea);padding:6px 8px;vertical-align:top}
 <li>En <span class="pant">Tu pedido</span>, tocá <b class="btn">Quitar</b> al lado del producto.</li>
 <li>La app pregunta <b>¿Quitar este producto del pedido?</b> Tocá <b class="btn">Sí, quitar</b> (o <b class="btn">No</b> para dejarlo).</li>
 </ol>
-<div class="aviso"><strong>Solo ves tus rubros</strong>La app te muestra únicamente los productos de los rubros que te asignaron. Hay un solo pedido por período.</div>
+<p>También podés cambiar una cantidad desde la lista de arriba: escribí el número nuevo (o borralo para quitarlo) y tocá <b class="btn">Guardar cantidades</b>.</p>
+<div class="aviso"><strong>Solo ves tus rubros</strong>La app te muestra únicamente los productos de los rubros que te asignaron.</div>
 
 <h2>5. Enviar el pedido</h2>
 <ol>
 <li>Revisá la lista en <span class="pant">Tu pedido</span>.</li>
-<li>Tocá <b class="btn">Enviar pedido</b>. (Si no cargaste nada, el botón no funciona.)</li>
+<li>Tocá <b class="btn">Enviar pedido</b>. (Si no cargaste nada, el botón no funciona. Si la app dice <b>Tenés cantidades sin guardar</b>, primero tocá <b class="btn">Guardar cantidades</b>.)</li>
 <li>La app pregunta <b>¿Enviás el pedido a la encargada? Después no vas a poder cambiarlo.</b></li>
 <li>Tocá <b class="btn">Sí, enviar</b>. Si querés seguir editando, tocá <b class="btn">No, seguir editando</b>.</li>
 </ol>
@@ -126,7 +142,7 @@ th,td{border:1px solid var(--linea);padding:6px 8px;vertical-align:top}
 <tr><td><b>Devuelto</b></td><td>La encargada pidió un cambio.</td><td>Leé el comentario, corregí y volvé a enviar.</td></tr>
 <tr><td><b>Aprobado</b></td><td>Listo, la encargada lo aceptó.</td><td>Nada. Ya no se puede cambiar.</td></tr>
 </table>
-<div class="aviso mal"><strong>Si te lo devolvieron</strong>Arriba aparece <b>La encargada te devolvió el pedido.</b> con el motivo. Leelo, corregí (quitá un producto y volvé a agregarlo con la cantidad correcta) y tocá de nuevo <b class="btn">Enviar pedido</b>.</div>
+<div class="aviso mal"><strong>Si te lo devolvieron</strong>Arriba aparece <b>La encargada te devolvió el pedido.</b> con el motivo. Leelo, corregí las cantidades en la lista de arriba, tocá <b class="btn">Guardar cantidades</b> y después tocá de nuevo <b class="btn">Enviar pedido</b>.</div>
 
 <h2>7. Salir</h2>
 <p>Tocá <b class="btn">Salir</b> arriba a la derecha, al lado de tu nombre. Hacelo si el celular lo usa otra persona.</p>
@@ -134,13 +150,15 @@ th,td{border:1px solid var(--linea);padding:6px 8px;vertical-align:top}
 <h2>8. Si algo no anda</h2>
 <table>
 <tr><th>Qué pasa</th><th>Qué hacer</th></tr>
-<tr><td>No puedo empezar el pedido</td><td>No hay período abierto. Esperá a que lo abran o avisale a la encargada.</td></tr>
-<tr><td>Dice que ya tengo un pedido</td><td>Hay uno solo por período. Seguí con el que tenés.</td></tr>
+<tr><td>No puedo empezar el pedido</td><td>No hay período abierto. Avisale a la encargada.</td></tr>
+<tr><td>El proveedor no aparece en la lista</td><td>Usá <b>Otro / sin proveedor</b> y avisale a la encargada para que lo cargue.</td></tr>
+<tr><td><b>Revisá estas cantidades:</b></td><td>Algún número está mal. La app dice cuál; corregilo y tocá de nuevo <b>Guardar cantidades</b>. No se guardó nada hasta que esté todo bien.</td></tr>
+<tr><td><b>No hay un pedido anterior a este proveedor</b></td><td>Es tu primer pedido a ese proveedor: buscá los productos abajo.</td></tr>
 <tr><td>No veo productos o faltan rubros</td><td>Avisale a la encargada o al administrador: tienen que asignarte los rubros.</td></tr>
 <tr><td>No aparece mi nombre, o trabajo en otra sucursal</td><td>Fijate que elegiste bien la sucursal. Si sigue igual, avisá a la encargada o al administrador.</td></tr>
 <tr><td>PIN incorrecto o acceso bloqueado</td><td>Revisá los 4 números. Tras 10 errores, esperá 15 minutos.</td></tr>
 <tr><td><b>Poné una cantidad mayor a cero.</b></td><td>Falta la cantidad o es cero.</td></tr>
-<tr><td><b>Para UNIDAD la cantidad tiene que ser un número entero.</b></td><td>Sacá la coma. Solo kilo y litro llevan decimales.</td></tr>
+<tr><td><b>Para UN la cantidad tiene que ser un número entero.</b></td><td>Sacá la coma. Solo kilo y litro llevan decimales.</td></tr>
 <tr><td>Quiero cambiar un pedido Enviado o Aprobado</td><td>No se puede. Hablá con la encargada.</td></tr>
 <tr><td>La app no carga</td><td>Revisá que tengas internet y probá de nuevo. Si sigue, avisá a la encargada.</td></tr>
 </table>

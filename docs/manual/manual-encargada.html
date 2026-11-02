@@ -57,7 +57,7 @@ th,td{border:1px solid var(--linea);padding:6px 8px;vertical-align:top}
 <main>
 
 <h2>1. Para qué sirve</h2>
-<p>Los repositores cargan lo que falta en cada sucursal. Vos revisás cada pedido, lo aprobás o lo devolvés, juntás todo en un <b>consolidado</b> por proveedor y descargás el Excel para comprar.</p>
+<p>Los repositores arman un pedido por proveedor con lo que falta en cada sucursal. Vos revisás cada pedido y lo aprobás o lo devolvés. Al aprobarlo, la app te arma el <b>mensaje para el proveedor</b>, listo para mandar por WhatsApp. También podés juntar todo en un <b>consolidado</b> y descargar el Excel.</p>
 <div class="direccion">Dirección de la app: <span class="dir"></span></div>
 
 <h2>2. Entrar</h2>
@@ -67,17 +67,17 @@ th,td{border:1px solid var(--linea);padding:6px 8px;vertical-align:top}
 <li>Escribí tu <b>Correo</b> y tu <b>Clave</b>.</li>
 <li>Hacé clic en <b class="btn">Entrar</b>.</li>
 </ol>
-<p>Vas a ver la pantalla <span class="pant">Compras</span> con dos accesos: <b>Revisar pedidos</b> y <b>Consolidado</b>. Para salir, usá <b class="btn">Salir</b> arriba a la derecha.</p>
+<p>Vas a ver la pantalla <span class="pant">Compras</span> con tres accesos: <b>Revisar pedidos</b>, <b>Consolidado</b> y <b>Proveedores</b>. Para salir, usá <b class="btn">Salir</b> arriba a la derecha.</p>
 
 <h2>3. Revisar pedidos</h2>
 <ol>
 <li>Entrá a <b>Revisar pedidos</b>. Se abre <span class="pant">Pedidos para revisar</span>.</li>
 <li>Elegí la pestaña por estado: <b class="btn">Enviados</b>, <b class="btn">Devueltos</b>, <b class="btn">Aprobados</b> o <b class="btn">Todos</b>. Arranca en <b>Enviados</b>.</li>
 <li>Si querés, filtrá por <b>Sucursal</b>: <b>Todas</b>, <b>Carmar 1</b> o <b>Carmar 2</b>.</li>
-<li>Cada fila muestra el repositor, la sucursal, el período, la cantidad de productos y la fecha de envío. Hacé clic en una para abrirla.</li>
+<li>Cada fila muestra el repositor, el nombre del pedido (si no le pusieron uno, el proveedor y la fecha, ej: <i>Coca-Cola – 02/11</i>), la sucursal, el período, la cantidad de productos y la fecha de envío. Hacé clic en una para abrirla.</li>
 <li>Si hay muchos, usá <b class="btn">Anterior</b> y <b class="btn">Siguiente</b>.</li>
 </ol>
-<p>Al abrir un pedido (<span class="pant">Pedido de ...</span>) ves el <b>Estado</b>, la <b>Sucursal</b>, el <b>Período</b> y <b>Enviado por</b> (quién y cuándo). Abajo, los <b>Productos</b> agrupados por rubro, con código, observación y cantidad. Para volver, usá <b>Volver a la lista</b>.</p>
+<p>Al abrir un pedido (<span class="pant">Pedido de ...</span>) ves el nombre del <b>Pedido</b>, el <b>Proveedor</b>, el <b>Estado</b>, la <b>Sucursal</b>, el <b>Período</b> y <b>Enviado por</b> (quién y cuándo). Abajo, los <b>Productos</b> agrupados por rubro, con código, observación y cantidad. Para volver, usá <b>Volver a la lista</b>.</p>
 
 <h2>4. Aprobar o devolver un pedido</h2>
 <p>Solo los pedidos en estado <b>Enviado</b> tienen botones.</p>
@@ -86,6 +86,18 @@ th,td{border:1px solid var(--linea);padding:6px 8px;vertical-align:top}
 <li>Tocá <b class="btn">Aprobar</b>.</li>
 <li>La app pregunta <b>¿Aprobás este pedido? Después no se puede cambiar.</b> Hacé clic en <b class="btn">Sí, aprobar</b> (o en <b class="btn">Cancelar</b>).</li>
 </ol>
+<h3>Mandar el pedido al proveedor</h3>
+<p>Cuando el pedido está <b>Aprobado</b>, abajo aparece <span class="pant">Mensaje para el proveedor</span> con el texto listo. Por ejemplo:</p>
+<p class="aviso" style="white-space:pre-line">Hola! Pedido de Supermercado Cármar – Sucursal 1:
+• Coca-Cola 2,25 L x 10 PACK
+• Sprite 1,5 L x 6 PACK
+Gracias!</p>
+<ol>
+<li>Hacé clic en <b class="btn">Enviar por WhatsApp</b>. Se abre WhatsApp (en la PC o el celular) con el chat del proveedor y el mensaje ya escrito.</li>
+<li>Revisalo y mandalo desde WhatsApp. La app no manda nada sola.</li>
+</ol>
+<p>Si preferís pegarlo en otro lado (otro chat, un mail), hacé clic en <b class="btn">Copiar</b> y pegalo donde quieras.</p>
+<div class="aviso ojo"><strong>Si dice que el proveedor no tiene WhatsApp cargado</strong>WhatsApp se abre igual, pero vas a tener que elegir el contacto a mano. Para que no pase más, cargale el número en <b>Proveedores</b> (ver punto 8).</div>
 <h3>Devolver</h3>
 <ol>
 <li>Hacé clic en <b class="btn">Devolver</b>.</li>
@@ -140,6 +152,7 @@ th,td{border:1px solid var(--linea);padding:6px 8px;vertical-align:top}
 <ol>
 <li>Verificá que el administrador abrió el período.</li>
 <li>Durante la semana, mirá los pedidos <b>Enviados</b> y aprobalos o devolvelos.</li>
+<li>De cada pedido aprobado, mandá el mensaje al proveedor con <b>Enviar por WhatsApp</b>.</li>
 <li>Generá el consolidado para ir viendo cómo viene.</li>
 <li>Cuando estén todos, hacé clic en <b>Regenerar</b>.</li>
 <li>Ajustá cantidades y observaciones, y hacé clic en <b>Guardar</b>.</li>
@@ -147,19 +160,32 @@ th,td{border:1px solid var(--linea);padding:6px 8px;vertical-align:top}
 <li>Descargá el Excel y hacé las compras.</li>
 </ol>
 
-<h2>8. Instalar la app en la PC</h2>
+<h2>8. Proveedores</h2>
+<p>Acá cargás a quién se le compra y su número de WhatsApp. Los repositores eligen el proveedor de esta lista al empezar cada pedido. Entrá desde <b>Proveedores</b>, en la pantalla <span class="pant">Compras</span>.</p>
+<ol>
+<li>Hacé clic en <b class="btn">Nuevo proveedor</b>.</li>
+<li>Completá el <b>Nombre</b> (ej: <i>Coca-Cola</i>).</li>
+<li>En <b>WhatsApp</b> poné el número con <b>549</b>, después el código de área y el número, <b>sin 0 ni 15</b>. Ejemplo: <span class="cant">5493624123456</span>.</li>
+<li>Hacé clic en <b class="btn">Crear proveedor</b>. Vas a ver <b>Proveedor guardado.</b></li>
+</ol>
+<p>Para cambiar el número de uno que ya está, buscalo en la lista, abrilo para editar y hacé clic en <b class="btn">Guardar cambios</b>.</p>
+<div class="aviso"><strong>Si no sabés el número</strong>Preguntale al repositor que le hace los pedidos a ese proveedor. Podés cargar el proveedor sin número y completarlo después.</div>
+
+<h2>9. Instalar la app en la PC</h2>
 <ol>
 <li>Abrí <span class="dir"></span> en Chrome o Edge.</li>
 <li>En la barra de direcciones, a la derecha, buscá el ícono de instalar (una pantallita con una flecha).</li>
 <li>Hacé clic y confirmá con <b>Instalar</b>. Se abre como una app aparte.</li>
 </ol>
 
-<h2>9. Si algo no anda</h2>
+<h2>10. Si algo no anda</h2>
 <table>
 <tr><th>Qué pasa</th><th>Qué hacer</th></tr>
 <tr><td>Un repositor dice que no ve productos</td><td>Avisá al administrador para que le asigne los rubros.</td></tr>
 <tr><td>No puedo entrar</td><td>Revisá que estés en la pestaña <b>Administración</b> y que Correo y Clave estén bien escritos.</td></tr>
 <tr><td>No hay pedidos en la lista</td><td>Probá con otro estado o sucursal.</td></tr>
+<tr><td>Un repositor no encuentra el proveedor al empezar el pedido</td><td>Cargalo en <b>Proveedores</b>. Mientras tanto puede usar <b>Otro / sin proveedor</b>.</td></tr>
+<tr><td>Enviar por WhatsApp abre el chat equivocado o no encuentra el número</td><td>Revisá el número del proveedor en <b>Proveedores</b>: 549 + área + número, sin 0 ni 15.</td></tr>
 <tr><td>El período no tiene consolidado</td><td>Dice <b>Este período todavía no tiene consolidado.</b> Hacé clic en <b>Generar consolidado</b>.</td></tr>
 <tr><td>No puedo devolver un pedido</td><td>Falta el comentario, o el consolidado del período ya está aprobado.</td></tr>
 <tr><td>Una cantidad no se guarda</td><td>Debajo de la fila sale el motivo. Revisá que sea mayor a cero, y entera si no es kilo o litro.</td></tr>
