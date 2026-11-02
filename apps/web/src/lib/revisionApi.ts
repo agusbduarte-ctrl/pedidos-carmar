@@ -13,6 +13,7 @@ export interface PedidoRevisionResumen {
   estado: EstadoPedido;
   sucursal: Sucursal;
   fechaEnvio: string | null;
+  createdAt: string;
   repositor: UsuarioNombre;
   periodo: PeriodoResumen;
   _count: { items: number };
@@ -25,7 +26,7 @@ export interface ItemRevision extends Omit<ItemPedido, "producto"> {
 export interface PedidoRevisionDetalle {
   id: string;
   titulo: string | null;
-  proveedor: UsuarioNombre | null;
+  proveedor: { id: string; nombre: string; telefono: string | null } | null;
   estado: EstadoPedido;
   sucursal: Sucursal;
   periodo: PeriodoResumen;
@@ -37,6 +38,7 @@ export interface PedidoRevisionDetalle {
   fechaEnvio: string | null;
   fechaDevolucion: string | null;
   fechaAprobacion: string | null;
+  createdAt: string;
   items: ItemRevision[];
 }
 

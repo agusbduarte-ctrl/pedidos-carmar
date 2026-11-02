@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ApiError, type Sucursal } from "../lib/api";
-import type { EstadoPedido } from "../lib/pedidosApi";
+import { nombrePedido, type EstadoPedido } from "../lib/pedidosApi";
 import { revisionApi } from "../lib/revisionApi";
 import { EstadoEtiqueta, formatearFecha, nombreSucursal } from "../revision/comun";
 
@@ -78,7 +78,7 @@ export default function RevisionPedidos() {
               <li key={p.id}>
                 <Link to={`/revision/${p.id}`} className="fila-revision">
                   <span className="fila-titulo fila-revision-repositor">{p.repositor.nombre}</span>
-                  <span className="chico">{p.titulo ?? "Pedido sin título"}</span>
+                  <span className="chico">{nombrePedido(p)}</span>
                   <span className="fila-revision-rotulos">
                     <span className="rotulo">{nombreSucursal(p.sucursal)}</span>
                     <span className="rotulo">{p.periodo.nombre}</span>

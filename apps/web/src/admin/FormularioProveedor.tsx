@@ -80,13 +80,14 @@ export default function FormularioProveedor({ proveedor, alEmpezar, alGuardar, a
           />
         </label>
         <label>
-          Teléfono (opcional)
+          WhatsApp (opcional)
           <input
             type="tel"
             autoComplete="off"
             value={telefono}
             onChange={(e) => setTelefono(e.target.value)}
           />
+          <span className="chico">Con código de país y área, sin 0 ni 15. Ej: 5493624123456</span>
         </label>
         {!editando && (
           <p className="chico">

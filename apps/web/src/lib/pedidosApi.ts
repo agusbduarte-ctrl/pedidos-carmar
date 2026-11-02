@@ -23,6 +23,13 @@ export interface ProveedorResumen {
   nombre: string;
 }
 
+export function nombrePedido(p: { titulo: string | null; proveedor: ProveedorResumen | null; createdAt: string }): string {
+  if (p.titulo) return p.titulo;
+  const d = new Date(p.createdAt);
+  const fecha = `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`;
+  return p.proveedor ? `${p.proveedor.nombre} – ${fecha}` : `Pedido del ${fecha}`;
+}
+
 export interface PedidoResumen {
   id: string;
   titulo: string | null;
@@ -41,7 +48,21 @@ export interface PedidoCompleto {
   estado: EstadoPedido;
   comentarioDevolucion: string | null;
   periodo: PeriodoResumen;
+  createdAt: string;
   items: ItemPedido[];
+}
+
+export interface SugeridoProducto {
+  producto: ProductoBuscado;
+  vecesPedido: number;
+  ultimaCantidad: string | null;
+  ultimaFecha: string | null;
+}
+
+export interface RepetirResultado {
+  data: PedidoCompleto;
+  copiados: number;
+  omitidos: number;
 }
 
 export interface Meta {
@@ -75,11 +96,24 @@ export const pedidosApi = {
     api<{ data: PedidoResumen[]; meta: Meta }>("/pedidos/mis-pedidos").then((r) => r.data),
   detalle: (id: string) =>
     api<{ data: PedidoCompleto }>(`/pedidos/mis-pedidos/${id}`).then((r) => r.data),
-  crear: (titulo?: string) =>
+  crear: (datos: { proveedorId?: string; titulo?: string } = {}) =>
     api<{ data: PedidoCompleto }>("/pedidos", {
       method: "POST",
-      body: titulo ? { titulo } : {},
+      body: {
+        ...(datos.proveedorId ? { proveedorId: datos.proveedorId } : {}),
+        ...(datos.titulo ? { titulo: datos.titulo } : {}),
+      },
     }).then((r) => r.data),
+  proveedores: () =>
+    api<{ data: ProveedorResumen[] }>("/pedidos/proveedores").then((r) => r.data),
+  sugeridos: (id: string) =>
+    api<{ data: SugeridoProducto[] }>(`/pedidos/${id}/sugeridos`).then((r) => r.data),
+  fijarCantidades: (id: string, items: { productoId: string; cantidad: number }[]) =>
+    api<{ data: PedidoCompleto }>(`/pedidos/${id}/items`, { method: "PUT", body: { items } }).then(
+      (r) => r.data,
+    ),
+  repetirUltimo: (id: string) =>
+    api<RepetirResultado>(`/pedidos/${id}/repetir-ultimo`, { method: "POST" }),
   cambiarTitulo: (id: string, titulo: string | null) =>
     api<{ data: PedidoCompleto }>(`/pedidos/${id}`, { method: "PATCH", body: { titulo } }).then(
       (r) => r.data,

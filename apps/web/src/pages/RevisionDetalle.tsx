@@ -4,6 +4,8 @@ import { useAuth } from "../auth/AuthContext";
 import { ApiError } from "../lib/api";
 import Cantidad from "../components/Cantidad";
 import { revisionApi, type ItemRevision } from "../lib/revisionApi";
+import { nombrePedido } from "../lib/pedidosApi";
+import MensajeProveedor from "../revision/BloqueMensajeProveedor";
 import AccionesRevision from "../revision/AccionesRevision";
 import { EstadoEtiqueta, formatearFecha, nombreSucursal } from "../revision/comun";
 
@@ -51,8 +53,12 @@ export default function RevisionDetalle() {
       <h1>Pedido de {p.repositor.nombre}</h1>
       <dl className="panel pares">
         <div className="par">
-          <dt>Título</dt>
-          <dd>{p.titulo ?? "Pedido sin título"}</dd>
+          <dt>Pedido</dt>
+          <dd>{nombrePedido(p)}</dd>
+        </div>
+        <div className="par">
+          <dt>Proveedor</dt>
+          <dd>{p.proveedor?.nombre ?? "Sin proveedor"}</dd>
         </div>
         <div className="par">
           <dt>Estado</dt>
@@ -120,6 +126,8 @@ export default function RevisionDetalle() {
           </div>
         ))}
       </section>
+
+      {p.estado === "APROBADO" && <MensajeProveedor pedido={p} />}
 
       {p.estado === "ENVIADO" && user?.rol === "ENCARGADA" && <AccionesRevision pedidoId={p.id} />}
       {p.estado === "ENVIADO" && user?.rol === "ADMIN" && (

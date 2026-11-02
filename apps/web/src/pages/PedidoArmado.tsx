@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "../lib/api";
-import { pedidosApi, type PedidoCompleto } from "../lib/pedidosApi";
+import { nombrePedido, pedidosApi, type PedidoCompleto } from "../lib/pedidosApi";
+import Sugeridos from "../pedidos/Sugeridos";
 import { EstadoEtiqueta } from "../revision/comun";
 import BuscadorProductos from "../pedidos/BuscadorProductos";
 import ListaItems from "../pedidos/ListaItems";
@@ -17,8 +18,9 @@ function EditorTitulo({ pedido }: { pedido: PedidoCompleto }) {
   const sinCambios = titulo.trim() === (pedido.titulo ?? "");
 
   return (
-    <form
-      className="bloque"
+    <details className="bloque">
+      <summary>Ponerle un nombre (opcional)</summary>
+      <form
       onSubmit={(e) => {
         e.preventDefault();
         guardar.mutate();
@@ -42,14 +44,21 @@ function EditorTitulo({ pedido }: { pedido: PedidoCompleto }) {
       <button className="boton secundario" type="submit" disabled={guardar.isPending || sinCambios}>
         {guardar.isPending ? "Guardando..." : "Guardar título"}
       </button>
-    </form>
+      </form>
+    </details>
   );
 }
 
 export default function PedidoArmado() {
   const { id = "" } = useParams();
   const qc = useQueryClient();
-  const [confirmandoEnvio, setConfirmandoEnvio] = useState(false);
+  const [sinGuardar, setSinGuardar] = useState(false);
+  const [avisoSinGuardar, setAvisoSinGuardar] = useState(false);
+  const alCambiarSinGuardar = useCallback((hay: boolean) => {
+    setSinGuardar(hay);
+    if (!hay) setAvisoSinGuardar(false);
+  }, []);
+  const [confirmandoEnvio,setConfirmandoEnvio] = useState(false);
   const [errorEnvio, setErrorEnvio] = useState<{ mensaje: string; detalles: string[] } | null>(null);
 
   const q = useQuery({
@@ -107,7 +116,7 @@ export default function PedidoArmado() {
   return (
     <main className="pagina">
       {volver}
-      <h1>{pedido.titulo ?? "Pedido sin título"}</h1>
+      <h1>{nombrePedido(pedido)}</h1>
       <p className="encabezado-pedido">
         {pedido.periodo.nombre} <EstadoEtiqueta estado={pedido.estado} />
       </p>
@@ -130,7 +139,7 @@ export default function PedidoArmado() {
         </div>
       )}
 
-      {editable && <EditorTitulo key={pedido.titulo ?? ""} pedido={pedido} />}
+      {editable && <Sugeridos pedido={pedido} alCambiarSinGuardar={alCambiarSinGuardar} />}
 
       <section className="bloque">
         <h2>Tu pedido ({pedido.items.length})</h2>
@@ -140,6 +149,11 @@ export default function PedidoArmado() {
       {editable && (
         <>
           <section className="bloque">
+            {avisoSinGuardar && (
+              <p className="error" role="alert">
+                Tenés cantidades sin guardar
+              </p>
+            )}
             {errorEnvio && (
               <div className="error" role="alert">
                 <p>{errorEnvio.mensaje}</p>
@@ -172,6 +186,10 @@ export default function PedidoArmado() {
                 disabled={pedido.items.length === 0}
                 onClick={() => {
                   setErrorEnvio(null);
+                  if (sinGuardar) {
+                    setAvisoSinGuardar(true);
+                    return;
+                  }
                   setConfirmandoEnvio(true);
                 }}
               >
@@ -180,6 +198,7 @@ export default function PedidoArmado() {
             )}
           </section>
           <BuscadorProductos pedidoId={pedido.id} />
+          <EditorTitulo key={pedido.titulo ?? ""} pedido={pedido} />
         </>
       )}
     </main>

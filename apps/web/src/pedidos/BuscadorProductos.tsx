@@ -124,7 +124,7 @@ export default function BuscadorProductos({ pedidoId }: { pedidoId: string }) {
 
   return (
     <section className="bloque">
-      <h2>Buscar productos</h2>
+      <h2>¿Falta algo? Buscalo</h2>
       <label>
         Nombre o código
         <input

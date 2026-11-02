@@ -2,19 +2,19 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "../lib/api";
-import { pedidosApi } from "../lib/pedidosApi";
+import { nombrePedido, pedidosApi } from "../lib/pedidosApi";
+import SelectorProveedor from "../pedidos/SelectorProveedor";
 import { EstadoEtiqueta } from "../revision/comun";
 
 export default function PedidoRepositor() {
   const qc = useQueryClient();
   const navigate = useNavigate();
-  const [titulo, setTitulo] = useState("");
+  const [eligiendo, setEligiendo] = useState(false);
   const lista = useQuery({ queryKey: ["pedidos", "mis-pedidos"], queryFn: pedidosApi.misPedidos });
 
   const crear = useMutation({
-    mutationFn: () => pedidosApi.crear(titulo.trim() || undefined),
+    mutationFn: (proveedorId: string | undefined) => pedidosApi.crear({ proveedorId }),
     onSuccess: (pedido) => {
-      setTitulo("");
       void qc.invalidateQueries({ queryKey: ["pedidos"] });
       navigate(`/pedido/${pedido.id}`);
     },
@@ -24,31 +24,23 @@ export default function PedidoRepositor() {
     <>
       <section className="bloque">
         <h2>Nuevo pedido</h2>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            crear.mutate();
-          }}
-        >
-          <label>
-            Título (opcional)
-            <input
-              type="text"
-              maxLength={80}
-              value={titulo}
-              placeholder="Ej: Arcor viernes"
-              onChange={(e) => setTitulo(e.target.value)}
-            />
-          </label>
-          {crear.isError && (
-            <p className="error" role="alert">
-              {crear.error instanceof ApiError ? crear.error.message : "Ocurrió un error inesperado."}
-            </p>
-          )}
-          <button className="boton" type="submit" disabled={crear.isPending}>
-            {crear.isPending ? "Creando..." : "Nuevo pedido"}
+        {eligiendo ? (
+          <SelectorProveedor
+            deshabilitado={crear.isPending}
+            alElegir={(id) => crear.mutate(id)}
+            alCancelar={() => setEligiendo(false)}
+          />
+        ) : (
+          <button className="boton" type="button" onClick={() => setEligiendo(true)}>
+            Nuevo pedido
           </button>
-        </form>
+        )}
+        {crear.isPending && <p className="chico">Creando...</p>}
+        {crear.isError && (
+          <p className="error" role="alert">
+            {crear.error instanceof ApiError ? crear.error.message : "Ocurrió un error inesperado."}
+          </p>
+        )}
       </section>
 
       <section className="bloque">
@@ -67,7 +59,7 @@ export default function PedidoRepositor() {
             {lista.data.map((p) => (
               <li key={p.id}>
                 <Link to={`/pedido/${p.id}`} className="fila-revision compacta">
-                  <span className="fila-titulo fila-revision-repositor">{p.titulo ?? "Pedido sin título"}</span>
+                  <span className="fila-titulo fila-revision-repositor">{nombrePedido(p)}</span>
                   <span className="fila-revision-rotulos">
                     <span className="rotulo">{p.periodo.nombre}</span>
                   </span>
