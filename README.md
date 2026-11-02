@@ -89,7 +89,7 @@ Creados por `pnpm --filter api seed`, que **borra y recrea todos los datos**.
 
 ## API
 
-Todas las rutas `/admin/*` requieren sesión de un usuario con rol ADMIN. El token viaja en la cookie httpOnly `token` (también se acepta `Authorization: Bearer`).
+Todas las rutas `/admin/*` requieren sesión de un usuario con rol ADMIN, salvo `/admin/proveedores`, que también acepta ENCARGADA. El token viaja en la cookie httpOnly `token` (también se acepta `Authorization: Bearer`).
 
 | Método y ruta | Qué hace |
 |---|---|
