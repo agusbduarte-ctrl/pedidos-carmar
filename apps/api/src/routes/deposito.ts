@@ -3,6 +3,7 @@ import { EstadoPedido, Prisma, Rol } from "@prisma/client";
 import { z } from "zod";
 import { authenticate, requireRole } from "../lib/auth.js";
 import { buildMeta, parsePagination, skipTake } from "../lib/pagination.js";
+import { datosAviso } from "../lib/notificaciones.js";
 import { cantidadValida } from "../lib/pedidos-helpers.js";
 import { sendValidationError } from "../lib/zod-helpers.js";
 
@@ -116,6 +117,7 @@ export default async function depositoRoutes(app: FastifyInstance) {
       select: {
         id: true,
         estado: true,
+        fechaRevisionDeposito: true,
         items: {
           select: { id: true, cantidad: true, producto: { select: { codigo: true, nombre: true, unidad: true } } },
         },
@@ -167,6 +169,26 @@ export default async function depositoRoutes(app: FastifyInstance) {
       return true;
     });
     if (!aplicado) return reply.code(409).send(YA_CAMBIO);
+
+    // Solo la primera revisión avisa: si Rodrigo corrige, no se repite
+    if (!pedido.fechaRevisionDeposito) {
+      app.seguirAviso(
+        datosAviso(app.db, pedido.id)
+        .then(
+          (d) =>
+            d &&
+            app.notificar(
+              { roles: [Rol.ENCARGADA], excepto: request.user.id },
+              {
+                titulo: "Depósito revisó un pedido",
+                cuerpo: `${d.proveedor} (${d.sucursal}) ya tiene lo del galpón cargado. Podés aprobarlo.`,
+                url: `/revision/${pedido.id}`,
+              },
+            ),
+        )
+        .catch((err) => app.log.warn({ err }, "No se pudo armar el aviso de revisión")),
+      );
+    }
 
     return { data: await detalle(pedido.id) };
   });

@@ -9,6 +9,7 @@ import {
   verificarRubroAsignado,
 } from "../lib/pedidos-helpers.js";
 import { isUniqueViolation, sendValidationError } from "../lib/zod-helpers.js";
+import { datosAviso } from "../lib/notificaciones.js";
 import { periodoConConsolidadoAprobado } from "../lib/consolidado-helpers.js";
 
 const PROVEEDOR_SELECT = { select: { id: true, nombre: true } } as const;
@@ -640,6 +641,34 @@ export default async function pedidosRoutes(app: FastifyInstance) {
         include: PEDIDO_COMPLETO,
       }),
     ]);
+
+    app.seguirAviso(
+      datosAviso(app.db, pedido.id)
+      .then(async (d) => {
+        if (!d) return;
+        const pidio = `${d.repositor} pidió a ${d.proveedor} (${d.sucursal}).`;
+        await Promise.all([
+          app.notificar(
+            { roles: [Rol.DEPOSITO], excepto: request.user.id },
+            {
+              titulo: "Pedido nuevo para revisar",
+              cuerpo: `${pidio} Fijate cuánto hay en el galpón.`,
+              url: `/deposito/${pedido.id}`,
+            },
+          ),
+          app.notificar(
+            { roles: [Rol.ENCARGADA], excepto: request.user.id },
+            {
+              titulo: "Pedido nuevo",
+              cuerpo: `${pidio} Esperá la revisión del depósito.`,
+              url: `/revision/${pedido.id}`,
+            },
+          ),
+        ]);
+      })
+      .catch((err) => app.log.warn({ err }, "No se pudo armar el aviso de pedido enviado")),
+    );
+
     return { data };
   });
 
@@ -668,6 +697,42 @@ export default async function pedidosRoutes(app: FastifyInstance) {
     if (count === 0) return reply.code(400).send({ error: errorEstado });
 
     return { data: await app.db.pedido.findUniqueOrThrow({ where: { id }, include: PEDIDO_DETALLE }) };
+  };
+
+  // Fire-and-forget: se llama después de que la transición se aplicó
+  const avisarResolucion = (id: string, accion: "aprobar" | "devolver", actorId: string) => {
+    app.seguirAviso((async () => {
+      const d = await datosAviso(app.db, id);
+      if (!d) return;
+      if (accion === "devolver") {
+        await app.notificar(
+          { usuarioIds: [d.repositorId], excepto: actorId },
+          {
+            titulo: "Te devolvieron un pedido",
+            cuerpo: d.comentarioDevolucion
+              ? `Pedido a ${d.proveedor}: ${d.comentarioDevolucion}`
+              : `Pedido a ${d.proveedor}`,
+            url: `/pedido/${id}`,
+          },
+        );
+        return;
+      }
+      await app.notificar(
+        { usuarioIds: [d.repositorId], excepto: actorId },
+        { titulo: "Pedido aprobado", cuerpo: `Tu pedido a ${d.proveedor} fue aprobado.`, url: `/pedido/${id}` },
+      );
+      const hayDelGalpon = await app.db.itemPedido.count({ where: { pedidoId: id, cantidadDeposito: { gt: 0 } } });
+      if (hayDelGalpon > 0) {
+        await app.notificar(
+          { roles: [Rol.DEPOSITO], excepto: actorId },
+          {
+            titulo: "Hay cosas para mandar",
+            cuerpo: `Mandá a ${d.sucursal} lo del pedido a ${d.proveedor}.`,
+            url: "/deposito",
+          },
+        );
+      }
+    })().catch((err) => app.log.warn({ err }, "No se pudo armar el aviso del pedido")));
   };
 
   app.get("/", puedeConsultar, async (request, reply) => {
@@ -729,22 +794,26 @@ export default async function pedidosRoutes(app: FastifyInstance) {
       return reply.code(400).send(PERIODO_CONSOLIDADO);
     }
 
-    return resolverEnviado(params.data.id, reply, "Solo se pueden devolver pedidos ENVIADOS", {
+    const res = await resolverEnviado(params.data.id, reply, "Solo se pueden devolver pedidos ENVIADOS", {
       estado: EstadoPedido.DEVUELTO,
       fechaDevolucion: new Date(),
       devueltoPorId: request.user.id,
       comentarioDevolucion: body.data.comentario,
     });
+    if (reply.statusCode < 400) avisarResolucion(params.data.id, "devolver", request.user.id);
+    return res;
   });
 
   app.post("/:id/aprobar", soloEncargada, async (request, reply) => {
     const params = idParams.safeParse(request.params);
     if (!params.success) return sendValidationError(reply, params.error);
 
-    return resolverEnviado(params.data.id, reply, "Solo se pueden aprobar pedidos ENVIADOS", {
+    const res = await resolverEnviado(params.data.id, reply, "Solo se pueden aprobar pedidos ENVIADOS", {
       estado: EstadoPedido.APROBADO,
       fechaAprobacion: new Date(),
       aprobadoPorId: request.user.id,
     });
+    if (reply.statusCode < 400) avisarResolucion(params.data.id, "aprobar", request.user.id);
+    return res;
   });
 }

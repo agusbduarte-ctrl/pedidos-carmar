@@ -17,10 +17,25 @@ import pedidosRoutes from "./routes/pedidos.js";
 import consolidadosRoutes from "./routes/consolidados.js";
 import depositoRoutes from "./routes/deposito.js";
 import historialRoutes from "./routes/historial.js";
+import pushRoutes from "./routes/push.js";
+import {
+  crearEmisorWebPush,
+  leerVapid,
+  notificar,
+  type EmisorPush,
+  type Notificar,
+} from "./lib/notificaciones.js";
 
 declare module "fastify" {
   interface FastifyInstance {
     db: PrismaClient;
+    // Avisos push: nunca tira error; sin emisor no hace nada
+    notificar: Notificar;
+    // Para tests: espera a que terminen los avisos en curso
+    esperarNotificaciones: () => Promise<void>;
+    // Registra una tarea de aviso en segundo plano (para poder esperarla en tests)
+    seguirAviso: (tarea: Promise<unknown>) => void;
+    clavePublicaPush: string | null;
   }
 }
 
@@ -36,6 +51,9 @@ type HealthResponse =
 
 export interface BuildAppOptions {
   logger?: boolean;
+  // Reemplaza al emisor real de Web Push (tests). Sin esto se arma con las variables VAPID_*.
+  emisorPush?: EmisorPush;
+  clavePublicaPush?: string;
 }
 
 function requireEnv(name: string): string {
@@ -58,6 +76,26 @@ export async function buildApp(
   });
 
   app.decorate("db", db);
+
+  const vapid = leerVapid(process.env);
+  const emisorPush = options.emisorPush ?? (vapid ? crearEmisorWebPush(vapid) : null);
+  if (!emisorPush) {
+    app.log.warn("Avisos push desactivados: faltan VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY o VAPID_SUBJECT");
+  }
+  const enCurso = new Set<Promise<unknown>>();
+  app.decorate("clavePublicaPush", emisorPush ? (options.clavePublicaPush ?? vapid?.publica ?? null) : null);
+  app.decorate("notificar", async (destino, mensaje) => {
+    if (!emisorPush) return;
+    await notificar(db, emisorPush, destino, mensaje, app.log);
+  });
+  app.decorate("seguirAviso", (tarea) => {
+    const p = tarea.catch(() => undefined);
+    enCurso.add(p);
+    void p.finally(() => enCurso.delete(p));
+  });
+  app.decorate("esperarNotificaciones", async () => {
+    await Promise.allSettled([...enCurso]);
+  });
 
   await app.register(cors, {
     origin: process.env.CORS_ORIGIN ?? "http://localhost:5173",
@@ -111,6 +149,7 @@ export async function buildApp(
   await app.register(consolidadosRoutes, { prefix: "/consolidados" });
   await app.register(depositoRoutes, { prefix: "/deposito" });
   await app.register(historialRoutes, { prefix: "/historial" });
+  await app.register(pushRoutes, { prefix: "/push" });
 
   app.addHook("onClose", async () => {
     if (!prisma) await db.$disconnect();

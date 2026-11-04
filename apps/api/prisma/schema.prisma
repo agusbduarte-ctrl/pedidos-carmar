@@ -70,14 +70,15 @@ model Usuario {
 
   // Relaciones
   rubrosAsignados          RepositorRubro[]
-  pedidosComoRepositor     Pedido[]         @relation("PedidoRepositor")
-  pedidosCreados           Pedido[]         @relation("PedidoCreadoPor")
-  pedidosEnviados          Pedido[]         @relation("PedidoEnviadoPor")
-  pedidosDevueltos         Pedido[]         @relation("PedidoDevueltoPor")
-  pedidosAprobados         Pedido[]         @relation("PedidoAprobadoPor")
-  consolidadosAprobados    Consolidado[]    @relation("ConsolidadoAprobadoPor")
-  pedidosRevisadosDeposito Pedido[]         @relation("PedidoRevisadoDepositoPor")
-  pedidosTrasladoEnviado   Pedido[]         @relation("PedidoTrasladoEnviadoPor")
+  pedidosComoRepositor     Pedido[]          @relation("PedidoRepositor")
+  pedidosCreados           Pedido[]          @relation("PedidoCreadoPor")
+  pedidosEnviados          Pedido[]          @relation("PedidoEnviadoPor")
+  pedidosDevueltos         Pedido[]          @relation("PedidoDevueltoPor")
+  pedidosAprobados         Pedido[]          @relation("PedidoAprobadoPor")
+  consolidadosAprobados    Consolidado[]     @relation("ConsolidadoAprobadoPor")
+  pedidosRevisadosDeposito Pedido[]          @relation("PedidoRevisadoDepositoPor")
+  pedidosTrasladoEnviado   Pedido[]          @relation("PedidoTrasladoEnviadoPor")
+  suscripcionesPush        SuscripcionPush[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -320,4 +321,18 @@ model ItemConsolidado {
   @@unique([consolidadoId, productoId])
   @@index([consolidadoId])
   @@index([productoId])
+}
+
+// Dispositivo (navegador) de un usuario que acepta avisos Web Push
+model SuscripcionPush {
+  id        String   @id @default(cuid())
+  usuarioId String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  creadaEn  DateTime @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId])
 }
