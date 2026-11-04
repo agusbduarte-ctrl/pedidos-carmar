@@ -105,8 +105,21 @@ code, kbd, samp, pre { font-family: inherit; font-size: inherit; }
 }
 .cabecera-salir:hover:not(:disabled) { background: #fff; color: var(--rojo-oscuro); }
 .cabecera-salir:disabled { opacity: 0.5; cursor: not-allowed; }
+.avisos { background: var(--rojo-oscuro); }
+.avisos-interior {
+  max-width: 1240px; margin: 0 auto; padding: 6px var(--e4);
+  display: flex; align-items: center; flex-wrap: wrap; gap: var(--e2);
+}
+.avisos-boton {
+  font: inherit; font-size: 0.95rem; font-weight: 700; min-height: 40px; padding: 0 14px;
+  background: transparent; color: #fff; border: 2px solid #fff; border-radius: var(--radio-control); cursor: pointer;
+}
+.avisos-boton[aria-pressed="true"] { background: #fff; color: var(--rojo-oscuro); }
+.avisos-boton:disabled { opacity: 0.5; cursor: not-allowed; }
+.avisos-texto { font-size: 0.95rem; font-weight: 600; }
 @media (min-width: 700px) {
   .cabecera-interior { padding: 0 var(--e5); }
+  .avisos-interior { padding: 6px var(--e5); }
 }
 @media (max-width: 480px) {
   .cabecera-interior { padding: 0 var(--e3); gap: var(--e2); }

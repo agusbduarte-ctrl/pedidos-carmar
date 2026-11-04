@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { nombreSucursal } from "../revision/comun";
+import BotonAvisos from "./BotonAvisos";
 
 export default function Cabecera() {
   const { user, logout } = useAuth();
@@ -31,6 +32,7 @@ export default function Cabecera() {
           </button>
         </div>
       </div>
+      {(user.rol === "REPOSITOR" || user.rol === "ENCARGADA" || user.rol === "DEPOSITO") && <BotonAvisos />}
     </header>
   );
 }

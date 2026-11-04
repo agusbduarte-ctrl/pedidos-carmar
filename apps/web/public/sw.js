@@ -1,6 +1,6 @@
 // Service worker mínimo: solo cachea el "app shell". Nunca toca /api.
 // Subir la versión fuerza a descartar cachés viejas.
-const VERSION = "v1";
+const VERSION = "v2";
 const CACHE = `carmar-shell-${VERSION}`;
 
 self.addEventListener("install", (event) => {
@@ -23,6 +23,41 @@ self.addEventListener("activate", (event) => {
         ),
       )
       .then(() => self.clients.claim()),
+  );
+});
+
+// Avisos (Web Push): payload JSON { titulo, cuerpo, url }.
+self.addEventListener("push", (event) => {
+  let datos = {};
+  if (event.data) {
+    try {
+      datos = event.data.json();
+    } catch {
+      datos = { cuerpo: event.data.text() };
+    }
+  }
+  const titulo = datos.titulo || "Carmar";
+  event.waitUntil(
+    self.registration.showNotification(titulo, {
+      body: datos.cuerpo || "",
+      icon: "/icon-192.png",
+      badge: "/icon-192.png",
+      data: { url: datos.url || "/" },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = new URL((event.notification.data && event.notification.data.url) || "/", self.location.origin).href;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((ventanas) => {
+      const ventana = ventanas.find((v) => new URL(v.url).origin === self.location.origin);
+      if (ventana) {
+        return ventana.focus().then((v) => (v && "navigate" in v ? v.navigate(url) : undefined));
+      }
+      return self.clients.openWindow(url);
+    }),
   );
 });
 
